@@ -1,0 +1,24 @@
+<?php declare(strict_types=1);
+
+namespace Generate\Service\ControllerPlugin;
+
+use Generate\Mvc\Controller\Plugin\GenerateViaChatgpt;
+use Interop\Container\ContainerInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
+
+class GenerateViaChatgptFactory implements FactoryInterface
+{
+    public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
+    {
+        $settings = $services->get('Omeka\Settings');
+
+        return new GenerateViaChatgpt(
+            $services->get('Omeka\ApiManager'),
+            $services->get('Common\EasyMeta'),
+            $services->get('Omeka\Logger'),
+            $settings,
+            $services->get('MvcTranslator'),
+            $settings->get('generate_chatgpt_api_key')
+        );
+    }
+}

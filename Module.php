@@ -189,6 +189,18 @@ class Module extends AbstractModule
             // \Annotate\Api\Adapter\AnnotationAdapter::class => \Annotate\Controller\Admin\AnnotationController::class,
         ];
         foreach ($adaptersAndControllers as $adapter => $controller) {
+            // Store status.
+            $sharedEventManager->attach(
+                $adapter,
+                'api.create.pre',
+                [$this, 'handleCreateUpdateResource']
+            );
+            $sharedEventManager->attach(
+                $adapter,
+                'api.update.pre',
+                [$this, 'handleCreateUpdateResource']
+            );
+
             // Process validation only with api create/update, after all processes.
             // The validation must not hydrate the resource.
             $sharedEventManager->attach(
@@ -267,6 +279,46 @@ class Module extends AbstractModule
     }
 
     /**
+     * Prepare generated metadata.
+     */
+    public function handleCreateUpdateResource(Event $event): void
+    {
+        /**
+         * @var \Omeka\Api\Request $request
+         * @var \Omeka\Api\Response $response
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+         * @var \Omeka\Entity\User $user
+         */
+        $services = $this->getServiceLocator();
+
+        // Check if generation is enabled.
+        $request = $event->getParam('request');
+        $resourceData = $request->getContent();
+        if (empty($resourceData['generate_metadata'])) {
+            return;
+        }
+
+        $settings = $services->get('Omeka\Settings');
+
+        // Generating may be expensive, so there is a specific check for roles.
+        $generateRoles = $settings->get('generate_roles');
+        $user = $services->get('Omeka\AuthenticationService')->getIdentity();
+        if (!$user || !in_array($user->getRole(), $generateRoles)) {
+            return;
+        }
+
+        $prompt = $resourceData['generate_chatgpt_prompt'] ?? '';
+        unset($resourceData['generate_metadata'], $resourceData['generate_chatgpt_prompt']);
+
+        $plugins = $services->get('ControllerPluginManager');
+        $generateViaChatgpt = $plugins->get('generateViaChatgpt');
+        $generateViaChatgpt($resourceData, [
+            'prompt' => $prompt,
+        ]);
+    }
+
+    /**
      * Add an error during hydration to avoid to save a resource to validate.
      */
     public function handleValidateGeneratedResource(Event $event): void
@@ -335,18 +387,25 @@ class Module extends AbstractModule
 
         $this->addHeadersAdmin($event);
 
-        $prompt = trim((string) $settings->get('generate_prompt'))
-            ?: $this->getModuleConfig('settings')['generate_prompt'];
+        $apiKey = $settings->get('generate_chatgpt_api_key');
+
+        $prompt = trim((string) $settings->get('generate_chatgpt_prompt'))
+            ?: $this->getModuleConfig('settings')['generate_chatgpt_prompt'];
 
         $elementGenerate = new \Laminas\Form\Element\Checkbox('generate_metadata');
         $elementGenerate
-            ->setLabel('Generate metadata') // @translate
+            ->setLabel(
+                empty($apiKey)
+                    ? 'Generate metadata (api key undefined)' // @translate
+                    : 'Generate metadata' // @translate
+            )
             ->setOptions([
                 'use_hidden_element' => false,
             ])
             ->setAttributes([
                 'id' => 'generate-metadata',
                 'value' => 0,
+                'disabled' => empty($apiKey) ? 'disabled' : false,
             ]);
 
         $elementPrompt = new \Laminas\Form\Element\Textarea('generate_chatgpt_prompt');

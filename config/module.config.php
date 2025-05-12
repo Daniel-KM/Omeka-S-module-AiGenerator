@@ -35,6 +35,7 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
+            Form\ConfigForm::class => Form\ConfigForm::class,
             Form\GenerateForm::class => Form\GenerateForm::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
         ],
@@ -50,6 +51,9 @@ return [
     'controller_plugins' => [
         'invokables' => [
             'generativeData' => Mvc\Controller\Plugin\GenerativeData::class,
+        ],
+        'factories' => [
+            'generateViaChatgpt' => Service\ControllerPlugin\GenerateViaChatgptFactory::class,
         ],
     ],
     'navigation' => [
@@ -130,6 +134,9 @@ return [
         ],
     ],
     'generate' => [
+        'config' => [
+            'generate_chatgpt_api_key' => '',
+        ],
         'settings' => [
             'generate_roles' => [],
             'generate_chatgpt_prompt' => 'Generate these metadata for the image and output them as json: {properties}', // @translate

@@ -57,6 +57,7 @@ attached as media.
 TODO
 ----
 
+- [ ] Add an option to skip validation (so a radio instead of a checkbox in forms).
 - [ ] Add an option to set a value annotation like "generated". For now, it can be set via module Advanced Resource Template.
 
 

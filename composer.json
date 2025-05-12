@@ -1,0 +1,44 @@
+{
+    "name": "daniel-km/omeka-s-module-generate",
+    "description": "Module for Omeka S that allows to generate resource metadata through a generator like ChatGPT and to validate them.",
+    "type": "library",
+    "license": "CECILL-2.1",
+    "authors": [
+        {
+            "name": "Daniel Berthereau",
+            "email": "Daniel.packagist@Berthereau.net"
+        }
+    ],
+    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-Generate",
+    "support": {
+        "issues": "https://gitlab.com/Daniel-KM/Omeka-S-module-Generate/-/issues",
+        "forum": "https://forum.omeka.org/"
+    },
+    "keywords": [
+        "Omeka S",
+        "module",
+        "curation",
+        "generated metadata",
+        "ChatGPT"
+    ],
+    "require": {
+        "openai-php/client": "^0.10",
+        "symfony/http-client": "^5.4",
+        "nyholm/psr7": "^1.8"
+    },
+    "replace": {
+        "psr/container": "*",
+        "symfony/polyfill-php80": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Translate\\": "src/"
+        }
+    },
+    "config": {
+        "platform": {"php": "8.1"},
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}
