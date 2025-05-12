@@ -1,0 +1,51 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Generate\Api\Representation\GeneratedResourceRepresentation $resource
+ * @var bool $linkTitle
+ * @var array $values Empty array
+ */
+
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
+?>
+
+<div class="resource-details" data-resource-values="<?= $escape($values) ?>">
+    <?php if ($linkTitle): ?>
+    <h3 class="o-title"><?= $resource->link($resource->displayTitle()) ?></h3>
+    <?php else: ?>
+    <h3 class="o-title"><?= $escape($resource->linkPrettyResource()) ?></h3>
+    <?php endif; ?>
+    <span class="resource-id">#<?= $resource->id() ?></span>
+    <div class="meta-group">
+        <h4><?= $escape($translate('Owner')) ?></h4>
+        <?php
+        if ($owner = $resource->owner()) {
+            $ownerText = $this->hyperlink($owner->name(), $this->url('admin/id', ['controller' => 'user', 'action' => 'show', 'id' => $owner->id()]));
+        } else {
+            $ownerText = $translate('[no owner]');
+        }
+        ?>
+        <div class="value"><?= $ownerText ?></div>
+    </div>
+    <div class="meta-group generated-resource">
+        <h4><?= $escape($translate('Resource')) ?></h4>
+        <ul class="generated-resource-status">
+            <li class="resource"><?= $resource->resource() ? $resource->resource()->linkPretty() : $escape($translate('No resource')) ?></li>
+            <li class="reviewed"><?= $escape($resource->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></li>
+        </ul>
+    </div>
+    <div class="meta-group generated-resource">
+        <h4><?= $escape($translate('Proposal')) ?></h4>
+        <?php
+        $resourceTemplate = $resource->resourceTemplate();
+        ?>
+        <div>
+            <strong><?= $translate('Resource template') ?></strong>
+            <span class="template"><?= $escape($resourceTemplate ? $resourceTemplate->label() : $translate('No resource template')) ?></span>
+        </div>
+        <?= $resource->displayValues() ?>
+    </div>
+    <?php $this->trigger('view.details', ['entity' => $resource]); ?>
+</div>

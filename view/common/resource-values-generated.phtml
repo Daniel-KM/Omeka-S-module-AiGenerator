@@ -1,0 +1,107 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\SiteRepresentation $site
+ * @var \Generate\Api\Representation\GeneratedResourceRepresentation $generatedResource
+ * @var array $templateProperties
+ * @var array $values
+ * @var array $valuesMedias
+ */
+
+$plugins = $this->getHelperPluginManager();
+$api = $plugins->get('api');
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
+
+$setting = $plugins->get('setting');
+$labelInfo = $setting('property_label_information');
+$showLocale = true;
+?>
+
+<dl class="generated-resource">
+
+<?php foreach ($values as $term => $propertyData): ?>
+    <?php if (empty($propertyData['generated_resources'])) continue; ?>
+    <div class="property">
+        <dt>
+            <?= $escape($propertyData['alternate_label'] ?: $translate($propertyData['property']->label())) ?>
+            <?php if (!isset($propertyData['property'])):?>
+            <?php // Nothing to do (file). ?>
+            <?php elseif ('term' === $labelInfo): ?>
+            <span class="field-term">(<?= $escape($propertyData['property']->term()) ?>)</span>
+            <?php elseif ('vocab' === $labelInfo): ?>
+            <span class="field-term">(<?= $escape($propertyData['property']->vocabulary()->label()) ?>)</span>
+            <?php endif; ?>
+        </dt>
+        <?php foreach ($propertyData['generated_resources'] as $generatedResourceData):
+            if (!empty($generatedResourceData['empty'])) continue;
+            $valueType = $generatedResourceData['type'];
+            $valueBaseType = $generatedResourceData['basetype'];
+            $valueLang = $generatedResourceData['lang'] ?? '';
+            $class = ['value'];
+            // TODO Improve.
+            if ($valueBaseType === 'resource') {
+                $class[] = 'resource';
+                // Only item is supported for now.
+                $class[] = substr($valueType, 0, 9) === 'resource:' ? substr($valueType, 9) : 'item';
+            } elseif ($valueBaseType === 'uri') {
+                $class[] = 'uri';
+            }
+            ?>
+        <dd class="<?= implode(' ', $class) ?>" lang="<?= $escape($valueLang) ?>">
+            <?php if ($showLocale && $valueLang): ?>
+            <span class="language"><?= $valueLang ?></span>
+            <?php endif; ?>
+            <?php if (!empty($generatedResourceData['new'])): ?>
+            <span class="value-content"><?php
+                    if ($valueBaseType === 'uri'):
+                        echo $escape($generatedResourceData['proposed']['@uri'] . ' / ' . $generatedResourceData['proposed']['@label']);
+                    elseif ($valueBaseType === 'resource'):
+                        try {
+                            $res = $api->read('resources', ['id' => $generatedResourceData['proposed']['@resource']])->getContent();
+                            echo $res->link($res->displayTitle());
+                        } catch (\Exception $e) {
+                            echo sprintf($translate('%s [unavailable]'), $generatedResourceData['proposed']['@resource']);
+                        }
+                    else:
+                        echo $escape($generatedResourceData['proposed']['@value']);
+                    endif;
+            ?></span>
+                <?php else: ?>
+            <dl>
+                <dd>
+                    <?php if ($valueBaseType === 'uri'):
+                        echo $escape($generatedResourceData['original']['@uri'] . ' / ' . $generatedResourceData['original']['@label']);
+                    elseif ($valueBaseType === 'resource'):
+                        try {
+                            $res = $api->read('resources', ['id' => $generatedResourceData['original']['@resource']])->getContent();
+                            echo $res->link($res->displayTitle());
+                        } catch (\Exception $e) {
+                            echo sprintf($translate('%s [unavailable]'), $generatedResourceData['original']['@resource']);
+                        };
+                    else:
+                        echo $escape($generatedResourceData['original']['@value']);
+                    endif; ?>
+                </dd>
+                <dd>
+                    <?php if ($valueBaseType === 'uri'):
+                        echo $escape($generatedResourceData['proposed']['@uri'] . ' / ' . $generatedResourceData['proposed']['@label']);
+                    elseif ($valueBaseType === 'resource'):
+                        try {
+                            $res = $api->read('resources', ['id' => $generatedResourceData['proposed']['@resource']])->getContent();
+                            echo $res->link($res->displayTitle());
+                        } catch (\Exception $e) {
+                            echo sprintf($translate('%s [unavailable]'), $generatedResourceData['proposed']['@resource']);
+                        }
+                    else:
+                        echo $escape($generatedResourceData['proposed']['@value']);
+                    endif; ?>
+                </dd>
+            </dl>
+            <?php endif; ?>
+        </dd>
+        <?php endforeach; ?>
+    </div>
+<?php endforeach; ?>
+
+</dl>

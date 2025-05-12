@@ -1,21 +1,13 @@
 Generate (module for Omeka S)
-===============================
+=============================
 
 > __New versions of this module and support for Omeka S version 3.0 and above
 > are available on [GitLab], which seems to respect users and privacy better
 > than the previous repository.__
 
-[Generate] is a module for [Omeka S] that allows visitors to add, edit,
-complete or translate metadata of the resources without access to the admin
-board.
-
-Access to the generate and to the edit page may be controlled by a token, that
-you can send to your users, or to users only (in particular guest users), or to
-anybody.
-
-The two main differences with module [Collecting] is the fact that this module
-uses standard resource templates, so you don't need to create specific forms,
-and the possibility to complete or to revise an existing document.
+[Generate] is a module for [Omeka S] that allows to fill items metadata from
+values generated from medias by an external tool. Currently, one generator is
+implemented, [ChatGPT]. Generated metadata can be validated by a reviewer.
 
 
 Installation
@@ -23,87 +15,49 @@ Installation
 
 ### Module
 
-
 See general end user documentation for [installing a module].
 
 The module [Common] must be installed first.
 
-The module uses the module [Advanced Resource Template] in order to manage the
-forms and the properties that the users can edit or fill, so it should be
-installed first.
-
-If you want to open generation only to authenticated users, it is recommended
-to install the module [Guest] and [Blocks Disposition] (unless you edit theme).
-
 * From the zip
 
-Download the last release [Generate.zip] from the list of releases (the
-master does not contain the dependency), and uncompress it in the `modules`
-directory.
+Download the last release [Generate.zip] from the list of releases (the master
+does not contain the dependency), and uncompress it in the `modules` directory.
 
 * From the source and for development
 
 If the module was installed from the source, rename the name of the folder of
 the module to `Generate`.
 
-### Upgrade from module Correction
-
-The upgrade from the module Correction was removed in version 3.4.24. If needed,
-install version 3.4.23 then upgrade the module.
-
 
 Usage
 -----
 
-To be generated or completed, a resource must have a template and be allowed
-in the main settings.
+To generate metadata of an item, it should have a template and at least one file
+attached as media.
 
-- Configure the main settings, in particular the generation mode.
-- Configure the resource templates to select the properties to be edited or
-  filled. Note: If a property has no value, it can't be edited, even if the
-  property is marked editable. To allow to add a value, choose "fillable". To
-  allow only one value, set the maximum number of values to 1.
-- To allow to generate a file, you should define a template for files and set
-  it in the parameters of the main template.
-- If the generate mode requires token:
-  - Create one or more tokens for the resources you want to edit via the link in
-    the sidebar of a resource or the bulk process dropdown at the top of the
-    resource browse pages.
-  - Send emails to your users with the tokens, so they can edit or complete
-    metadata of the resources.
-- Else a link is displayed on the item page if enabled in the theme or via the
-  module Blocks Disposition.
-- After submission, the admin can go to the resource page of the edited items
-  and apply changes, or decline them. A page lists all generations too.
-  Generation can be marked as reviewed and token can be made expired.
+- Set the [ChatGPT] api key in the config form.
+
+### Process on save
+
+- Check the box in the tab "Advanced" of the item form.
+- An automatic prompt is available with properties of the resource template.
+  Else, you can configure a specific prompt.
+
+### Bulk process
+
+- Select items to process via an advanced search, then batch edit them.
+- In the batch edit form, an automatic prompt is available with properties of
+  the resource template. Else, you can configure a specific prompt.
+- After process, the admin can go to the resource page of the edited items and
+  moderate the values. The values can be accepted as a whole or one by one.
+- A page lists lists all generations too. Generation can be marked as reviewed.
 
 
 TODO
 ----
 
-- [x] Reintegrate features for corrections in version 3.3.0.18+.
-- [ ] Store the site in the generation.
-- [ ] Store the ip and some data to check anonymous generation (see module Contact Us).
-- [x] Make the token optional (allow anybody to edit; review all rights).
-- [ ] Manage the fillable fields with a language, so it will simplify validation of translation (use advanced resource template).
-- [ ] Finalize value resources.
-- [ ] Finalize select for resources (dynamic api query via chosen-select).
-- [x] Create an admin browse page with all generates.
-- [ ] Remove the fallback generation settings to simplify config and move all settings to advanced resource template.
-- [ ] Check process when the resource template is updated (required, max values, editable, fillable…).
-- [ ] Remove requirement for Advanced Resource Template: only list of editable and fillable properties may be needed (or make them all editable/fillable).
-- [ ] Remove the "@" in internal proposition values.
-- [ ] Add the elements via the form, not only via view.
-- [ ] Add resource via token (only edition currently).
-- [ ] Clarify add/edition resource for correction.
-- [ ] Dynamic select for resource (without custom vocab).
-- [ ] Add pagination in guest generation list.
-- [ ] Require only on submit for new generation?
-- [ ] Improve lang management.
-- [ ] Allow to create subresource in the main form (author). Require check.
-- [ ] Manage value annotations.
-- [ ] Include all fields as form elements (included laminas collections of elements).
-- [ ] Allow to edit item and media together.
+- [ ] Add an option to set a value annotation like "generated". For now, it can be set via module Advanced Resource Template.
 
 
 Warning
@@ -163,11 +117,7 @@ the digital archiving of student works ([Dante]) of the [Université de Toulouse
 
 [Omeka S]: https://omeka.org/s
 [Generate]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generate
-[Collecting]: https://omeka.org/s/modules/Collecting
-[Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
-[Blocks Disposition]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition
 [Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
-[Guest]: https://gitlab.com/Daniel-KM/Omeka-S-module-Guest
 [Generate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generate/-/releases
 [installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generate/-/issues
@@ -175,9 +125,6 @@ the digital archiving of student works ([Dante]) of the [Université de Toulouse
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
 [OSI]: http://opensource.org
-[Université de Paris-Saclay]: https://www.universite-paris-saclay.fr
-[Enssib]: https://www.enssib.fr
-[Dante]: https://dante.univ-tlse2.fr
-[Université de Toulouse Jean-Jaurès]: https://www.univ-tlse2.fr
+[ChatGPT]: https://chatgpt.com
 [GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"

@@ -5,6 +5,7 @@ namespace Generate\Form;
 use Laminas\Form\Element;
 use Laminas\Form\Form;
 use Laminas\View\Helper\Url;
+use Omeka\Form\Element as OmekaElement;
 
 class QuickSearchForm extends Form
 {
@@ -30,11 +31,10 @@ class QuickSearchForm extends Form
         $this
             ->add([
                 'name' => 'resource_template_id',
-                'type' => Element\Select::class,
+                'type' => OmekaElement\ResourceTemplateSelect::class,
                 'options' => [
                     'label' => 'Template', // @translate
                     'empty_option' => '',
-                    'value_options' => $this->resourceTemplates,
                 ],
                 'attributes' => [
                     'id' => 'resource_template_id',
@@ -47,7 +47,7 @@ class QuickSearchForm extends Form
                 'name' => 'fulltext_search',
                 'type' => Element\Search::class,
                 'options' => [
-                    'label' => 'Texte', // @translate
+                    'label' => 'Text', // @translate
                 ],
                 'attributes' => [
                     'id' => 'fulltext_search',
@@ -66,38 +66,6 @@ class QuickSearchForm extends Form
                 ],
             ])
 
-            ->add([
-                'name' => 'patch',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'Type of generation', // @translate
-                    'value_options' => [
-                        '' => 'Any', // @translate
-                        '1' => 'Correction', // @translate
-                        '00' => 'Full generation', // @translate
-                    ],
-                ],
-                'attributes' => [
-                    'id' => 'submitted',
-                    'value' => '',
-                ],
-            ])
-            ->add([
-                'name' => 'submitted',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'Submitted', // @translate
-                    'value_options' => [
-                        '' => 'Any', // @translate
-                        '1' => 'Yes', // @translate
-                        '00' => 'No', // @translate
-                    ],
-                ],
-                'attributes' => [
-                    'id' => 'submitted',
-                    'value' => '',
-                ],
-            ])
             ->add([
                 'name' => 'reviewed',
                 'type' => Element\Radio::class,
@@ -149,16 +117,6 @@ class QuickSearchForm extends Form
                     'id' => 'owner_id',
                 ],
             ])
-            ->add([
-                'name' => 'email',
-                'type' => Element\Email::class,
-                'options' => [
-                    'label' => 'User by email', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'email',
-                ],
-            ])
 
             ->add([
                 'name' => 'submit',
@@ -175,12 +133,6 @@ class QuickSearchForm extends Form
                 'name' => 'resource_template_id',
                 'required' => false,
             ]);
-    }
-
-    public function setResourceTemplates(array $resourceTemplates): self
-    {
-        $this->resourceTemplates = $resourceTemplates;
-        return $this;
     }
 
     public function setUrlHelper(Url $urlHelper): self

@@ -1,36 +1,15 @@
-CREATE TABLE `generation` (
+CREATE TABLE `generated_resource` (
     `id` INT AUTO_INCREMENT NOT NULL,
     `resource_id` INT DEFAULT NULL,
     `owner_id` INT DEFAULT NULL,
-    `token_id` INT DEFAULT NULL,
-    `email` VARCHAR(190) DEFAULT NULL,
-    `patch` TINYINT(1) NOT NULL,
-    `submitted` TINYINT(1) NOT NULL,
-    `reviewed` TINYINT(1) NOT NULL,
+    `reviewed` TINYINT(1) DEFAULT 0 NOT NULL,
     `proposal` LONGTEXT NOT NULL COMMENT '(DC2Type:json)',
     `created` DATETIME NOT NULL,
     `modified` DATETIME DEFAULT NULL,
-    INDEX IDX_EA351E1589329D25 (`resource_id`),
-    INDEX IDX_EA351E157E3C61F9 (`owner_id`),
-    UNIQUE INDEX UNIQ_EA351E1541DEE7B9 (`token_id`),
-    INDEX `generate_email_idx` (`email`),
-    INDEX `generate_modified_idx` (`modified`),
+    INDEX IDX_FC30C3AF89329D25 (`resource_id`),
+    INDEX IDX_FC30C3AF7E3C61F9 (`owner_id`),
     PRIMARY KEY(`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB;
-CREATE TABLE `generation_token` (
-    `id` INT AUTO_INCREMENT NOT NULL,
-    `resource_id` INT NOT NULL,
-    `token` VARCHAR(40) NOT NULL,
-    `email` VARCHAR(190) DEFAULT NULL,
-    `expire` DATETIME DEFAULT NULL,
-    `created` DATETIME NOT NULL,
-    `accessed` DATETIME DEFAULT NULL,
-    INDEX IDX_3A44AA8989329D25 (`resource_id`),
-    INDEX `generation_token_idx` (`token`),
-    INDEX `generation_expire_idx` (`expire`),
-    PRIMARY KEY(`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB;
-ALTER TABLE `generation` ADD CONSTRAINT FK_EA351E1589329D25 FOREIGN KEY (`resource_id`) REFERENCES `resource` (`id`) ON DELETE SET NULL;
-ALTER TABLE `generation` ADD CONSTRAINT FK_EA351E157E3C61F9 FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE SET NULL;
-ALTER TABLE `generation` ADD CONSTRAINT FK_EA351E1541DEE7B9 FOREIGN KEY (`token_id`) REFERENCES `contribution_token` (`id`) ON DELETE SET NULL;
-ALTER TABLE `generation_token` ADD CONSTRAINT FK_3A44AA8989329D25 FOREIGN KEY (`resource_id`) REFERENCES `resource` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `generated_resource` ADD CONSTRAINT FK_FC30C3AF89329D25 FOREIGN KEY (`resource_id`) REFERENCES `resource` (`id`) ON DELETE CASCADE;
+ALTER TABLE `generated_resource` ADD CONSTRAINT FK_FC30C3AF7E3C61F9 FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE SET NULL;
