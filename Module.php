@@ -49,6 +49,31 @@ class Module extends AbstractModule
     protected function postInstall(): void
     {
         $this->postInstallAuto();
+
+        /**
+         * @var \Omeka\Settings\Settings $settings
+         */
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+
+        $settings->set('generate_roles', [
+            \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
+            \Omeka\Permissions\Acl::ROLE_SITE_ADMIN,
+            \Omeka\Permissions\Acl::ROLE_EDITOR,
+            \Omeka\Permissions\Acl::ROLE_REVIEWER,
+            \Omeka\Permissions\Acl::ROLE_AUTHOR,
+        ]);
+    }
+
+    protected function isSettingTranslatable(string $settingsType, string $name): bool
+    {
+        $translatables = [
+            'settings' => [
+                'generate_chatgpt_prompt',
+            ],
+        ];
+        return isset($translatables[$settingsType])
+            && in_array($name, $translatables[$settingsType]);
     }
 
     public function onBootstrap(MvcEvent $event): void
@@ -156,27 +181,37 @@ class Module extends AbstractModule
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
-        // Process validation only with api create/update, after all processes.
-        $sharedEventManager->attach(
-            \Omeka\Api\Adapter\ItemAdapter::class,
-            'api.hydrate.post',
-            [$this, 'handleValidateGeneratedResource'],
-            -1000
-        );
-        $sharedEventManager->attach(
-            \Omeka\Api\Adapter\MediaAdapter::class,
-            'api.hydrate.post',
-            [$this, 'handleValidateGeneratedResource'],
-            -1000
-        );
-
         // Admin management.
-        $controllers = [
-            'Omeka\Controller\Admin\Item',
-            'Omeka\Controller\Admin\Media',
+        $adaptersAndControllers = [
+            \Omeka\Api\Adapter\ItemAdapter::class => 'Omeka\Controller\Admin\Item',
+            \Omeka\Api\Adapter\MediaAdapter::class => 'Omeka\Controller\Admin\Media',
+            // \Omeka\Api\Adapter\ItemSetAdapter::class => 'Omeka\Controller\Admin\ItemSet',
+            // \Annotate\Api\Adapter\AnnotationAdapter::class => \Annotate\Controller\Admin\AnnotationController::class,
         ];
-        foreach ($controllers as $controller) {
-            // Add a tab to the resource show admin pages.
+        foreach ($adaptersAndControllers as $adapter => $controller) {
+            // Process validation only with api create/update, after all processes.
+            // The validation must not hydrate the resource.
+            $sharedEventManager->attach(
+                $adapter,
+                'api.hydrate.post',
+                [$this, 'handleValidateGeneratedResource'],
+                -900
+            );
+
+            // Add form inputs to resource form to run generation.
+            $sharedEventManager->attach(
+                $controller,
+                'view.add.form.advanced',
+                [$this, 'addResourceFormElements']
+            );
+            $sharedEventManager->attach(
+                $controller,
+                'view.edit.form.advanced',
+                [$this, 'addResourceFormElements']
+            );
+
+            // Add a tab to the resource show admin pages to manage generated
+            // metadata.
             $sharedEventManager->attach(
                 $controller,
                 // There is no "view.show.before".
@@ -244,16 +279,19 @@ class Module extends AbstractModule
         ) {
             return;
         }
+
         $entity = $event->getParam('entity');
         if (!$entity instanceof \Omeka\Entity\Resource) {
             return;
         }
+
         // Don't add an error if there is already one.
         /** @var \Omeka\Stdlib\ErrorStore $errorStore */
         $errorStore = $event->getParam('errorStore');
         if ($errorStore->hasErrors()) {
             return;
         }
+
         // The validation of the entity in the adapter is processed after event,
         // so trigger it here with a new error store.
         $validateErrorStore = new \Omeka\Stdlib\ErrorStore;
@@ -262,6 +300,7 @@ class Module extends AbstractModule
         if ($validateErrorStore->hasErrors()) {
             return;
         }
+
         $errorStore->addError('validateOnly', 'No error');
     }
 
@@ -273,6 +312,57 @@ class Module extends AbstractModule
             ->appendStylesheet($assetUrl('css/generate-admin.css', 'Generate'));
         $view->headScript()
             ->appendFile($assetUrl('js/generate-admin.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
+    }
+
+    public function addResourceFormElements(Event $event): void
+    {
+        /**
+         * @var \Omeka\Api\Request $request
+         * @var \Omeka\Settings\Settings $settings
+         * @var \Laminas\View\Renderer\PhpRenderer $view
+         * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+         * @var \Omeka\Entity\User $user
+         */
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+
+        // Generating may be expensive, so there is a specific check for roles.
+        $generateRoles = $settings->get('generate_roles');
+        $user = $services->get('Omeka\AuthenticationService')->getIdentity();
+        if (!$user || !in_array($user->getRole(), $generateRoles)) {
+            return;
+        }
+
+        $this->addHeadersAdmin($event);
+
+        $prompt = trim((string) $settings->get('generate_prompt'))
+            ?: $this->getModuleConfig('settings')['generate_prompt'];
+
+        $elementGenerate = new \Laminas\Form\Element\Checkbox('generate_metadata');
+        $elementGenerate
+            ->setLabel('Generate metadata') // @translate
+            ->setOptions([
+                'use_hidden_element' => false,
+            ])
+            ->setAttributes([
+                'id' => 'generate-metadata',
+                'value' => 0,
+            ]);
+
+        $elementPrompt = new \Laminas\Form\Element\Textarea('generate_chatgpt_prompt');
+        $elementPrompt
+            ->setLabel('Prompt') // @translate
+            ->setAttributes([
+                'id' => 'generate-prompt',
+                'value' => $prompt,
+                'rows' => 10,
+                // Enabled via js when checkbox is on.
+                'disabled' => 'disabled',
+            ]);
+
+        $view = $event->getTarget();
+        echo $view->formRow($elementGenerate);
+        echo str_replace('<div class="field"', '<div class="field" style="display: none;"', $view->formRow($elementPrompt));
     }
 
     /**

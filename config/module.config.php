@@ -130,5 +130,9 @@ return [
         ],
     ],
     'generate' => [
+        'settings' => [
+            'generate_roles' => [],
+            'generate_chatgpt_prompt' => 'Generate these metadata for the image and output them as json: {properties}', // @translate
+        ],
     ],
 ];

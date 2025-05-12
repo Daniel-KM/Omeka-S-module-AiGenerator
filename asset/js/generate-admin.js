@@ -40,6 +40,15 @@ $(document).ready(function() {
         }
     }
 
+    // Manage resource form check box to generate resource metadata.
+    $('.resource-form').on('change', 'input[type=checkbox]#generate-metadata', function(e) {
+        if ($('.resource-form input[type=checkbox]#generate-metadata').prop("checked")) {
+            $('.resource-form textarea#generate-prompt').prop('disabled', false).closest('.field').show();
+        } else {
+            $('.resource-form textarea#generate-prompt').prop('disabled', true).closest('.field').hide();
+        }
+    });
+
     // Mark a generated resource reviewed/unreviewed.
     $('#content').on('click', '.generated-resource a.status-toggle', function(e) {
         e.preventDefault();
