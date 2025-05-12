@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Mvc\Controller\Plugin;
+namespace Generate\Mvc\Controller\Plugin;
 
 use Laminas\Log\Logger;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
@@ -10,7 +10,7 @@ use Omeka\Stdlib\Message;
 /**
  * Send an email.
  */
-class SendContributionEmail extends AbstractPlugin
+class SendGenerationEmail extends AbstractPlugin
 {
     /**
      * @var MailerService

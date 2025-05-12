@@ -1,7 +1,7 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \Contribute\Api\Representation\ContributionRepresentation $resource
+ * @var \Generate\Api\Representation\GenerationRepresentation $resource
  * @var bool $linkTitle
  * @var array $values Empty array
  */
@@ -29,15 +29,15 @@ $translate = $plugins->get('translate');
         ?>
         <div class="value"><?= $ownerText ?></div>
     </div>
-    <div class="meta-group contribution contribution-resource">
+    <div class="meta-group generation generation-resource">
         <h4><?= $escape($translate('Resource')) ?></h4>
-        <ul class="contribution-status">
+        <ul class="generation-status">
             <li class="resource"><?= $resource->resource() ? $resource->resource()->linkPretty() : $escape($translate('No resource')) ?></li>
             <li class="submitted"><?= $escape($resource->isSubmitted() ? $translate('Is submitted') : $translate('Is not submitted')) ?></li>
             <li class="reviewed"><?= $escape($resource->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></li>
         </ul>
     </div>
-    <div class="meta-group contribution">
+    <div class="meta-group generation">
         <h4><?= $escape($translate('Proposal')) ?></h4>
         <?php
         $resourceTemplate = $resource->resourceTemplate();

@@ -27,7 +27,7 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace Contribute\Entity;
+namespace Generate\Entity;
 
 use DateTime;
 use Omeka\Entity\AbstractEntity;
@@ -36,14 +36,14 @@ use Omeka\Entity\Resource;
 /**
  * @Entity
  * @Table(
- *     name="contribution_token",
+ *     name="generation_token",
  *     indexes={
  *         @Index(
- *             name="contribution_token_idx",
+ *             name="generation_token_idx",
  *             columns={"token"}
  *         ),
  *         @Index(
- *             name="contribution_expire_idx",
+ *             name="generation_expire_idx",
  *             columns={"expire"}
  *         )
  *     }

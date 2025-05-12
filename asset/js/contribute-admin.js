@@ -1,7 +1,7 @@
 // TODO Remove dead code.
 
 // Kept as long as pull request #1260 is not passed.
-Omeka.contributionManageSelectedActions = function() {
+Omeka.generationManageSelectedActions = function() {
     var selectedOptions = $('[value="update-selected"], [value="delete-selected"], #batch-form .batch-inputs .batch-selected');
     if ($('.batch-edit td input[type="checkbox"]:checked').length > 0) {
         selectedOptions.removeAttr('disabled');
@@ -21,18 +21,18 @@ Omeka.contributionManageSelectedActions = function() {
         batchSelect.attr('name', 'batch_action');
 
         batchSelect.append(
-            $('<option class="batch-selected" disabled></option>').val('contribution_selected').html(Omeka.jsTranslate('Prepare tokens to edit selected'))
+            $('<option class="batch-selected" disabled></option>').val('generation_selected').html(Omeka.jsTranslate('Prepare tokens to edit selected'))
         );
         batchSelect.append(
-            $('<option></option>').val('contribution_all').html(Omeka.jsTranslate('Prepare tokens to edit all'))
+            $('<option></option>').val('generation_all').html(Omeka.jsTranslate('Prepare tokens to edit all'))
         );
 
         const batchActions = $('#batch-form .batch-actions');
         batchActions.append(
-            $('<input type="submit" class="contribution-selected" formaction="contribution/create-token">').val(Omeka.jsTranslate('Go'))
+            $('<input type="submit" class="generation-selected" formaction="generation/create-token">').val(Omeka.jsTranslate('Go'))
         );
         batchActions.append(
-            $('<input type="submit" class="contribution-all" formaction="contribution/create-token">').val(Omeka.jsTranslate('Go'))
+            $('<input type="submit" class="generation-all" formaction="generation/create-token">').val(Omeka.jsTranslate('Go'))
         );
 
         const resourceType = window.location.pathname.split("/").pop();
@@ -42,10 +42,10 @@ Omeka.contributionManageSelectedActions = function() {
 
         // Kept as long as pull request #1260 is not passed.
         $('.select-all').change(function() {
-            Omeka.contributionManageSelectedActions();
+            Omeka.generationManageSelectedActions();
         });
         $('.batch-edit td input[type="checkbox"]').change(function() {
-            Omeka.contributionManageSelectedActions();
+            Omeka.generationManageSelectedActions();
         });
 
     });
@@ -54,10 +54,10 @@ Omeka.contributionManageSelectedActions = function() {
 
 $(document).ready(function() {
 
-    var contributionInfo = function() {
+    var generationInfo = function() {
         return `
             <div class="field">
-                <h3>` + Omeka.jsTranslate('Contribute options') + `</h3>
+                <h3>` + Omeka.jsTranslate('Generate options') + `</h3>
                 <div class="option">
                     <label for="is-editable">
                         ` + Omeka.jsTranslate('Editable') + `
@@ -73,23 +73,23 @@ $(document).ready(function() {
             </div>
         `;
     }
-    $('#edit-sidebar .confirm-main').append(contributionInfo());
+    $('#edit-sidebar .confirm-main').append(generationInfo());
 
     // Manage the modal to create the token.
     // Get the modal.
-    var modal = document.getElementById('create_contribution_token_dialog');
+    var modal = document.getElementById('create_generation_token_dialog');
     // Get the button that opens the modal.
-    var btn = document.getElementById('create_contribution_token_dialog_go');
+    var btn = document.getElementById('create_generation_token_dialog_go');
     // Get the <span> element that closes the modal.
-    var span = document.getElementById('create_contribution_token_dialog_close');
+    var span = document.getElementById('create_generation_token_dialog_close');
 
     // When the user clicks the button, open the modal.
     if (btn) {
         btn.onclick = function() {
-            var href = $('#create_contribution_token a').prop('href');
-            var email = $('#create_contribution_token_dialog_email').val();
+            var href = $('#create_generation_token a').prop('href');
+            var email = $('#create_generation_token_dialog_email').val();
             if (email !== '' && !validateEmail(email)) {
-                $('#create_contribution_token_dialog_email').css('color', 'red');
+                $('#create_generation_token_dialog_email').css('color', 'red');
                 return;
             }
             href = href + '&email=' + email;
@@ -137,7 +137,7 @@ $(document).ready(function() {
             }
             var message = data.message && data.message.length
                 ? data.message
-                : Omeka.jsTranslate('Contribution is not valid.');
+                : Omeka.jsTranslate('Generation is not valid.');
             var flatData = flat(data.data, {});
             Object.keys(flatData).reduce(function (r, k) {
                 message += "\n" + flatData[k];
@@ -150,13 +150,13 @@ $(document).ready(function() {
         }
     }
 
-    $('#create_contribution_token').on('click', function(ev){
+    $('#create_generation_token').on('click', function(ev){
         modal.style.display = 'block';
         ev.preventDefault();
     })
 
-    // Mark a contribution reviewed/unreviewed.
-    $('#content').on('click', '.contribution a.status-toggle', function(e) {
+    // Mark a generation reviewed/unreviewed.
+    $('#content').on('click', '.generation a.status-toggle', function(e) {
         e.preventDefault();
 
         var button = $(this);
@@ -172,10 +172,10 @@ $(document).ready(function() {
             if (!data.status || data.status !== 'success') {
                 alertDataError(data);
             } else {
-                status = data.data.contribution.status;
+                status = data.data.generation.status;
                 button.data('status', status);
-                button.prop('title', data.data.contribution.statusLabel);
-                button.prop('aria-label', data.data.contribution.statusLabel);
+                button.prop('title', data.data.generation.statusLabel);
+                button.prop('aria-label', data.data.generation.statusLabel);
             }
         })
         .fail(alertFail)
@@ -185,7 +185,7 @@ $(document).ready(function() {
     });
 
     // Expire a token
-    $('#content').on('click', '.contribution a.expire-token', function(e) {
+    $('#content').on('click', '.generation a.expire-token', function(e) {
         e.preventDefault();
 
         var button = $(this);
@@ -202,8 +202,8 @@ $(document).ready(function() {
                 alertDataError(data);
             } else {
                 status = 'expired';
-                button.prop('title', data.data.contribution_token.statusLabel);
-                button.prop('aria-label', data.data.contribution_token.statusLabel);
+                button.prop('title', data.data.generation_token.statusLabel);
+                button.prop('aria-label', data.data.generation_token.statusLabel);
             }
         })
         .fail(alertFail)
@@ -212,8 +212,8 @@ $(document).ready(function() {
         });
     });
 
-    // Validate all values of a contribution.
-    $('#content').on('click', '.contribution .actions .o-icon-add', function(e) {
+    // Validate all values of a generation.
+    $('#content').on('click', '.generation .actions .o-icon-add', function(e) {
         e.preventDefault();
         var button = $(this);
         var url = button.prop('href');
@@ -243,8 +243,8 @@ $(document).ready(function() {
         });
     });
 
-    // Validate all values of a contribution.
-    $('#content').on('click', '.contribution a.validate', function(e) {
+    // Validate all values of a generation.
+    $('#content').on('click', '.generation a.validate', function(e) {
         e.preventDefault();
         var button = $(this);
         var url = button.data('validate-url');
@@ -259,19 +259,19 @@ $(document).ready(function() {
             if (!data.status || data.status !== 'success') {
                 alertDataError(data);
             } else {
-                // Set the contribution reviewed in all cases.
-                status = data.data.contribution.reviewed.status;
+                // Set the generation reviewed in all cases.
+                status = data.data.generation.reviewed.status;
                 buttonReviewed = button.closest('th').find('a.status-toggle');
                 buttonReviewed.data('status', status);
                 buttonReviewed.addClass('o-icon-' + status);
 
                 // Update the validate button.
-                status = data.data.contribution.status;
+                status = data.data.generation.status;
                 // button.prop('title', statusLabel);
                 // button.prop('aria-label', statusLabel);
 
                 // Reload the page to update the default show view.
-                // TODO Dynamically update default show view after contribution.
+                // TODO Dynamically update default show view after generation.
                 location.reload();
             }
         })
@@ -281,8 +281,8 @@ $(document).ready(function() {
         });
     });
 
-    // Validate a specific value of a contribution.
-    $('#content').on('click', '.contribution a.validate-value', function(e) {
+    // Validate a specific value of a generation.
+    $('#content').on('click', '.generation a.validate-value', function(e) {
         e.preventDefault();
 
         var button = $(this);
@@ -299,9 +299,9 @@ $(document).ready(function() {
                 alertDataError(data);
             } else {
                 // Update the validate button.
-                status = data.data.contribution.status;
-                button.prop('title', data.data.contribution.statusLabel);
-                button.prop('aria-label', data.data.contribution.statusLabel);
+                status = data.data.generation.status;
+                button.prop('title', data.data.generation.statusLabel);
+                button.prop('aria-label', data.data.generation.statusLabel);
                 // TODO Update the value in the main metadata tab.
             }
         })

@@ -76,7 +76,7 @@ $(document).ready(function() {
         main.val(regex.test(iso) ? iso : '');
     }
 
-    function contributionDelete(id, urlDelete, urlRedirect) {
+    function generationDelete(id, urlDelete, urlRedirect) {
         $.post({
             url: url,
             data: {
@@ -119,14 +119,14 @@ $(document).ready(function() {
 
     // Manage some special fields that may be pre-loaded.
 
-    $(':not(.contribute_template) .chosen-select').chosen(chosenOptions);
+    $(':not(.generate_template) .chosen-select').chosen(chosenOptions);
 
     $('#edit-resource').on('blur change', '[data-input-part]', fillHiddenInput);
 
     $('#edit-resource').on('blur change', '[data-input-part=year], [data-input-part=month], [data-input-part=day]', fillDate);
 
     if (typeof valueSuggestAutocomplete === 'function') {
-        $(':not(.contribute_template) .valuesuggest-input').on('load', valueSuggestAutocomplete);
+        $(':not(.generate_template) .valuesuggest-input').on('load', valueSuggestAutocomplete);
     }
 
     $('#edit-resource').on('click', '.add-values .add-value', function(ev) {
@@ -152,7 +152,7 @@ $(document).ready(function() {
         var term = selector.data('next-term');
         var index = selector.data('next-index') ? parseInt(selector.data('next-index')) : 0;
         var isMedia = target.hasClass('add-value-media');
-        var indexMedia = isMedia ? parseInt(target.closest('.contribute-media').data('index-media')) : null;
+        var indexMedia = isMedia ? parseInt(target.closest('.generate-media').data('index-media')) : null;
         var inputs = target.closest('.property').find('.values').first();
         var newElement,
             name,
@@ -323,7 +323,7 @@ $(document).ready(function() {
 
     $('#edit-resource').on('click', '.inputs-media .add-media-new', function(ev) {
         var target = $(ev.target);
-        var fieldsetMedias = target.closest('.contribute-medias');
+        var fieldsetMedias = target.closest('.generate-medias');
         var indexMedia = 0 + parseInt(fieldsetMedias.data('next-index-media'));
         var fieldsetMedia = $('#edit_template_media > .sub-form').clone();
         // Set all names and indexes.
@@ -347,10 +347,10 @@ $(document).ready(function() {
             .before(fieldsetMedia);
     });
 
-    $('#edit-resource').on('click', '.contribute-media .remove-media', function(ev) {
+    $('#edit-resource').on('click', '.generate-media .remove-media', function(ev) {
         ev.stopPropagation();
         ev.preventDefault();
-        $(this).closest('.contribute-media').remove();
+        $(this).closest('.generate-media').remove();
     });
 
     /* Avoid submission with return key. */
@@ -360,15 +360,15 @@ $(document).ready(function() {
         }
     });
 
-    $('.remove-contribution').on('click', function(ev) {
+    $('.remove-generation').on('click', function(ev) {
         ev.stopPropagation();
         ev.preventDefault();
-        const id = $(this).data('contribution-id');
-        const urlDelete = $(this).data('contribution-url');
+        const id = $(this).data('generation-id');
+        const urlDelete = $(this).data('generation-url');
         const urlRedirect = $(this).data('redirect-url') ? $(this).data('redirect-url') : urlDelete.slice(0, urlDelete.lastIndexOf('/')).slice(0, urlDelete.lastIndexOf('/'));
-        const message = $(this).closest('.actions').data('message-remove-contribution');
+        const message = $(this).closest('.actions').data('message-remove-generation');
         if (urlDelete && confirm(message)) {
-            contributionDelete(id, urlDelete, urlRedirect);
+            generationDelete(id, urlDelete, urlRedirect);
         }
         return false;
     });

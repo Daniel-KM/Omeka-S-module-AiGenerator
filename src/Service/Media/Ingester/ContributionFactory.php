@@ -1,22 +1,22 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Service\Media\Ingester;
+namespace Generate\Service\Media\Ingester;
 
-use Contribute\Media\Ingester\Contribution;
+use Generate\Media\Ingester\Generation;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
-class ContributionFactory implements FactoryInterface
+class GenerationFactory implements FactoryInterface
 {
     /**
-     * Create the Contribution media ingester service.
+     * Create the Generation media ingester service.
      *
-     * @return Contribution
+     * @return Generation
      */
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
-        return new Contribution(
-            $services->get(\Contribute\File\Contribution::class)
+        return new Generation(
+            $services->get(\Generate\File\Generation::class)
         );
     }
 }

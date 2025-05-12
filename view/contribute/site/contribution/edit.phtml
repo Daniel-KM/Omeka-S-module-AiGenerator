@@ -3,9 +3,9 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
  * @var \Omeka\Entity\User|null $user
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation|null $resourceTemplate
- * @var \Contribute\Api\Representation\ContributionRepresentation|null $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation|null $generation
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null $resource
  * @var array $fields
  * @var \Omeka\Api\Representation\ResourceTemplateRepresentation|null $templateMedia A sub template for media may have no fields.
@@ -20,21 +20,21 @@ $plugins = $this->getHelperPluginManager();
 $setting = $plugins->get('setting');
 $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
-$contributionForm = $plugins->get('contributionForm');
+$generationForm = $plugins->get('generationForm');
 
 $this->htmlElement('body')->appendAttribute('class', 'edit items ' . $this->params()->fromRoute('resource') . ' resource');
 
 if ($form) $form->prepare();
 
 $mapLabels = [
-    'contributions' => 'item',
+    'generations' => 'item',
     'items' => 'item',
     'media' => 'media',
     'item_sets' => 'item set',
 ];
 ?>
 
-<div class="contribute-resource conbribute-add container <?= $space && $space !== 'default' ? $space : '' ?>">
+<div class="generate-resource conbribute-add container <?= $space && $space !== 'default' ? $space : '' ?>">
 
     <?= $this->pageTitle($resource ? $escape($resource->displayTitle()) : sprintf($translate('Add %s'), $translate($mapLabels['items'])), 2) ?>
     <h3><?= $resource ? sprintf($translate('Edit %s'), $translate($mapLabels[$resource->resourceName()])) : sprintf($translate('New %s'), $translate($mapLabels['items'])) ?></h3>
@@ -46,12 +46,12 @@ $mapLabels = [
     <?php if (count($fields) && $form):
         // The two lists of fields are merged in one form by default.
         $this->trigger("view.$action.before");
-        echo $contributionForm([
+        echo $generationForm([
             'site' => $site,
             'user' => $user,
             'form' => $form,
             'resourceTemplate' => $resourceTemplate,
-            'contribution' => $contribution,
+            'generation' => $generation,
             'resource' => $resource,
             'fields' => $fields,
             'templateMedia' => $templateMedia,
@@ -60,10 +60,10 @@ $mapLabels = [
             'action' => $action,
             'mode' => $mode,
             'space' => $space,
-            'submitLabel' => $action === 'add' && $setting('contribute_allow_update') !== 'no' ? $translate('Add') : $translate('Submit'),
+            'submitLabel' => $action === 'add' && $setting('generate_allow_update') !== 'no' ? $translate('Add') : $translate('Submit'),
             'cancelLabel' => $translate('Cancel'),
             'isMainForm' => true,
-            'skipContributeCss' => false,
+            'skipGenerateCss' => false,
         ]);
         $this->trigger("view.$action.after");
 

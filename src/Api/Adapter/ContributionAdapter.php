@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Api\Adapter;
+namespace Generate\Api\Adapter;
 
 use Common\Stdlib\PsrMessage;
 use Doctrine\ORM\Query\Expr\Comparison;
@@ -10,7 +10,7 @@ use Omeka\Api\Request;
 use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
 
-class ContributionAdapter extends AbstractEntityAdapter
+class GenerationAdapter extends AbstractEntityAdapter
 {
     protected $sortFields = [
         'id' => 'id',
@@ -41,17 +41,17 @@ class ContributionAdapter extends AbstractEntityAdapter
 
     public function getResourceName()
     {
-        return 'contributions';
+        return 'generations';
     }
 
     public function getRepresentationClass()
     {
-        return \Contribute\Api\Representation\ContributionRepresentation::class;
+        return \Generate\Api\Representation\GenerationRepresentation::class;
     }
 
     public function getEntityClass()
     {
-        return \Contribute\Entity\Contribution::class;
+        return \Generate\Entity\Generation::class;
     }
 
     public function buildQuery(QueryBuilder $qb, array $query): void
@@ -148,19 +148,19 @@ class ContributionAdapter extends AbstractEntityAdapter
             $ids = array_filter($ids);
             if ($ids) {
                 // Not available in orm, but via direct dbal sql.
-                $sql = <<<SQL
-SELECT `id`
-FROM `contribution`
-WHERE JSON_EXTRACT(`proposal`, "$.template") IN (:templates);
-SQL;
+                $sql = <<<'SQL'
+                    SELECT `id`
+                    FROM `generation`
+                    WHERE JSON_EXTRACT(`proposal`, "$.template") IN (:templates);
+                    SQL;
                 /** @var \Doctrine\DBAL\Connection $connection */
                 $connection = $this->getServiceLocator()->get('Omeka\Connection');
-                $contributionIds = $connection->executeQuery($sql, ['templates' => $ids], ['templates' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY])->fetchFirstColumn();
-                $contributionIds = array_map('intval', $contributionIds);
-                if ($contributionIds) {
+                $generationIds = $connection->executeQuery($sql, ['templates' => $ids], ['templates' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY])->fetchFirstColumn();
+                $generationIds = array_map('intval', $generationIds);
+                if ($generationIds) {
                     $qb->andWhere($expr->in(
                         'omeka_root.id',
-                        $this->createNamedParameter($qb, $contributionIds)
+                        $this->createNamedParameter($qb, $generationIds)
                     ));
                 } else {
                     $qb->andWhere($expr->eq(
@@ -190,10 +190,10 @@ SQL;
                     $text = $propertyData['text'] ?? null;
                     // Not available in orm, but via direct dbal sql.
                     $sql = <<<SQL
-SELECT `id`
-FROM `contribution`
-WHERE JSON_EXTRACT(`proposal`, "$.{$property}[*].proposed.{$keyType}") IN (:values);
-SQL;
+                        SELECT `id`
+                        FROM `generation`
+                        WHERE JSON_EXTRACT(`proposal`, "$.{$property}[*].proposed.{$keyType}") IN (:values);
+                        SQL;
                     /** @var \Doctrine\DBAL\Connection $connection */
                     $text = is_array($text) ? array_values($text) : [$text];
                     foreach ($text as &$t) {
@@ -205,12 +205,12 @@ SQL;
                     }
                     unset($t);
                     $connection = $this->getServiceLocator()->get('Omeka\Connection');
-                    $contributionIds = $connection->executeQuery($sql, ['values' => $text], ['values' => \Doctrine\DBAL\Connection::PARAM_STR_ARRAY])->fetchFirstColumn();
-                    $contributionIds = array_map('intval', $contributionIds);
-                    if ($contributionIds) {
+                    $generationIds = $connection->executeQuery($sql, ['values' => $text], ['values' => \Doctrine\DBAL\Connection::PARAM_STR_ARRAY])->fetchFirstColumn();
+                    $generationIds = array_map('intval', $generationIds);
+                    if ($generationIds) {
                         $qb->andWhere($expr->in(
                             'omeka_root.id',
-                            $this->createNamedParameter($qb, $contributionIds)
+                            $this->createNamedParameter($qb, $generationIds)
                         ));
                     } else {
                         $qb->andWhere($expr->eq(
@@ -233,8 +233,8 @@ SQL;
     public function validateRequest(Request $request, ErrorStore $errorStore): void
     {
         $data = $request->getContent();
-        if (array_key_exists('o-module-contribute:proposal', $data)) {
-            $proposal = $data['o-module-contribute:proposal'];
+        if (array_key_exists('o-module-generate:proposal', $data)) {
+            $proposal = $data['o-module-generate:proposal'];
             $check = $this->checkProposedFiles($proposal);
             if (!is_null($check)) {
                 $errorStore->addError('file', $check);
@@ -245,23 +245,24 @@ SQL;
     public function hydrate(Request $request, EntityInterface $entity, ErrorStore $errorStore): void
     {
         // TODO Use shouldHydrate() and validateEntity().
-        /** @var \Contribute\Entity\Contribution $entity */
+        /** @var \Generate\Entity\Generation $entity */
+
         $data = $request->getContent();
         if (Request::CREATE === $request->getOperation()) {
             $this->hydrateOwner($request, $entity);
             $resource = empty($data['o:resource']['o:id'])
                 ? null
                 : $this->getAdapter('resources')->findEntity($data['o:resource']['o:id']);
-            $token = empty($data['o-module-contribute:token'])
+            $token = empty($data['o-module-generate:token'])
                 ? null
-                : $this->getAdapter('contribution_tokens')->findEntity($data['o-module-contribute:token']['o:id']);
+                : $this->getAdapter('generation_tokens')->findEntity($data['o-module-generate:token']['o:id']);
             $email = empty($data['o:email']) ? null : $data['o:email'];
             $isPatch = !empty($resource);
-            $submitted = !empty($data['o-module-contribute:submitted']);
-            $reviewed = !empty($data['o-module-contribute:reviewed']);
-            $proposal = empty($data['o-module-contribute:proposal'])
+            $submitted = !empty($data['o-module-generate:submitted']);
+            $reviewed = !empty($data['o-module-generate:reviewed']);
+            $proposal = empty($data['o-module-generate:proposal'])
                 ? []
-                : $this->uploadProposedFiles($data['o-module-contribute:proposal']);
+                : $this->uploadProposedFiles($data['o-module-generate:proposal']);
             $entity
                 ->setResource($resource)
                 ->setToken($token)
@@ -281,20 +282,20 @@ SQL;
                 }
             }
             // "patch" is an historical data that cannot be updated.
-            if ($this->shouldHydrate($request, 'o-module-contribute:submitted', $data)) {
-                $submitted = !empty($data['o-module-contribute:submitted']);
+            if ($this->shouldHydrate($request, 'o-module-generate:submitted', $data)) {
+                $submitted = !empty($data['o-module-generate:submitted']);
                 $entity
                     ->setSubmitted($submitted);
             }
-            if ($this->shouldHydrate($request, 'o-module-contribute:reviewed', $data)) {
-                $reviewed = !empty($data['o-module-contribute:reviewed']);
+            if ($this->shouldHydrate($request, 'o-module-generate:reviewed', $data)) {
+                $reviewed = !empty($data['o-module-generate:reviewed']);
                 $entity
                     ->setReviewed($reviewed);
             }
-            if ($this->shouldHydrate($request, 'o-module-contribute:proposal', $data)) {
-                $proposal = empty($data['o-module-contribute:proposal'])
+            if ($this->shouldHydrate($request, 'o-module-generate:proposal', $data)) {
+                $proposal = empty($data['o-module-generate:proposal'])
                     ? []
-                    : $this->uploadProposedFiles($data['o-module-contribute:proposal']);
+                    : $this->uploadProposedFiles($data['o-module-generate:proposal']);
                 $entity
                     ->setProposal($proposal);
             }
@@ -382,7 +383,7 @@ SQL;
                             $proposal['media'][$key]['file'][0]['proposed']['@value'] = $uploaded['name'];
                             $proposal['media'][$key]['file'][0]['proposed']['store'] = $filename;
                             unset($proposal['media'][$key]['file'][0]['proposed']['file']);
-                            $tempFile->store('contribution');
+                            $tempFile->store('generation');
                             $tempFile->delete();
                         }
                     }
@@ -396,7 +397,7 @@ SQL;
      * Add a comparison condition to query from a date.
      *
      * @see \Annotate\Api\Adapter\QueryDateTimeTrait::searchDateTime()
-     * @see \Contribute\Api\Adapter\ContributionAdapter::buildQueryDateComparison()
+     * @see \Generate\Api\Adapter\GenerationAdapter::buildQueryDateComparison()
      * @see \Log\Api\Adapter\LogAdapter::buildQueryDateComparison()
      *
      * @todo Normalize with NumericDataTypes.

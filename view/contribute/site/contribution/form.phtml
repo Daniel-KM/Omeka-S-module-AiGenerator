@@ -3,9 +3,9 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
  * @var \Omeka\Entity\User|null $user
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation|null $resourceTemplate
- * @var \Contribute\Api\Representation\ContributionRepresentation|null $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation|null $generation
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null $resource
  * @var array $fields
  * @var \Omeka\Api\Representation\ResourceTemplateRepresentation|null $templateMedia A sub template for media may have no fields.
@@ -18,7 +18,7 @@
  * @var string $submitLabel
  * @var string $cancelLabel
  * @var bool $isMainForm
- * @var bool $skipContributeCss
+ * @var bool $skipGenerateCss
  *
  * When called recursively for sub-fields (media):
  * @var ?int $indexMedia
@@ -39,7 +39,7 @@ $labelInfo = $this->siteSetting('property_label_information') ?? $this->setting(
 // Prepare variables one time for the form and all sub-forms.
 if ($isMainForm) {
     // No echo: only includes variables, css, and js.
-    $partial('contribute/site/contribution/form-include');
+    $partial('generate/site/generation/form-include');
     /**
      * @var \Laminas\View\HelperPluginManager $plugins
      * @var \Laminas\View\Helper\Url $url
@@ -55,13 +55,13 @@ if ($isMainForm) {
      * @var string $baseUrlFiles
      * @var string $mode "read" (for template) or "write"
      */
-    $contributeVars = $plugins
+    $generateVars = $plugins
         ->get(\Laminas\View\Helper\ViewModel::class)
         ->getRoot()
-        ->getVariable('contributeVars') ?? [];
-    extract($contributeVars);
-    $vars = $this->setVars(new \Laminas\View\Variables($contributeVars))->vars();
-    unset($contributeVars);
+        ->getVariable('generateVars') ?? [];
+    extract($generateVars);
+    $vars = $this->setVars(new \Laminas\View\Variables($generateVars))->vars();
+    unset($generateVars);
 }
 
 // To wrap the elements with a disabled fieldset makes the whole form disabled.
@@ -69,25 +69,25 @@ $disabled = $mode === 'read' ? ' disabled="disabled"' : '';
 ?>
 
 <?php if ($isMainForm): ?>
-<div class="contribute main-form">
+<div class="generate main-form">
     <?= $this->form()->openTag($form) ?>
         <?php $this->trigger("view.$action.form.before", ['form' => $form]); ?>
-        <fieldset class="contribute-resource main-form"<?= $disabled ?> data-resource-template-id="<?= $templateMedia ? $templateMedia->id() : '' ?>" data-resource-class-id="<?= $templateMedia && $templateMedia->resourceClass() ? $templateMedia->resourceClass()->id() : '' ?>">
+        <fieldset class="generate-resource main-form"<?= $disabled ?> data-resource-template-id="<?= $templateMedia ? $templateMedia->id() : '' ?>" data-resource-class-id="<?= $templateMedia && $templateMedia->resourceClass() ? $templateMedia->resourceClass()->id() : '' ?>">
     <?php endif; ?>
 
             <?php // Display the special field for media file (required, not a property, and cannot be set in resource template). ?>
             <?php if (!$isMainForm):
                 // Only one file is allowed by media and it cannot be updated, like in Omeka.
-                $file = $fieldsMedia['file']['contributions'][0]['proposed']['store'] ?? null;
+                $file = $fieldsMedia['file']['generations'][0]['proposed']['store'] ?? null;
             ?>
             <div class="property" data-term="file">
                 <h4><?= $escape($translate('Upload')) ?></h4>
                 <?php if ($file): ?>
                 <div class="values">
                     <div class="value">
-                        <a href="<?= $escapeAttr($baseUrlFiles . '/contribution/' . $file) ?>" download="download" target="_self"><?= $escape($fieldsMedia['file']['contributions'][0]['proposed']['@value']) ?></a>
+                        <a href="<?= $escapeAttr($baseUrlFiles . '/generation/' . $file) ?>" download="download" target="_self"><?= $escape($fieldsMedia['file']['generations'][0]['proposed']['@value']) ?></a>
                         <input type="hidden"  name="media[<?= $indexMedia ?>][file][0][store]" value="<?= $escapeAttr($file) ?>"/>
-                        <input type="hidden"  name="media[<?= $indexMedia ?>][file][0][@value]" value="<?= $escapeAttr($fieldsMedia['file']['contributions'][0]['proposed']['@value']) ?>"/>
+                        <input type="hidden"  name="media[<?= $indexMedia ?>][file][0][@value]" value="<?= $escapeAttr($fieldsMedia['file']['generations'][0]['proposed']['@value']) ?>"/>
                     </div>
                 </div>
                 <?php else: ?>
@@ -109,7 +109,7 @@ $disabled = $mode === 'read' ? ' disabled="disabled"' : '';
                  */
                 if ($term === 'file') continue;
                 // Don't display empty values that are not fillable.
-                if (empty($field['contributions']) && !$field['fillable']) continue;
+                if (empty($field['generations']) && !$field['fillable']) continue;
                 $indexFieldInput = 0;
                 $templateProperty = $field['template_property'];
                 $property = $field['property'];
@@ -140,7 +140,7 @@ $disabled = $mode === 'read' ? ' disabled="disabled"' : '';
                     <?php
                     foreach ($field['values'] as $value):
                         $vars->offsetSet('value', $value);
-                        echo $partial('contribute/site/contribution/form-value');
+                        echo $partial('generate/site/generation/form-value');
                     endforeach; ?>
                 </div>
                 <?php // Early end this property and continue to next fields. ?>
@@ -149,54 +149,54 @@ $disabled = $mode === 'read' ? ' disabled="disabled"' : '';
                     endif; ?>
 
                 <?php // Editable fields, that may have been edited or not. ?>
-                <?php // Some contributions may be empty (minimum number of values, or a required one). ?>
+                <?php // Some generations may be empty (minimum number of values, or a required one). ?>
 
                 <div class="values">
                     <?php
-                    foreach ($field['contributions'] as $indexContribution => $fieldContribution) {
+                    foreach ($field['generations'] as $indexGeneration => $fieldGeneration) {
                         // TODO Utiliser main type plutôt que type colon.
                         /** @var \Omeka\Api\Representation\ValueRepresentation $value */
-                        $value = $fieldContribution['original']['value'];
+                        $value = $fieldGeneration['original']['value'];
                         if (!$value && !$field['fillable']) continue;
-                        $typeColon = strtok((string) $fieldContribution['type'], ':');
-                        $vars->offsetSet('indexContribution', $indexContribution);
-                        $vars->offsetSet('fieldContribution', $fieldContribution);
+                        $typeColon = strtok((string) $fieldGeneration['type'], ':');
+                        $vars->offsetSet('indexGeneration', $indexGeneration);
+                        $vars->offsetSet('fieldGeneration', $fieldGeneration);
                         $vars->offsetSet('value', $value);
                         // Check if the value exists or is editable (the value may be empty).
                         if ($value && !$field['editable']) {
-                            echo $partial('contribute/site/contribution/form-value');
+                            echo $partial('generate/site/generation/form-value');
                         } else {
-                            switch ($fieldContribution['type']) {
+                            switch ($fieldGeneration['type']) {
                                 // Check special cases first in a switch.
                                 case $typeColon === 'customvocab':
-                                    echo $partial('contribute/site/contribution/form-input-custom-vocab');
+                                    echo $partial('generate/site/generation/form-input-custom-vocab');
                                     break;
                                 case $typeColon === 'valuesuggest':
                                 case $typeColon === 'valuesuggestall':
-                                    echo $partial('contribute/site/contribution/form-input-value-suggest');
+                                    echo $partial('generate/site/generation/form-input-value-suggest');
                                     break;
                                 case 'numeric:integer':
-                                    echo $partial('contribute/site/contribution/form-input-numeric-integer');
+                                    echo $partial('generate/site/generation/form-input-numeric-integer');
                                     break;
                                 case 'numeric:timestamp':
-                                    echo $partial('contribute/site/contribution/form-input-numeric-timestamp');
+                                    echo $partial('generate/site/generation/form-input-numeric-timestamp');
                                     break;
                                 case 'literal':
-                                    echo $partial('contribute/site/contribution/form-input-literal');
+                                    echo $partial('generate/site/generation/form-input-literal');
                                     break;
                                 case 'resource':
                                 case 'resource:item':
                                 case 'resource:media':
                                 case 'resource:itemset':
-                                    echo $partial('contribute/site/contribution/form-input-resource');
+                                    echo $partial('generate/site/generation/form-input-resource');
                                     break;
                                 case 'uri':
-                                    echo $partial('contribute/site/contribution/form-input-uri');
+                                    echo $partial('generate/site/generation/form-input-uri');
                                     break;
                                 default:
                                     // Other data types are not yet editable.
                                     if ($value):
-                                        echo $partial('contribute/site/contribution/form-value');
+                                        echo $partial('generate/site/generation/form-value');
                                     endif;
                                     break;
                             }
@@ -209,7 +209,7 @@ $disabled = $mode === 'read' ? ' disabled="disabled"' : '';
 
                 <?php // Add a button to add a new value for fillable properties. ?>
                 <?php // The button is always added to manage value removing: if not fillable, it is hidden here and via js. ?>
-                <?= $partial('contribute/site/contribution/form-value-more') ?>
+                <?= $partial('generate/site/generation/form-value-more') ?>
 
             </div>
             <?php endforeach; // Next field/property. ?>
@@ -218,20 +218,20 @@ $disabled = $mode === 'read' ? ' disabled="disabled"' : '';
         </fieldset>
 
         <?php if (!empty($templateMedia)): ?>
-        <fieldset class="contribute-medias sub-forms" data-next-index-media="<?= count($fieldsByMedia) ?>"<?= $disabled ?>>
+        <fieldset class="generate-medias sub-forms" data-next-index-media="<?= count($fieldsByMedia) ?>"<?= $disabled ?>>
             <?php // For end user, "media" means "files". // TODO Add other types of media. ?>
             <legend><?= $escape($translate('Files')) ?></legend>
             <?php
             $vars->offsetSet('isMainForm', false);
             $indexMedia = 0;
             foreach ($fieldsByMedia as $fieldsMedia): ?>
-            <fieldset class="contribute-media sub-form" name="media[<?= $indexMedia ?>]" data-index-media="<?= $indexMedia ?>">
+            <fieldset class="generate-media sub-form" name="media[<?= $indexMedia ?>]" data-index-media="<?= $indexMedia ?>">
                 <legend><?= $escape(sprintf($translate('File %s'), $indexMedia + 1)) ?></legend>
                 <?php
                 $vars->offsetSet('indexMedia', $indexMedia);
                 $vars->offsetSet('fieldsMedia', $fieldsMedia);
                 ?>
-                <?= $partial('contribute/site/contribution/form') ?>
+                <?= $partial('generate/site/generation/form') ?>
                 <ul class="actions resource-edit-remove-value">
                     <li><button type="button" class="remove-media button o-icon-delete"><?= $escape($translate('Remove file')) ?></button></li>
                 </ul>
@@ -268,10 +268,10 @@ $disabled = $mode === 'read' ? ' disabled="disabled"' : '';
             <?php //= TODO $this->cancelButton() ?>
             <?= $hyperlink(
                 $cancelLabel,
-                $contribution
-                    ? $contribution->siteUrl(null, false, 'view', $space === 'guest')
+                $generation
+                    ? $generation->siteUrl(null, false, 'view', $space === 'guest')
                     : ($space === 'guest'
-                            ? $url('site/guest/contribution', [], true)
+                            ? $url('site/guest/generation', [], true)
                             : $url('site/resource', ['controller' => 'item', 'action' => 'browse'], true)),
                 ['class' => 'button button-cancel', 'role' => 'button'])
             ?>
@@ -282,18 +282,18 @@ $disabled = $mode === 'read' ? ' disabled="disabled"' : '';
     <?= $this->form()->closeTag() ?>
 
     <?php //= $partial('common/resource-form-templates') ?>
-    <?= $partial('contribute/site/contribution/form-inputs-default') ?>
+    <?= $partial('generate/site/generation/form-inputs-default') ?>
 
     <?php if (!empty($templateMedia) && !$resource): // TODO Make possible to edit media with item. ?>
-    <div id="edit_template_media" class="contribute_template media" style="display:none;" data-resource-template-id="<?= $templateMedia->id() ?>" data-resource-class-id="<?= $templateMedia->resourceClass() ? $templateMedia->resourceClass()->id() : '' ?>">
-        <fieldset class="contribute-media sub-form" name="media[]" data-index-media="">
+    <div id="edit_template_media" class="generate_template media" style="display:none;" data-resource-template-id="<?= $templateMedia->id() ?>" data-resource-class-id="<?= $templateMedia->resourceClass() ? $templateMedia->resourceClass()->id() : '' ?>">
+        <fieldset class="generate-media sub-form" name="media[]" data-index-media="">
             <legend><?= $escape($translate('File')) ?></legend>
             <?php
             $vars->offsetSet('isMainForm', false);
             $vars->offsetSet('indexMedia', null);
             $vars->offsetSet('fieldsMedia', $fieldsMediaBase);
             ?>
-            <?= $partial('contribute/site/contribution/form') ?>
+            <?= $partial('generate/site/generation/form') ?>
             <?php
             $vars->offsetSet('isMainForm', true);
             $vars->offsetSet('indexMedia', null);

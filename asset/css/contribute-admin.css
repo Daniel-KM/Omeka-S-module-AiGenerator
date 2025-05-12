@@ -1,68 +1,68 @@
 @media all {
-    header nav .contribution:before {
+    header nav .generation:before {
         content:"\f044"; /* fas fa-edit */
     }
-    .contributions .no-resources:before,
-    #contribution .no-contributions:before,
-    .contribution .no-resources:before {
+    .generations .no-resources:before,
+    #generation .no-generations:before,
+    .generation .no-resources:before {
         content:"\f044"; /* far fa-edit */
     }
-    #contribution .no-tokens:before {
+    #generation .no-tokens:before {
         content:""; /* clock */
     }
-    #contributions .property {
+    #generations .property {
         display: inherit;
     }
-    #resource-contributions .actions {
+    #resource-generations .actions {
         float: right;
     }
-    #resource-contributions.empty,
-    #resource-contributions+.no-resources {
+    #resource-generations.empty,
+    #resource-generations+.no-resources {
         display:none;
     }
-    #resource-contributions.empty+.no-resources {
+    #resource-generations.empty+.no-resources {
         display:block;
         padding:0 24px;
     }
-    #resource-contributions.empty+.no-resources:before {
+    #resource-generations.empty+.no-resources:before {
         content:"\f044"; /* far fa-edit */
     }
-    #resource-contributions tr.delete {
+    #resource-generations tr.delete {
         background-color:#fcc;
     }
-    .contributions .resource-details .contribution-internal-id {
+    .generations .resource-details .generation-internal-id {
         font-size: 0.7em;
     }
 
-    .contribution table .resource-name {
+    .generation table .resource-name {
         display: inline-block;
         vertical-align: bottom;
         margin-left: .5em;
         opacity: .5;
     }
-    .contribution table .resource-link .resource-name {
+    .generation table .resource-link .resource-name {
         margin-left: 0;
         opacity: 1;
     }
 
-    .contributions .contribution-public {
+    .generations .generation-public {
         font-style: italic;
     }
 
-    .contribution .no-action,
-    .contribution .single.actions {
+    .generation .no-action,
+    .generation .single.actions {
         float: right;
     }
-    .contribution .no-action span::before,
-    .contribution .single.actions a::before {
+    .generation .no-action span::before,
+    .generation .single.actions a::before {
     }
     .actions .fa-spin::before {
         text-align: center;
         display: inline-block;
         /* position: fixed; */
     }
-    .contribution .o-icon-users,
-    .contribution .no-action::before {
+    .generation .o-icon-users,
+    .generation .no-action::before {
         width: 24px;
         height: 24px;
         line-height: 24px;
@@ -72,8 +72,8 @@
         opacity: .5;
         text-align: inherit;
     }
-    .contribution.meta-group .single.actions,
-    .contribution.meta-group .no-action::before {
+    .generation.meta-group .single.actions,
+    .generation.meta-group .no-action::before {
         float: right;
     }
 
@@ -88,104 +88,104 @@
       text-align: right;
     }
 
-    .contribution.meta-group span,
-    .contribution .meta-group span {
+    .generation.meta-group span,
+    .generation .meta-group span {
         display: inline;
         hyphens: auto;
         word-wrap: break-word;
     }
 
-    .contribution .resource-name.item-set::before {
+    .generation .resource-name.item-set::before {
         content: ""; /* item set */
     }
-    .contribution .resource-name.item::before {
+    .generation .resource-name.item::before {
         content: ""; /* item */
     }
-    .contribution .resource-name.media::before {
+    .generation .resource-name.media::before {
         content: ""; /* media */
     }
-    .contribution .o-icon-unsubmitted::before {
+    .generation .o-icon-unsubmitted::before {
         color: #FF0000;
         content: ""; /* bookmark */
         opacity: 0.5;
     }
-    .contribution .o-icon-submitted::before {
+    .generation .o-icon-submitted::before {
         color: #00FF00;
         content: ""; /* bookmark */
         opacity: 0.5;
     }
-    .contribution .o-icon-unreviewed::before {
+    .generation .o-icon-unreviewed::before {
         color: #FF0000;
         content: ""; /* question */
     }
-    .contribution .o-icon-reviewed::before {
+    .generation .o-icon-reviewed::before {
         color: #00FF00;
         content: ""; /* check */
     }
-    .contribution .o-icon-proposed::before {
+    .generation .o-icon-proposed::before {
         color: #FFA500;
         content: ""; /* question */
     }
-    .contribution .o-icon-approve::before {
+    .generation .o-icon-approve::before {
         color: #00FF00;
         content: ""; /* check */
     }
-    .contribution .o-icon-unvalidated::before,
-    .contribution .o-icon-unapprove::before {
+    .generation .o-icon-unvalidated::before,
+    .generation .o-icon-unapprove::before {
         color: #FF0000;
         content: ""; /* cancel */
     }
-    .contribution .o-icon-validate-value::before,
-    .contribution .o-icon-validate::before {
+    .generation .o-icon-validate-value::before,
+    .generation .o-icon-validate::before {
         color: #FFA500;
         content: "\f359"; /* arrow left */
     }
-    .contribution .o-icon-validate-value.no-right::before,
-    .contribution .o-icon-validate.no-right::before {
+    .generation .o-icon-validate-value.no-right::before,
+    .generation .o-icon-validate.no-right::before {
         color: #FFA500;
         content: "\f359"; /* arrow left */
     }
-    .contribution .o-icon-validated::before {
+    .generation .o-icon-validated::before {
         color: #00FF00;
         content: "\f359"; /* arrow left / equal not available iin 5.0.8 */
     }
-    .contribution .o-icon-validated-value::before {
+    .generation .o-icon-validated-value::before {
         color: #00FF00;
         content: ""; /* check */
     }
-    .contribution .o-icon-unvalidated-value::before {
+    .generation .o-icon-unvalidated-value::before {
         color: #FF0000;
         content: ""; /* cancel */
     }
-    .contribution .o-icon-expire-token::before {
+    .generation .o-icon-expire-token::before {
         color: #00FF00;
         content: ""; /* clock */
     }
-    .contribution .o-icon-expired-token::before {
+    .generation .o-icon-expired-token::before {
         color: #FF0000;
         content: ""; /* clock */
         opacity: 0.4;
     }
-    .contribution .o-icon-no-token::before {
+    .generation .o-icon-no-token::before {
         color: #00FF00;
         content: ""; /* infinity */
         opacity: 0.4;
     }
-    .contribution .o-icon-unknown-value::before,
-    .contribution .o-icon-not-validable-value::before {
+    .generation .o-icon-unknown-value::before,
+    .generation .o-icon-not-validable-value::before {
         color: #FF8800;
         content: ""; /* exclamation */
     }
-    .contribution .o-icon-undefined::before {
+    .generation .o-icon-undefined::before {
         color: #FF0000;
         content: ""; /* exclamation */
     }
-    .contribution .o-icon-none::before {
+    .generation .o-icon-none::before {
         color: #FFFFFF;
         content: "";
     }
 
-    .contribution-medias-label {
+    .generation-medias-label {
         border-bottom: solid 1px;
     }
 
@@ -213,24 +213,24 @@
         box-shadow: none;
     }
 
-    .contribution .contribution-email,
-    .contribution .contribution-date,
-    .contribution .contribution-date-modified {
+    .generation .generation-email,
+    .generation .generation-date,
+    .generation .generation-date-modified {
         opacity: 0.6;
     }
-    .contribution .contribution-id {
+    .generation .generation-id {
         opacity: 0.4;
     }
-    .contribution .original-value {
+    .generation .original-value {
         opacity: 0.6;
     }
-    .contribution .remove-value {
+    .generation .remove-value {
        text-decoration: line-through;
     }
 
     /* Modal */
     /* Modal background */
-    .create_contribute .modal {
+    .create_generate .modal {
         display: none; /* Hidden by default */
         position: fixed; /* Stay in place */
         z-index: 1; /* Sit on top */
@@ -244,7 +244,7 @@
         background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
     }
     /* Modal content */
-    .create_contribute .modal-content {
+    .create_generate .modal-content {
         background-color: #fefefe;
         margin: auto;
         padding: 20px;
@@ -252,47 +252,47 @@
         width: 60%;
     }
     /* Modal close button */
-    .create_contribute .close {
+    .create_generate .close {
         color: #aaaaaa;
         float: right;
         font-size: 28px;
         font-weight: bold;
     }
-    .create_contribute .close:hover,
-    .create_contribute .close:focus {
+    .create_generate .close:hover,
+    .create_generate .close:focus {
         color: #000;
         text-decoration: none;
         cursor: pointer;
     }
 
-    .resource-details .contribution dd {
+    .resource-details .generation dd {
         margin-left: 0;
         opacity: .5;
     }
-    .resource-details .contribution dt {
+    .resource-details .generation dt {
         margin-bottom: .5em;
     }
 
-    .contributions.browse .sidebar label {
+    .generations.browse .sidebar label {
         margin: 0 0 0 0;
         padding: 0 24px 0 0;
     }
-    .contributions.browse .sidebar label::after {
+    .generations.browse .sidebar label::after {
         top: initial;
     }
-    .contributions.browse .sidebar .meta-group.contribution {
+    .generations.browse .sidebar .meta-group.generation {
         justify-content: normal;
     }
-    .contributions.browse .sidebar .meta-group.contribution .contribution{
+    .generations.browse .sidebar .meta-group.generation .generation{
         padding-left: 12px;
     }
 }
 
 @media screen and (max-width: 640px) {
-    fieldset.section>#resource-contributions.empty+.no-resources {
+    fieldset.section>#resource-generations.empty+.no-resources {
         display:none;
     }
-    fieldset.section.mobile-active>#resource-contributions.empty+.no-resources {
+    fieldset.section.mobile-active>#resource-generations.empty+.no-resources {
         display:block;
         margin-top:48px;
     }

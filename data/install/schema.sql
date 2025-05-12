@@ -1,4 +1,4 @@
-CREATE TABLE `contribution` (
+CREATE TABLE `generation` (
     `id` INT AUTO_INCREMENT NOT NULL,
     `resource_id` INT DEFAULT NULL,
     `owner_id` INT DEFAULT NULL,
@@ -13,11 +13,11 @@ CREATE TABLE `contribution` (
     INDEX IDX_EA351E1589329D25 (`resource_id`),
     INDEX IDX_EA351E157E3C61F9 (`owner_id`),
     UNIQUE INDEX UNIQ_EA351E1541DEE7B9 (`token_id`),
-    INDEX `contribute_email_idx` (`email`),
-    INDEX `contribute_modified_idx` (`modified`),
+    INDEX `generate_email_idx` (`email`),
+    INDEX `generate_modified_idx` (`modified`),
     PRIMARY KEY(`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB;
-CREATE TABLE `contribution_token` (
+CREATE TABLE `generation_token` (
     `id` INT AUTO_INCREMENT NOT NULL,
     `resource_id` INT NOT NULL,
     `token` VARCHAR(40) NOT NULL,
@@ -26,11 +26,11 @@ CREATE TABLE `contribution_token` (
     `created` DATETIME NOT NULL,
     `accessed` DATETIME DEFAULT NULL,
     INDEX IDX_3A44AA8989329D25 (`resource_id`),
-    INDEX `contribution_token_idx` (`token`),
-    INDEX `contribution_expire_idx` (`expire`),
+    INDEX `generation_token_idx` (`token`),
+    INDEX `generation_expire_idx` (`expire`),
     PRIMARY KEY(`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB;
-ALTER TABLE `contribution` ADD CONSTRAINT FK_EA351E1589329D25 FOREIGN KEY (`resource_id`) REFERENCES `resource` (`id`) ON DELETE SET NULL;
-ALTER TABLE `contribution` ADD CONSTRAINT FK_EA351E157E3C61F9 FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE SET NULL;
-ALTER TABLE `contribution` ADD CONSTRAINT FK_EA351E1541DEE7B9 FOREIGN KEY (`token_id`) REFERENCES `contribution_token` (`id`) ON DELETE SET NULL;
-ALTER TABLE `contribution_token` ADD CONSTRAINT FK_3A44AA8989329D25 FOREIGN KEY (`resource_id`) REFERENCES `resource` (`id`) ON DELETE CASCADE;
+ALTER TABLE `generation` ADD CONSTRAINT FK_EA351E1589329D25 FOREIGN KEY (`resource_id`) REFERENCES `resource` (`id`) ON DELETE SET NULL;
+ALTER TABLE `generation` ADD CONSTRAINT FK_EA351E157E3C61F9 FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE SET NULL;
+ALTER TABLE `generation` ADD CONSTRAINT FK_EA351E1541DEE7B9 FOREIGN KEY (`token_id`) REFERENCES `contribution_token` (`id`) ON DELETE SET NULL;
+ALTER TABLE `generation_token` ADD CONSTRAINT FK_3A44AA8989329D25 FOREIGN KEY (`resource_id`) REFERENCES `resource` (`id`) ON DELETE CASCADE;

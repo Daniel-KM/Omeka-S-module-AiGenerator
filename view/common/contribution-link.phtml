@@ -16,27 +16,27 @@ $url = $plugins->get('url');
 $translate = $plugins->get('translate');
 ?>
 
-<div id="contribute" class="contribution contribute">
-    <h3><?= $translate('Contribute') ?></h3>
+<div id="generate" class="generation generate">
+    <h3><?= $translate('Generate') ?></h3>
     <?= $this->messages() // Messages are displayed here only for theme that don't include it before. ?>
     <?php if ($isEditable): ?>
         <?php if ($resource): ?>
             <?php if ($canEdit): ?>
-            <?= $this->hyperlink($translate('Edit this record'), $url($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['resource' => $resource->getControllerName(), 'id' => $resource->id(), 'action' => 'edit'], true), ['class' => 'contribute-edit']) ?>
+            <?= $this->hyperlink($translate('Edit this record'), $url($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['resource' => $resource->getControllerName(), 'id' => $resource->id(), 'action' => 'edit'], true), ['class' => 'generate-edit']) ?>
             <?php elseif ($user): ?>
-            <span class="contribute-edit contribute-token"><?= $translate('Click your token link to edit this record.') ?></span>
+            <span class="generate-edit generate-token"><?= $translate('Click your token link to edit this record.') ?></span>
             <?php else: ?>
             <?php $urlLogin = $plugins->has('guestWidget') ? $url('site/guest/anonymous', ['action' => 'login'], true) : $url('login'); ?>
-            <?= sprintf($translate('%1$sLogin%2$s or click your token link to edit this record.'), '<a href="' . $urlLogin . '" class="contribute-edit contribute-login">', '</a>') ?>
+            <?= sprintf($translate('%1$sLogin%2$s or click your token link to edit this record.'), '<a href="' . $urlLogin . '" class="generate-edit generate-login">', '</a>') ?>
             <?php endif; ?>
         <?php else: ?>
             <?php if ($canEdit): ?>
-            <?= $this->hyperlink($translate('Add a new record'), $url($space === 'guest' ? 'site/guest/contribution' : 'site/contribution', ['action' => 'add'], true), ['class' => 'contribute-edit contribute-add']) ?>
+            <?= $this->hyperlink($translate('Add a new record'), $url($space === 'guest' ? 'site/guest/generation' : 'site/generation', ['action' => 'add'], true), ['class' => 'generate-edit generate-add']) ?>
             <?php elseif ($user): ?>
-            <span class="contribute-edit contribute-token"><?= $translate('Click your token link to add a new record.') ?></span>
+            <span class="generate-edit generate-token"><?= $translate('Click your token link to add a new record.') ?></span>
             <?php else: ?>
             <?php $urlLogin = $plugins->has('guestWidget') ? $url('site/guest/anonymous', ['action' => 'login'], true) : $url('login'); ?>
-            <?= sprintf($translate('%1$sLogin%2$s or click your token link to add a new record.'), '<a href="' . $urlLogin . '" class="contribute-edit contribute-login">', '</a>') ?>
+            <?= sprintf($translate('%1$sLogin%2$s or click your token link to add a new record.'), '<a href="' . $urlLogin . '" class="generate-edit generate-login">', '</a>') ?>
             <?php endif; ?>
         <?php endif; ?>
     <?php else: ?>

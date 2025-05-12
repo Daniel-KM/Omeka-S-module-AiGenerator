@@ -3,9 +3,9 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
  * @var \Omeka\Entity\User|null $user
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation|null $resourceTemplate
- * @var \Contribute\Api\Representation\ContributionRepresentation|null $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation|null $generation
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null $resource
  * @var array $fields
  * @var \Omeka\Api\Representation\ResourceTemplateRepresentation|null $templateMedia A sub template for media may have no fields.
@@ -18,7 +18,7 @@
  * @var string $submitLabel
  * @var string $cancelLabel
  * @var bool $isMainForm
- * @var bool $skipContributeCss
+ * @var bool $skipGenerateCss
  *
  * When called recursively for sub-fields (media):
  * @var ?int $indexMedia
@@ -53,16 +53,16 @@ $args['term'] = 'field-to-set';
 $args['indexFieldInput'] = 0;
 $args['property'] = null;
 $args['value'] = null;
-$args['fieldContribution'] = ['type' => null, 'original' => [], 'proposed' => []];
-$args['indexContribution'] = null;
+$args['fieldGeneration'] = ['type' => null, 'original' => [], 'proposed' => []];
+$args['indexGeneration'] = null;
 $args['readonly'] = true;
 ?>
 
-<div id="edit_template_value" class="contribute_template value" style="display:none;">
-    <?= $partial('contribute/site/contribution/form-input-literal', $args) ?>
+<div id="edit_template_value" class="generate_template value" style="display:none;">
+    <?= $partial('generate/site/generation/form-input-literal', $args) ?>
 </div>
 
-<div id="edit_template_resource" class="contribute_template resource" style="display:none;">
+<div id="edit_template_resource" class="generate_template resource" style="display:none;">
     <div class="value resource">
         <select class="form-control input-value" data-value-key="@resource" name="dcterms:title[__INDEX__][@resource]" aria-labelledby="property-__PROPERTYID__-label" readonly="readonly"><option value=""></option></select>
     </div>
@@ -71,25 +71,25 @@ $args['readonly'] = true;
     </ul>
 </div>
 
-<div id="edit_template_uri" class="contribute_template uri" style="display:none;">
-    <?= $partial('contribute/site/contribution/form-input-uri', $args) ?>
+<div id="edit_template_uri" class="generate_template uri" style="display:none;">
+    <?= $partial('generate/site/generation/form-input-uri', $args) ?>
 </div>
 
-<div id="edit_template_media-file" class="contribute_template media" style="display:none;">
-    <?= $partial('contribute/site/contribution/form-input-media-file', $args) ?>
+<div id="edit_template_media-file" class="generate_template media" style="display:none;">
+    <?= $partial('generate/site/generation/form-input-media-file', $args) ?>
 </div>
 
 <?php if ($hasNumericDataTypes): ?>
-<div id="edit_template_numeric-integer" class="contribute_template value" style="display:none;">
-    <?= $partial('contribute/site/contribution/form-input-numeric-integer', $args) ?>
+<div id="edit_template_numeric-integer" class="generate_template value" style="display:none;">
+    <?= $partial('generate/site/generation/form-input-numeric-integer', $args) ?>
 </div>
-<div id="edit_template_numeric-timestamp" class="contribute_template value" style="display:none;">
-    <?= $partial('contribute/site/contribution/form-input-numeric-timestamp', $args) ?>
+<div id="edit_template_numeric-timestamp" class="generate_template value" style="display:none;">
+    <?= $partial('generate/site/generation/form-input-numeric-timestamp', $args) ?>
 </div>
 <?php endif; ?>
 
 <?php if ($easyMeta->dataTypeMainCustomVocabs()): ?>
-<div id="edit_template_customvocab" class="contribute_template custom_vocab" style="display:none;">
+<div id="edit_template_customvocab" class="generate_template custom_vocab" style="display:none;">
     <div class="value custom_vocab" data-basetype="literal">
         <select class="form-control input-value" data-value-key="@value" name="dcterms:title[__INDEX__][@value]" aria-labelledby="property-__PROPERTYID__-label" readonly="readonly"><option value=""></option></select>
         <ul class="actions resource-edit-remove-value">
@@ -112,7 +112,7 @@ $args['readonly'] = true;
 <?php endif; ?>
 
 <?php if ($hasValueSuggest): ?>
-<div id="edit_template_valuesuggest" class="contribute_template value_suggest" style="display:none;">
-    <?= $partial('contribute/site/contribution/form-input-value-suggest', $args) ?>
+<div id="edit_template_valuesuggest" class="generate_template value_suggest" style="display:none;">
+    <?= $partial('generate/site/generation/form-input-value-suggest', $args) ?>
 </div>
 <?php endif; ?>

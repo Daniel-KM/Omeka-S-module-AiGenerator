@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Mvc\Controller\Plugin;
+namespace Generate\Mvc\Controller\Plugin;
 
-use Contribute\Api\Representation\TokenRepresentation;
+use Generate\Api\Representation\TokenRepresentation;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
@@ -23,16 +23,16 @@ class CheckToken extends AbstractPlugin
             return false;
         }
 
-        /** @var \Contribute\Api\Representation\TokenRepresentation $token */
+        /** @var \Generate\Api\Representation\TokenRepresentation $token */
         $token = $controller->api()
-            ->searchOne('contribution_tokens', ['token' => $token, 'resource_id' => $resource->id()])
+            ->searchOne('generation_tokens', ['token' => $token, 'resource_id' => $resource->id()])
             ->getContent();
         if (empty($token)) {
             return false;
         }
 
         // Update the token with last accessed time.
-        $controller->api()->update('contribution_tokens', $token->id(), ['o-module-contribute:accessed' => 'now'], [], ['isPartial' => true]);
+        $controller->api()->update('generation_tokens', $token->id(), ['o-module-generate:accessed' => 'now'], [], ['isPartial' => true]);
 
         // TODO Add a message for expiration.
         if ($token->isExpired()) {

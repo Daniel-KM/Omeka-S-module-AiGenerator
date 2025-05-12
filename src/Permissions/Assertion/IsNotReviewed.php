@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Permissions\Assertion;
+namespace Generate\Permissions\Assertion;
 
-use Contribute\Entity\Contribution;
+use Generate\Entity\Generation;
 use Laminas\Permissions\Acl\Acl;
 use Laminas\Permissions\Acl\Assertion\AssertionInterface;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
@@ -16,7 +16,7 @@ class IsNotReviewed implements AssertionInterface
         ResourceInterface $resource = null,
         $privilege = null
     ) {
-        if (!$resource instanceof Contribution) {
+        if (!$resource instanceof Generation) {
             return false;
         }
         return !$resource->getReviewed();

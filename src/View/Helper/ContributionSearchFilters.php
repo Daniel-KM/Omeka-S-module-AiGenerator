@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\View\Helper;
+namespace Generate\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Manager as ApiManager;
@@ -8,7 +8,7 @@ use Omeka\Api\Manager as ApiManager;
 /**
  * View helper for rendering search filters.
  */
-class ContributionSearchFilters extends AbstractHelper
+class GenerationSearchFilters extends AbstractHelper
 {
     /**
      * The default partial view script.
@@ -65,10 +65,10 @@ class ContributionSearchFilters extends AbstractHelper
                     break;
 
                 case 'patch':
-                    $filterLabel = $translate('Type of contribution'); // @translate
+                    $filterLabel = $translate('Type of generation'); // @translate
                     $filterValue = (int) $value
                         ? $translate('Correction') // @translate
-                        : $translate('Full contribution'); // @translate
+                        : $translate('Full generation'); // @translate
                     $filters[$filterLabel][] = $filterValue;
                     break;
 

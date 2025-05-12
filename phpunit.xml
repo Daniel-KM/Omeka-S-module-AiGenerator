@@ -13,8 +13,8 @@
     beStrictAboutTodoAnnotatedTests="true"
     >
     <testsuites>
-        <testsuite name="Contribute">
-            <directory suffix="Test.php">test/ContributeTest</directory>
+        <testsuite name="Generate">
+            <directory suffix="Test.php">test/GenerateTest</directory>
         </testsuite>
     </testsuites>
     <filter>

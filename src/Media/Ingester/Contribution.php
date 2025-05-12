@@ -1,29 +1,29 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Media\Ingester;
+namespace Generate\Media\Ingester;
 
-use Contribute\File\Contribution as FileContribution;
+use Generate\File\Generation as FileGeneration;
 use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Api\Request;
 use Omeka\Entity\Media;
 use Omeka\Media\Ingester\IngesterInterface;
 use Omeka\Stdlib\ErrorStore;
 
-class Contribution implements IngesterInterface
+class Generation implements IngesterInterface
 {
     /**
-     * @var \Contribute\File\Contribution
+     * @var \Generate\File\Generation
      */
-    protected $fileContribution;
+    protected $fileGeneration;
 
-    public function __construct(FileContribution $fileContribution)
+    public function __construct(FileGeneration $fileGeneration)
     {
-        $this->fileContribution = $fileContribution;
+        $this->fileGeneration = $fileGeneration;
     }
 
     public function getLabel()
     {
-        return 'Contribution'; // @translate
+        return 'Generation'; // @translate
     }
 
     public function getRenderer()
@@ -32,7 +32,7 @@ class Contribution implements IngesterInterface
     }
 
     /**
-     * Ingest from a contribution stored in "/contribution".
+     * Ingest from a generation stored in "/generation".
      *
      * {@inheritDoc}
      */
@@ -46,7 +46,7 @@ class Contribution implements IngesterInterface
 
         $sourceName = $data['o:source'] ?? null;
 
-        $tempFile = $this->fileContribution->toTempFile($data['store'], $sourceName, $errorStore);
+        $tempFile = $this->fileGeneration->toTempFile($data['store'], $sourceName, $errorStore);
         if (!$tempFile) {
             return;
         }
@@ -61,7 +61,7 @@ class Contribution implements IngesterInterface
 
         $storeOriginal = true;
         $storeThumbnails = true;
-        // Keep temp files to avoid losses when contribution is validated.
+        // Keep temp files to avoid losses when generation is validated.
         // TODO The file will be removed later (after hydration: see Module).
         $deleteTempFile = false;
         $hydrateFileMetadataOnStoreOriginalFalse = true;
@@ -78,6 +78,6 @@ class Contribution implements IngesterInterface
 
     public function form(PhpRenderer $view, array $options = [])
     {
-        return $view->translate('Used only for internal contribution process.'); // @translate
+        return $view->translate('Used only for internal generation process.'); // @translate
     }
 }

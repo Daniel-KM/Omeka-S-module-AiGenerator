@@ -3,9 +3,9 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
  * @var \Omeka\Entity\User|null $user
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation|null $resourceTemplate
- * @var \Contribute\Api\Representation\ContributionRepresentation|null $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation|null $generation
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null $resource
  * @var array $fields
  * @var \Omeka\Api\Representation\ResourceTemplateRepresentation|null $templateMedia A sub template for media may have no fields.
@@ -18,7 +18,7 @@
  * @var string $submitLabel
  * @var string $cancelLabel
  * @var bool $isMainForm
- * @var bool $skipContributeCss
+ * @var bool $skipGenerateCss
  *
  * When called recursively for sub-fields (media):
  * @var ?int $indexMedia
@@ -44,18 +44,18 @@
  * @var ?\Omeka\Api\Representation\ResourceTemplatePropertyRepresentation $templateProperty
  * @var ?\Omeka\Api\Representation\PropertyRepresentation $property
  * @var ?\Omeka\Api\Representation\ValueRepresentation $value
- * @var ?array $fieldContribution
- * @var ?int $indexContribution
+ * @var ?array $fieldGeneration
+ * @var ?int $indexGeneration
  * @var bool $readonly
  * @var ?string $baseType
  *
  * @uses \CustomVocab\DataType\CustomVocab
  */
 
-$original = $fieldContribution['original'];
-$proposed = $fieldContribution['proposed'];
+$original = $fieldGeneration['original'];
+$proposed = $fieldGeneration['proposed'];
 $isPrivate = $value ? !$value->isPublic() : (isset($templateProperty) ? $templateProperty->isPrivate() : false);
-$isRequired = !empty($field['required']) && (($indexContribution ?? null) === 0);
+$isRequired = !empty($field['required']) && (($indexGeneration ?? null) === 0);
 
 $class = ['value', 'custom_vocab'];
 if ($isPrivate) {
@@ -65,8 +65,8 @@ $language = isset($proposed['@value']) ? null : (isset($original['value']) ? $or
 
 // Use the standard select, except for thesaurus.
 // Manage hierarchical list (via module Thesaurus).
-$mainType = $easyMeta->dataTypeMainCustomVocab($fieldContribution['type']);
-$customVocabId = (int) substr($fieldContribution['type'], 12);
+$mainType = $easyMeta->dataTypeMainCustomVocab($fieldGeneration['type']);
+$customVocabId = (int) substr($fieldGeneration['type'], 12);
 $customVocab = $customVocabId ? $apiManager->read('custom_vocabs', ['id' => $customVocabId])->getContent() : null;
 $customVocabType = $baseType ?? $mainType ?? 'literal';
 $typeName = $customVocabType === 'literal' ? 'value' : $customVocabType;
@@ -89,7 +89,7 @@ if ($isCustomVocabThesaurus) {
     $selectHtml = (new \CustomVocab\DataType\CustomVocab($customVocab))->form($this);
 } else {
     $customVocab = null;
-    $selectHtml = '<select name="' . $fieldContribution['type'] . '"></select>';
+    $selectHtml = '<select name="' . $fieldGeneration['type'] . '"></select>';
 }
 
 $name = $isMainForm

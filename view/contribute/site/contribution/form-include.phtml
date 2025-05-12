@@ -3,9 +3,9 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
  * @var \Omeka\Entity\User|null $user
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation|null $resourceTemplate
- * @var \Contribute\Api\Representation\ContributionRepresentation|null $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation|null $generation
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null $resource
  * @var array $fields
  * @var \Omeka\Api\Representation\ResourceTemplateRepresentation|null $templateMedia A sub template for media may have no fields.
@@ -18,7 +18,7 @@
  * @var string $submitLabel
  * @var string $cancelLabel
  * @var bool $isMainForm
- * @var bool $skipContributeCss
+ * @var bool $skipGenerateCss
  */
 
 // Prepare all the variables one time to simplify sub-template and sub-forms.
@@ -73,28 +73,28 @@ $vars['baseUrlFiles'] = $baseUrlFiles;
 $plugins
     ->get(\Laminas\View\Helper\ViewModel::class)
     ->getRoot()
-    ->setVariable('contributeVars', $vars);
+    ->setVariable('generateVars', $vars);
 
 $assetUrl = $plugins->get('assetUrl');
 $this->headLink()
     ->prependStylesheet($assetUrl('vendor/chosen-js/chosen.min.css', 'Omeka'));
-if (empty($skipContributeCss)) {
+if (empty($skipGenerateCss)) {
     $this->headLink()
-        ->appendStylesheet($assetUrl('css/contribute.css', 'Contribute'));
+        ->appendStylesheet($assetUrl('css/generate.css', 'Generate'));
 }
 $this->headScript()
     ->appendFile($assetUrl('vendor/chosen-js/chosen.jquery.min.js', 'Omeka'), 'text/javascript', ['defer' => 'defer'])
-    ->appendFile($assetUrl('js/contribute.js', 'Contribute'), 'text/javascript', ['defer' => 'defer']);
+    ->appendFile($assetUrl('js/generate.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
 
 $js = '';
 // To check if ValueSuggest is available, just try to get the routed url.
 try {
     $proxyUrl = $this->url('admin/value-suggest/proxy', [], true);
     $this->headLink()
-        ->appendStylesheet($assetUrl('css/valuesuggest.css', 'Contribute'));
+        ->appendStylesheet($assetUrl('css/valuesuggest.css', 'Generate'));
     $this->headScript()
         ->appendFile($assetUrl('vendor/jquery-autocomplete/jquery.autocomplete.min.js', 'AdvancedResourceTemplate'), 'text/javascript', ['defer' => 'defer'])
-        ->appendFile($assetUrl('js/valuesuggest.js', 'Contribute'), 'text/javascript', ['defer' => 'defer']);
+        ->appendFile($assetUrl('js/valuesuggest.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
     $js .= sprintf('const valueSuggestProxyUrl = "%s";', $this->escapeJs($proxyUrl));
 } catch (\Exception $e) {
     // Nothing to prepare.
@@ -103,13 +103,13 @@ try {
 // Store in js basic config of the fields.
 $simpleFields = $fields ?? [];
 foreach ($simpleFields as &$simpleField) {
-    unset($simpleField['template_property'], $simpleField['property'], $simpleField['alternate_comment'], $simpleField['alternate_label'], $simpleField['values'], $simpleField['contributions']);
+    unset($simpleField['template_property'], $simpleField['property'], $simpleField['alternate_comment'], $simpleField['alternate_label'], $simpleField['values'], $simpleField['generations']);
 }
 unset($simpleField);
 $js .= PHP_EOL . sprintf('const fields = %s;', json_encode($simpleFields, 320));
 $simpleMediaFields = $fieldsMediaBase ?? [];
 foreach ($simpleMediaFields as &$simpleMediaField) {
-    unset($simpleMediaField['template_property'], $simpleMediaField['property'], $simpleMediaField['alternate_comment'], $simpleMediaField['alternate_label'], $simpleMediaField['values'], $simpleMediaField['contributions']);
+    unset($simpleMediaField['template_property'], $simpleMediaField['property'], $simpleMediaField['alternate_comment'], $simpleMediaField['alternate_label'], $simpleMediaField['values'], $simpleMediaField['generations']);
 }
 unset($simpleMediaField);
 $js .= PHP_EOL . sprintf('const templateMedia = %s;', isset($templateMedia) ? $templateMedia->id() : 'null');

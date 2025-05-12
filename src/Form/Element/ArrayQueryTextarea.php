@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Form\Element;
+namespace Generate\Form\Element;
 
 use Omeka\Form\Element\ArrayTextarea;
 

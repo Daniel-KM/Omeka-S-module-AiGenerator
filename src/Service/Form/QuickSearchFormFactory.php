@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Service\Form;
+namespace Generate\Service\Form;
 
-use Contribute\Form\QuickSearchForm;
+use Generate\Form\QuickSearchForm;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
@@ -12,14 +12,14 @@ class QuickSearchFormFactory implements FactoryInterface
     {
         $api = $services->get('Omeka\ApiManager');
         $availableTemplates = $api->search('resource_templates', [], ['returnScalar' => 'label'])->getContent();
-        $contributeTemplates = $services->get('Omeka\Settings')->get('contribute_templates', []);
-        $set = array_intersect_key($availableTemplates, array_flip($contributeTemplates));
+        $generateTemplates = $services->get('Omeka\Settings')->get('generate_templates', []);
+        $set = array_intersect_key($availableTemplates, array_flip($generateTemplates));
         $unset = array_diff_key($availableTemplates, $set);
         natcasesort($set);
         natcasesort($unset);
         $resourceTemplates = [
             'set' => [
-                'label' => 'Contribute templates', // @translate
+                'label' => 'Generate templates', // @translate
                 'options' => $set,
             ],
             'unset' => [

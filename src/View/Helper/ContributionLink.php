@@ -1,17 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\View\Helper;
+namespace Generate\View\Helper;
 
-use Contribute\Mvc\Controller\Plugin\CheckToken;
+use Generate\Mvc\Controller\Plugin\CheckToken;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
-class ContributionLink extends AbstractHelper
+class GenerationLink extends AbstractHelper
 {
     /**
      * The default partial view script.
      */
-    const PARTIAL_NAME = 'common/contribution-link';
+    const PARTIAL_NAME = 'common/generation-link';
 
     /**
      * @var CheckToken
@@ -24,7 +24,7 @@ class ContributionLink extends AbstractHelper
     }
 
     /**
-     * Get the link to the contribute page (add if no resource, else edit).
+     * Get the link to the generate page (add if no resource, else edit).
      *
      * @todo Don't check the view.
      *
@@ -53,9 +53,9 @@ class ContributionLink extends AbstractHelper
         $plugins = $view->getHelperPluginManager();
         $user = $plugins->get('identity')();
         $setting = $plugins->get('setting');
-        $canContribute = $plugins->get('canContribute');
+        $canGenerate = $plugins->get('canGenerate');
 
-        $canEditWithoutToken = $canContribute();
+        $canEditWithoutToken = $canGenerate();
         $canEdit = $canEditWithoutToken
             || ($resource && $this->checkToken->__invoke($resource));
 
@@ -63,10 +63,10 @@ class ContributionLink extends AbstractHelper
         if ($resource) {
             $resourceTemplate = $resource->resourceTemplate();
             if ($resourceTemplate) {
-                $isEditable = in_array($resourceTemplate->id(), $setting('contribute_templates', []));
+                $isEditable = in_array($resourceTemplate->id(), $setting('generate_templates', []));
             }
         } else {
-            $isEditable = !empty($setting('contribute_templates', []));
+            $isEditable = !empty($setting('generate_templates', []));
         }
 
         $template = $options['template'];
@@ -90,7 +90,7 @@ class ContributionLink extends AbstractHelper
             // Existing resource.
             if ($resource) {
                 if ($canEdit) {
-                    return $url($asGuest ? 'site/guest/contribution-id' : 'site/contribution-id', ['resource' => $resource->getControllerName(), 'id' => $resource->id(), 'action' => 'edit'], true);
+                    return $url($asGuest ? 'site/guest/generation-id' : 'site/generation-id', ['resource' => $resource->getControllerName(), 'id' => $resource->id(), 'action' => 'edit'], true);
                 } elseif ($user) {
                     return '';
                 } else {
@@ -99,7 +99,7 @@ class ContributionLink extends AbstractHelper
             } else {
                 // New resource.
                 if ($canEdit) {
-                    return $url($asGuest ? 'site/guest/contribution' : 'site/contribution', [], true);
+                    return $url($asGuest ? 'site/guest/generation' : 'site/generation', [], true);
                 } elseif ($user) {
                     return '';
                 } else {

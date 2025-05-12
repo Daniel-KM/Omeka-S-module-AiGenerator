@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Form;
+namespace Generate\Form;
 
 use Laminas\Form\Element;
 use Laminas\Form\Form;
 
-class ContributeForm extends Form
+class GenerateForm extends Form
 {
     /**
      * @var array

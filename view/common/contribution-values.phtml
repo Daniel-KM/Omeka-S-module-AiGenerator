@@ -2,7 +2,7 @@
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
- * @var \Contribute\Api\Representation\ContributionRepresentation $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation $generation
  * @var array $templateProperties
  * @var array $values
  * @var array $valuesMedias
@@ -32,7 +32,7 @@ $baseUrlFiles = $site->getServiceLocator()->get('Config')['file_store']['local']
 
 $varsBase = [
     'site' => $site,
-    'contribution' => $contribution,
+    'generation' => $generation,
     'templateProperties' => $templateProperties,
     'api' => $api,
     'escape' => $escape,
@@ -47,11 +47,11 @@ $varsBase = [
     'indexValuesMedia' => null,
 ];
 
-echo $this->partial('common/contribution-values-part', $varsBase);
+echo $this->partial('common/generation-values-part', $varsBase);
 
 if (count($valuesMedias)): ?>
-    <div class="contribution-medias">
-        <h4 class="contribution-medias-label"><?= $isSiteRequest ? $translate('Files') : $translate('Medias') ?></h4>
+    <div class="generation-medias">
+        <h4 class="generation-medias-label"><?= $isSiteRequest ? $translate('Files') : $translate('Medias') ?></h4>
         <?php
         $varsBase['isSub'] = true;
         $varsForLoop = [];
@@ -60,7 +60,7 @@ if (count($valuesMedias)): ?>
             $varsBase['indexValuesMedia'] = $indexValuesMedia;
             $varsForLoop[] = $varsBase;
         }
-        echo $this->partialLoop('common/contribution-values-part', $varsForLoop);
+        echo $this->partialLoop('common/generation-values-part', $varsForLoop);
         ?>
     </div>
     <?php

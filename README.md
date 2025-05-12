@@ -1,15 +1,15 @@
-Contribute (module for Omeka S)
+Generate (module for Omeka S)
 ===============================
 
 > __New versions of this module and support for Omeka S version 3.0 and above
 > are available on [GitLab], which seems to respect users and privacy better
 > than the previous repository.__
 
-[Contribute] is a module for [Omeka S] that allows visitors to add, edit,
+[Generate] is a module for [Omeka S] that allows visitors to add, edit,
 complete or translate metadata of the resources without access to the admin
 board.
 
-Access to the contribute and to the edit page may be controlled by a token, that
+Access to the generate and to the edit page may be controlled by a token, that
 you can send to your users, or to users only (in particular guest users), or to
 anybody.
 
@@ -32,19 +32,19 @@ The module uses the module [Advanced Resource Template] in order to manage the
 forms and the properties that the users can edit or fill, so it should be
 installed first.
 
-If you want to open contribution only to authenticated users, it is recommended
+If you want to open generation only to authenticated users, it is recommended
 to install the module [Guest] and [Blocks Disposition] (unless you edit theme).
 
 * From the zip
 
-Download the last release [Contribute.zip] from the list of releases (the
+Download the last release [Generate.zip] from the list of releases (the
 master does not contain the dependency), and uncompress it in the `modules`
 directory.
 
 * From the source and for development
 
 If the module was installed from the source, rename the name of the folder of
-the module to `Contribute`.
+the module to `Generate`.
 
 ### Upgrade from module Correction
 
@@ -55,17 +55,17 @@ install version 3.4.23 then upgrade the module.
 Usage
 -----
 
-To be contributed or completed, a resource must have a template and be allowed
+To be generated or completed, a resource must have a template and be allowed
 in the main settings.
 
-- Configure the main settings, in particular the contribution mode.
+- Configure the main settings, in particular the generation mode.
 - Configure the resource templates to select the properties to be edited or
   filled. Note: If a property has no value, it can't be edited, even if the
   property is marked editable. To allow to add a value, choose "fillable". To
   allow only one value, set the maximum number of values to 1.
-- To allow to contribute a file, you should define a template for files and set
+- To allow to generate a file, you should define a template for files and set
   it in the parameters of the main template.
-- If the contribute mode requires token:
+- If the generate mode requires token:
   - Create one or more tokens for the resources you want to edit via the link in
     the sidebar of a resource or the bulk process dropdown at the top of the
     resource browse pages.
@@ -74,22 +74,22 @@ in the main settings.
 - Else a link is displayed on the item page if enabled in the theme or via the
   module Blocks Disposition.
 - After submission, the admin can go to the resource page of the edited items
-  and apply changes, or decline them. A page lists all contributions too.
-  Contribution can be marked as reviewed and token can be made expired.
+  and apply changes, or decline them. A page lists all generations too.
+  Generation can be marked as reviewed and token can be made expired.
 
 
 TODO
 ----
 
 - [x] Reintegrate features for corrections in version 3.3.0.18+.
-- [ ] Store the site in the contribution.
-- [ ] Store the ip and some data to check anonymous contribution (see module Contact Us).
+- [ ] Store the site in the generation.
+- [ ] Store the ip and some data to check anonymous generation (see module Contact Us).
 - [x] Make the token optional (allow anybody to edit; review all rights).
 - [ ] Manage the fillable fields with a language, so it will simplify validation of translation (use advanced resource template).
 - [ ] Finalize value resources.
 - [ ] Finalize select for resources (dynamic api query via chosen-select).
-- [x] Create an admin browse page with all contributes.
-- [ ] Remove the fallback contribution settings to simplify config and move all settings to advanced resource template.
+- [x] Create an admin browse page with all generates.
+- [ ] Remove the fallback generation settings to simplify config and move all settings to advanced resource template.
 - [ ] Check process when the resource template is updated (required, max values, editable, fillable…).
 - [ ] Remove requirement for Advanced Resource Template: only list of editable and fillable properties may be needed (or make them all editable/fillable).
 - [ ] Remove the "@" in internal proposition values.
@@ -97,8 +97,8 @@ TODO
 - [ ] Add resource via token (only edition currently).
 - [ ] Clarify add/edition resource for correction.
 - [ ] Dynamic select for resource (without custom vocab).
-- [ ] Add pagination in guest contribution list.
-- [ ] Require only on submit for new contribution?
+- [ ] Add pagination in guest generation list.
+- [ ] Require only on submit for new generation?
 - [ ] Improve lang management.
 - [ ] Allow to create subresource in the main form (author). Require check.
 - [ ] Manage value annotations.
@@ -162,15 +162,15 @@ the digital archiving of student works ([Dante]) of the [Université de Toulouse
 
 
 [Omeka S]: https://omeka.org/s
-[Contribute]: https://gitlab.com/Daniel-KM/Omeka-S-module-Contribute
+[Generate]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generate
 [Collecting]: https://omeka.org/s/modules/Collecting
 [Advanced Resource Template]: https://gitlab.com/Daniel-KM/Omeka-S-module-AdvancedResourceTemplate
 [Blocks Disposition]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition
 [Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
 [Guest]: https://gitlab.com/Daniel-KM/Omeka-S-module-Guest
-[Contribute.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Contribute/-/releases
+[Generate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generate/-/releases
 [installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
-[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-Contribute/-/issues
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-Generate/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org

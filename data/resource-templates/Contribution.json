@@ -1,5 +1,5 @@
 {
-    "o:label": "Contribution",
+    "o:label": "Generation",
     "o:resource_template_property": [
         {
             "o:alternate_label": null,
@@ -142,11 +142,11 @@
         "groups": [],
         "subject_values_order": [],
         "settings": "",
-        "contribute_template_media": "",
-        "contribute_author_confirmation_subject": "",
-        "contribute_author_confirmation_body": "",
-        "contribute_reviewer_confirmation_subject": "",
-        "contribute_reviewer_confirmation_body": "",
+        "generate_template_media": "",
+        "generate_author_confirmation_subject": "",
+        "generate_author_confirmation_body": "",
+        "generate_reviewer_confirmation_subject": "",
+        "generate_reviewer_confirmation_body": "",
         "suggested_resource_class_ids": []
     }
 }

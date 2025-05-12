@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Controller\Admin;
+namespace Generate\Controller\Admin;
 
 use Common\Stdlib\PsrMessage;
-use Contribute\Controller\ContributionTrait;
-use Contribute\Form\QuickSearchForm;
+use Generate\Controller\GenerationTrait;
+use Generate\Form\QuickSearchForm;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManager;
@@ -14,9 +14,9 @@ use Laminas\View\Model\ViewModel;
 use Omeka\Form\ConfirmForm;
 use Omeka\Stdlib\ErrorStore;
 
-class ContributionController extends AbstractActionController
+class GenerationController extends AbstractActionController
 {
-    use ContributionTrait;
+    use GenerationTrait;
 
     /**
      * @var \Doctrine\ORM\EntityManager
@@ -35,7 +35,7 @@ class ContributionController extends AbstractActionController
         $formSearch = $this->getForm(QuickSearchForm::class);
         $formSearch
             ->setAttribute('action', $this->url()->fromRoute(null, ['action' => 'browse'], true))
-            ->setAttribute('id', 'contribution-search');
+            ->setAttribute('id', 'generation-search');
 
         // Fix form radio for empty value and form select.
         $data = $params;
@@ -78,32 +78,32 @@ class ContributionController extends AbstractActionController
             $params['sort_order'] = 'desc';
         }
 
-        $this->browse()->setDefaults('contributions');
+        $this->browse()->setDefaults('generations');
 
-        $response = $this->api()->search('contributions', $params);
+        $response = $this->api()->search('generations', $params);
         $this->paginator($response->getTotalResults());
 
         /** @var \Omeka\Form\ConfirmForm $formDeleteSelected */
         $formDeleteSelected = $this->getForm(ConfirmForm::class);
         $formDeleteSelected
             ->setAttribute('id', 'confirm-delete-selected')
-            ->setAttribute('action', $this->url()->fromRoute('admin/contribution/default', ['action' => 'batch-delete'], true))
+            ->setAttribute('action', $this->url()->fromRoute('admin/generation/default', ['action' => 'batch-delete'], true))
             ->setButtonLabel('Confirm Delete'); // @translate
 
         /** @var \Omeka\Form\ConfirmForm $formDeleteAll */
         $formDeleteAll = $this->getForm(ConfirmForm::class);
         $formDeleteAll
             ->setAttribute('id', 'confirm-delete-all')
-            ->setAttribute('action', $this->url()->fromRoute('admin/contribution/default', ['action' => 'batch-delete-all'], true))
+            ->setAttribute('action', $this->url()->fromRoute('admin/generation/default', ['action' => 'batch-delete-all'], true))
             ->setButtonLabel('Confirm Delete'); // @translate
         $formDeleteAll
             ->get('submit')->setAttribute('disabled', true);
 
-        $contributions = $response->getContent();
+        $generations = $response->getContent();
 
         return new ViewModel([
-            'contributions' => $contributions,
-            'resources' => $contributions,
+            'generations' => $generations,
+            'resources' => $generations,
             'formSearch' => $formSearch,
             'formDeleteSelected' => $formDeleteSelected,
             'formDeleteAll' => $formDeleteAll,
@@ -113,51 +113,51 @@ class ContributionController extends AbstractActionController
     public function showAction()
     {
         $params = $this->params()->fromRoute();
-        $response = $this->api()->read('contributions', $this->params('id'));
-        $contribution = $response->getContent();
-        $res = $contribution->resource();
+        $response = $this->api()->read('generations', $this->params('id'));
+        $generation = $response->getContent();
+        $res = $generation->resource();
         if (!$res) {
-            $message = new PsrMessage('This contribution is a new resource or has no more resource.'); // @translate
+            $message = new PsrMessage('This generation is a new resource or has no more resource.'); // @translate
             $this->messenger()->addError($message);
             $params['action'] = 'browse';
-            return $this->forward()->dispatch('Contribute\Controller\Admin\Contribution', $params);
+            return $this->forward()->dispatch('Generate\Controller\Admin\Generation', $params);
         }
 
         $params = [];
         $params['controller'] = $res->getControllerName();
         $params['action'] = 'show';
         $params['id'] = $res->id();
-        $url = $this->url()->fromRoute('admin/id', $params, ['fragment' => 'contribution']);
+        $url = $this->url()->fromRoute('admin/id', $params, ['fragment' => 'generation']);
         return $this->redirect()->toUrl($url);
     }
 
     public function showDetailsAction()
     {
         $linkTitle = (bool) $this->params()->fromQuery('link-title', true);
-        $response = $this->api()->read('contributions', $this->params('id'));
-        $contribution = $response->getContent();
+        $response = $this->api()->read('generations', $this->params('id'));
+        $generation = $response->getContent();
 
         $view = new ViewModel([
             'linkTitle' => $linkTitle,
-            'resource' => $contribution,
+            'resource' => $generation,
             'values' => json_encode([]),
         ]);
         return $view
-            ->setTemplate('contribute/admin/contribution/show-details')
+            ->setTemplate('generate/admin/generation/show-details')
             ->setTerminal(true);
     }
 
     public function deleteConfirmAction()
     {
         $linkTitle = (bool) $this->params()->fromQuery('link-title', true);
-        $response = $this->api()->read('contributions', $this->params('id'));
-        $contribution = $response->getContent();
+        $response = $this->api()->read('generations', $this->params('id'));
+        $generation = $response->getContent();
 
         $view = new ViewModel([
-            'contribution' => $contribution,
-            'resource' => $contribution,
-            'resourceLabel' => 'contribution', // @translate
-            'partialPath' => 'contribute/admin/contribution/show-details',
+            'generation' => $generation,
+            'resource' => $generation,
+            'resourceLabel' => 'generation', // @translate
+            'partialPath' => 'generate/admin/generation/show-details',
             'linkTitle' => $linkTitle,
             'values' => json_encode([]),
         ]);
@@ -172,16 +172,16 @@ class ContributionController extends AbstractActionController
             $form = $this->getForm(ConfirmForm::class);
             $form->setData($this->getRequest()->getPost());
             if ($form->isValid()) {
-                $response = $this->api($form)->delete('contributions', $this->params('id'));
+                $response = $this->api($form)->delete('generations', $this->params('id'));
                 if ($response) {
-                    $this->messenger()->addSuccess('Contribution successfully deleted'); // @translate
+                    $this->messenger()->addSuccess('Generation successfully deleted'); // @translate
                 }
             } else {
                 $this->messenger()->addFormErrors($form);
             }
         }
         return $this->redirect()->toRoute(
-            'admin/contribution',
+            'admin/generation',
             ['action' => 'browse'],
             true
         );
@@ -195,16 +195,16 @@ class ContributionController extends AbstractActionController
 
         $resourceIds = $this->params()->fromPost('resource_ids', []);
         if (!$resourceIds) {
-            $this->messenger()->addError('You must select at least one contribution to batch delete.'); // @translate
+            $this->messenger()->addError('You must select at least one generation to batch delete.'); // @translate
             return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
         }
 
         $form = $this->getForm(ConfirmForm::class);
         $form->setData($this->getRequest()->getPost());
         if ($form->isValid()) {
-            $response = $this->api($form)->batchDelete('contributions', $resourceIds, [], ['continueOnError' => true]);
+            $response = $this->api($form)->batchDelete('generations', $resourceIds, [], ['continueOnError' => true]);
             if ($response) {
-                $this->messenger()->addSuccess('Contributions successfully deleted'); // @translate
+                $this->messenger()->addSuccess('Generations successfully deleted'); // @translate
             }
         } else {
             $this->messenger()->addFormErrors($form);
@@ -227,10 +227,10 @@ class ContributionController extends AbstractActionController
         $form->setData($this->getRequest()->getPost());
         if ($form->isValid()) {
             $this->jobDispatcher()->dispatch(\Omeka\Job\BatchDelete::class, [
-                'resource' => 'contributions',
+                'resource' => 'generations',
                 'query' => $query,
             ]);
-            $this->messenger()->addSuccess('Deleting contributions. This may take a while.'); // @translate
+            $this->messenger()->addSuccess('Deleting generations. This may take a while.'); // @translate
         } else {
             $this->messenger()->addFormErrors($form);
         }
@@ -295,9 +295,9 @@ class ContributionController extends AbstractActionController
             ? (is_array($params['resource_ids']) ? $params['resource_ids'] : explode(',', $params['resource_ids']))
             : [];
         $params['resource_ids'] = $resourceIds;
-        $params['batch_action'] = $params['batch_action'] === 'contribution-all' ? 'contribution-all' : 'contribution-selected';
+        $params['batch_action'] = $params['batch_action'] === 'generation-all' ? 'generation-all' : 'generation-selected';
 
-        if ($params['batch_action'] === 'contribution-all') {
+        if ($params['batch_action'] === 'generation-all') {
             // Derive the query, removing limiting and sorting params.
             $query = json_decode($params['query'] ?: [], true);
             unset($query['submit'], $query['page'], $query['per_page'], $query['limit'],
@@ -316,7 +316,7 @@ class ContributionController extends AbstractActionController
         $email = trim($params['email'] ?? '');
         if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->messenger()->addError(new PsrMessage(
-                'You set the optional email "{email}" to create a contribution token, but it is not well-formed.', // @translate
+                'You set the optional email "{email}" to create a generation token, but it is not well-formed.', // @translate
                 ['email' => $email]
             ));
             return $params['redirect']
@@ -325,7 +325,7 @@ class ContributionController extends AbstractActionController
         }
 
         // $expire = $params['expire'];
-        $tokenDuration = $this->settings()->get('contribute_token_duration');
+        $tokenDuration = $this->settings()->get('generate_token_duration');
         $expire = $tokenDuration > 0
             ? (new DateTime('now'))->add(new DateInterval('PT' . ($tokenDuration * 86400) . 'S'))
             : null;
@@ -335,14 +335,14 @@ class ContributionController extends AbstractActionController
         $urlHelper = $this->viewHelpers()->get('url');
         $urls = [];
         foreach ($resourceIds as $resourceId) {
-            /** @var \Contribute\Api\Representation\TokenRepresentation $token */
+            /** @var \Generate\Api\Representation\TokenRepresentation $token */
             $token = $api
                 ->create(
-                    'contribution_tokens',
+                    'generation_tokens',
                     [
                         'o:resource' => ['o:id' => $resourceId],
                         'o:email' => $email,
-                        'o-module-contribute:expire' => $expire,
+                        'o-module-generate:expire' => $expire,
                     ]
                 )
                 ->getContent();
@@ -358,7 +358,7 @@ class ContributionController extends AbstractActionController
         }
 
         $message = new PsrMessage(
-            'Created {total} contribution tokens (email: {email}, duration: {duration}): {urls}', // @translate
+            'Created {total} generation tokens (email: {email}, duration: {duration}): {urls}', // @translate
             [
                 'total' => $count,
                 'email' => $email ?: new PsrMessage('none'), // @translate
@@ -392,7 +392,7 @@ class ContributionController extends AbstractActionController
         $resourceType = $resource->getControllerName();
         $response = $api
             ->search(
-                'contribution_tokens',
+                'generation_tokens',
                 [
                     'resource_id' => $id,
                     'datetime' => [['field' => 'expire', 'type' => 'gte', 'value' => date('Y-m-d H:i:s')], ['joiner' => 'or', 'field' => 'expire', 'type' => 'nex']],
@@ -420,9 +420,9 @@ class ContributionController extends AbstractActionController
 
         $response = $api
             ->batchUpdate(
-                'contribution_tokens',
+                'generation_tokens',
                 $ids,
-                ['o-module-contribute:expire' => 'now']
+                ['o-module-generate:expire' => 'now']
             );
 
         $message = 'All tokens of the resource were expired.'; // @translate
@@ -437,17 +437,17 @@ class ContributionController extends AbstractActionController
         }
 
         $id = $this->params('id');
-        /** @var \Contribute\Api\Representation\ContributionRepresentation $contribution */
-        $contribution = $this->api()->read('contributions', $id)->getContent();
+        /** @var \Generate\Api\Representation\GenerationRepresentation $generation */
+        $generation = $this->api()->read('generations', $id)->getContent();
 
         // Only a resource already added can have a status reviewed.
-        $resource = $contribution ? $contribution->resource() : null;
+        $resource = $generation ? $generation->resource() : null;
         if (!$resource) {
             return new JsonModel([
                 'status' => 'success',
                 // Status is updated, so inverted.
                 'data' => [
-                    'contribution' => [
+                    'generation' => [
                         'status' => 'unreviewed',
                         'statusLabel' => $this->translate('Unreviewed'), // @translate
                     ],
@@ -460,12 +460,12 @@ class ContributionController extends AbstractActionController
             return $this->jsonErrorUnauthorized();
         }
 
-        $isReviewed = $contribution->isReviewed();
+        $isReviewed = $generation->isReviewed();
 
         $data = [];
-        $data['o-module-contribute:reviewed'] = !$isReviewed;
+        $data['o-module-generate:reviewed'] = !$isReviewed;
         $response = $this->api()
-            ->update('contributions', $id, $data, [], ['isPartial' => true]);
+            ->update('generations', $id, $data, [], ['isPartial' => true]);
         if (!$response) {
             return $this->jsonErrorUpdate();
         }
@@ -474,7 +474,7 @@ class ContributionController extends AbstractActionController
             'status' => 'success',
             // Status is updated, so inverted.
             'data' => [
-                'contribution' => [
+                'generation' => [
                     'status' => $isReviewed ? 'unreviewed' : 'reviewed',
                     'statusLabel' => $isReviewed ? $this->translate('Unreviewed') : $this->translate('Reviewed'), // @translate
                 ],
@@ -495,28 +495,28 @@ class ContributionController extends AbstractActionController
             if (empty($token)) {
                 return $this->jsonErrorNotFound();
             }
-            /** @var \Contribute\Api\Representation\TokenRepresentation $token */
-            $token = $this->api()->searchOne('contribution_tokens', ['token' => $token])->getContent();
+            /** @var \Generate\Api\Representation\TokenRepresentation $token */
+            $token = $this->api()->searchOne('generation_tokens', ['token' => $token])->getContent();
             if (!$token) {
                 return $this->jsonErrorNotFound();
             }
         } else {
-            /** @var \Contribute\Api\Representation\ContributionRepresentation $contribution */
-            $contribution = $this->api()->read('contributions', $id)->getContent();
-            $token = $contribution->token();
+            /** @var \Generate\Api\Representation\GenerationRepresentation $generation */
+            $generation = $this->api()->read('generations', $id)->getContent();
+            $token = $generation->token();
         }
 
         // Check rights to edit without token.
         if (!$token) {
-            $canContribute = $this->viewHelpers()->get('canContribute');
-            $canEditWithoutToken = $canContribute();
+            $canGenerate = $this->viewHelpers()->get('canGenerate');
+            $canEditWithoutToken = $canGenerate();
             if (!$canEditWithoutToken) {
                 return $this->jsonErrorUnauthorized();
             }
             return new JsonModel([
                 'status' => 'success',
                 'data' => [
-                    'contribution_token' => [
+                    'generation_token' => [
                         'status' => 'no-token',
                         'statusLabel' => $this->translate('No token'), // @translate
                     ],
@@ -526,7 +526,7 @@ class ContributionController extends AbstractActionController
 
         if (!$token->isExpired()) {
             $response = $this->api()
-                ->update('contribution_tokens', $token->id(), ['o-module-contribute:expire' => 'now'], [], ['isPartial' => true]);
+                ->update('generation_tokens', $token->id(), ['o-module-generate:expire' => 'now'], [], ['isPartial' => true]);
             if (!$response) {
                 return $this->jsonErrorUpdate();
             }
@@ -535,7 +535,7 @@ class ContributionController extends AbstractActionController
         return new JsonModel([
             'status' => 'success',
             'data' => [
-                'contribution_token' => [
+                'generation_token' => [
                     'status' => 'expired',
                     'statusLabel' => $this->translate('Expired'), // @translate
                 ],
@@ -551,35 +551,35 @@ class ContributionController extends AbstractActionController
 
         $id = $this->params('id');
 
-        /** @var \Contribute\Api\Representation\ContributionRepresentation $contribution */
-        $contribution = $this->api()->read('contributions', $id)->getContent();
+        /** @var \Generate\Api\Representation\GenerationRepresentation $generation */
+        $generation = $this->api()->read('generations', $id)->getContent();
 
         // If there is a resource, it can't be created.
-        $contributionResource = $contribution->resource();
-        if ($contributionResource) {
+        $generationResource = $generation->resource();
+        if ($generationResource) {
             return $this->jsonErrorUpdate();
         }
 
         // Only people who can create resource can validate.
-        $acl = $contribution->getServiceLocator()->get('Omeka\Acl');
+        $acl = $generation->getServiceLocator()->get('Omeka\Acl');
         if (!$acl->userIsAllowed(\Omeka\Api\Adapter\ItemAdapter::class, 'create')) {
             return $this->jsonErrorUnauthorized();
         }
 
-        $resourceData = $contribution->proposalToResourceData();
+        $resourceData = $generation->proposalToResourceData();
         if (!$resourceData) {
             return $this->jsonErrorUpdate(new PsrMessage(
-                $this->translate('Contribution is not valid: check template.') // @translate
+                $this->translate('Generation is not valid: check template.') // @translate
             ));
         }
 
         // Validate and create the resource.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($contribution, $resourceData, $errorStore, false);
+        $resource = $this->validateOrCreateOrUpdate($generation, $resourceData, $errorStore, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
             return $this->jsonErrorUpdate(new PsrMessage(
-                'Contribution cannot be created: some values are not valid.' // @translate
+                'Generation cannot be created: some values are not valid.' // @translate
             ), $errorStore);
         }
         if (!$resource) {
@@ -589,7 +589,7 @@ class ContributionController extends AbstractActionController
         return new JsonModel([
             'status' => 'success',
             'data' => [
-                'contribution' => $contribution,
+                'generation' => $generation,
                 'is_new' => true,
                 'url' => $resource->adminUrl(),
             ],
@@ -604,33 +604,33 @@ class ContributionController extends AbstractActionController
 
         $id = $this->params('id');
 
-        /** @var \Contribute\Api\Representation\ContributionRepresentation $contribution */
-        $contribution = $this->api()->read('contributions', $id)->getContent();
+        /** @var \Generate\Api\Representation\GenerationRepresentation $generation */
+        $generation = $this->api()->read('generations', $id)->getContent();
 
         // If there is no resource, create it as a whole.
-        $contributionResource = $contribution->resource();
+        $generationResource = $generation->resource();
 
         // Only people who can edit the resource can validate.
-        if (($contributionResource && !$contributionResource->userIsAllowed('update'))
-            || (!$contributionResource && !$contribution->getServiceLocator()->get('Omeka\Acl')->userIsAllowed('Omeka\Api\Adapter\ItemAdapter', 'create'))
+        if (($generationResource && !$generationResource->userIsAllowed('update'))
+            || (!$generationResource && !$generation->getServiceLocator()->get('Omeka\Acl')->userIsAllowed('Omeka\Api\Adapter\ItemAdapter', 'create'))
         ) {
             return $this->jsonErrorUnauthorized();
         }
 
-        $resourceData = $contribution->proposalToResourceData();
+        $resourceData = $generation->proposalToResourceData();
         if (!$resourceData) {
             return $this->jsonErrorUpdate(new PsrMessage(
-                'Contribution is not valid.' // @translate
+                'Generation is not valid.' // @translate
             ));
         }
 
         // Validate and update the resource.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($contribution, $resourceData, $errorStore, false);
+        $resource = $this->validateOrCreateOrUpdate($generation, $resourceData, $errorStore, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
             return $this->jsonErrorUpdate(new PsrMessage(
-                'Contribution is not valid: check its values.' // @translate
+                'Generation is not valid: check its values.' // @translate
             ), $errorStore);
         }
         if (!$resource) {
@@ -641,7 +641,7 @@ class ContributionController extends AbstractActionController
             'status' => 'success',
             // Status is updated, so inverted.
             'data' => [
-                'contribution' => [
+                'generation' => [
                     'status' => 'validated',
                     'statusLabel' => $this->translate('Validated'), // @translate
                     'reviewed' => [
@@ -649,7 +649,7 @@ class ContributionController extends AbstractActionController
                         'statusLabel' => $this->translate('Reviewed'), // @translate
                     ],
                 ],
-                'is_new' => !$contribution->isPatch(),
+                'is_new' => !$generation->isPatch(),
                 'url' => $resource->adminUrl(),
             ],
         ]);
@@ -663,17 +663,17 @@ class ContributionController extends AbstractActionController
 
         $id = $this->params('id');
 
-        /** @var \Contribute\Api\Representation\ContributionRepresentation $contribution */
-        $contribution = $this->api()->read('contributions', $id)->getContent();
+        /** @var \Generate\Api\Representation\GenerationRepresentation $generation */
+        $generation = $this->api()->read('generations', $id)->getContent();
 
         // A resource is required to update it.
-        $contributionResource = $contribution->resource();
-        if (!$contributionResource) {
+        $generationResource = $generation->resource();
+        if (!$generationResource) {
             return $this->jsonErrorUpdate();
         }
 
         // Only people who can edit the resource can validate.
-        if (!$contributionResource->userIsAllowed('update')) {
+        if (!$generationResource->userIsAllowed('update')) {
             return $this->jsonErrorUnauthorized();
         }
 
@@ -685,19 +685,19 @@ class ContributionController extends AbstractActionController
 
         $key = (int) $key;
 
-        $resourceData = $contribution->proposalToResourceData($term, $key);
+        $resourceData = $generation->proposalToResourceData($term, $key);
         if (!$resourceData) {
             return $this->jsonErrorUpdate(new PsrMessage(
-                'Contribution is not valid.' // @translate
+                'Generation is not valid.' // @translate
             ));
         }
 
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($contribution, $resourceData, $errorStore, true);
+        $resource = $this->validateOrCreateOrUpdate($generation, $resourceData, $errorStore, true);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
             return $this->jsonErrorUpdate(new PsrMessage(
-                'Contribution is not valid: check values.' // @translate
+                'Generation is not valid: check values.' // @translate
             ), $errorStore);
         }
         if (!$resource) {
@@ -708,7 +708,7 @@ class ContributionController extends AbstractActionController
             'status' => 'success',
             // Status is updated, so inverted.
             'data' => [
-                'contribution' => [
+                'generation' => [
                     'status' => 'validated-value',
                     'statusLabel' => $this->translate('Validated value'), // @translate
                 ],

@@ -1,10 +1,10 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
- * @var \Contribute\Api\Representation\ContributionRepresentation[] $contributions
- * @var \Contribute\Api\Representation\TokenRepresentation[] $unusedTokens
+ * @var \Generate\Api\Representation\GenerationRepresentation[] $generations
+ * @var \Generate\Api\Representation\TokenRepresentation[] $unusedTokens
  * @var string $siteSlug
  */
 
@@ -17,32 +17,32 @@ $hyperlink = $plugins->get('hyperlink');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 ?>
 
-<div class="contributions">
-    <?php $totalTokens = $api->search('contribution_tokens', ['resource_id' => $resource->id(), 'limit' => 0])->getTotalResults(); ?>
+<div class="generations">
+    <?php $totalTokens = $api->search('generation_tokens', ['resource_id' => $resource->id(), 'limit' => 0])->getTotalResults(); ?>
     <?php if (empty($totalTokens)): ?>
-        <?php if (in_array($setting('contribute_mode'), ['user_token', 'token'])): ?>
+        <?php if (in_array($setting('generate_mode'), ['user_token', 'token'])): ?>
     <div class="no-resources no-tokens">
-        <p><?= $translate('There are no tokens for this resource or contribution mode doesn’t use token.') ?></p>
+        <p><?= $translate('There are no tokens for this resource or generation mode doesn’t use token.') ?></p>
     </div>
         <?php endif; ?>
     <?php else: ?>
     <?php $totalExpiredTokens = $api
         ->search(
-            'contribution_tokens',
+            'generation_tokens',
             ['resource_id' => $resource->id(), 'datetime' => [['field' => 'expire', 'type' => 'lt', 'value' => date('Y-m-d H:i:s')]]]
         )
         ->getTotalResults(); ?>
-    <div class="contribution-token">
+    <div class="generation-token">
         <p><?= sprintf($translate('There are %d tokens for this resource (%d expired).'), $totalTokens, $totalExpiredTokens) ?></p>
-        <?php if (($totalTokens - $totalExpiredTokens) && $this->userIsAllowed('Contribute\Controller\Admin\Contribution', 'expire-tokens')): ?>
-        <?= $hyperlink($translate('Expire all tokens'), $this->url('admin/contribution/id', ['action' => 'expire-tokens', 'id' => $resource->id()]), ['class' => 'button']) ?>
+        <?php if (($totalTokens - $totalExpiredTokens) && $this->userIsAllowed('Generate\Controller\Admin\Generation', 'expire-tokens')): ?>
+        <?= $hyperlink($translate('Expire all tokens'), $this->url('admin/generation/id', ['action' => 'expire-tokens', 'id' => $resource->id()]), ['class' => 'button']) ?>
         <?php endif; ?>
     </div>
     <?php endif; ?>
 
-<?php if (empty($contributions)): ?>
-    <div class="no-resources no-contributions">
-        <p><?= $translate('There are no contributions for this resource.') ?></p>
+<?php if (empty($generations)): ?>
+    <div class="no-resources no-generations">
+        <p><?= $translate('There are no generations for this resource.') ?></p>
     </div>
 <?php else: ?>
 <?php
@@ -56,46 +56,46 @@ $adapterName = $mapResourceAdapters[$resourceName];
 $batchEditRight = $this->userIsAllowed($adapterName, 'batch-update');
 $editRight = $resource->userIsAllowed('update');
 ?>
-<?php foreach ($contributions as $contribution): ?>
-<?php $token = $contribution->token(); ?>
-<div class="contribution">
+<?php foreach ($generations as $generation): ?>
+<?php $token = $generation->token(); ?>
+<div class="generation">
 <table class="tablesaw <?php if ($batchEditRight) echo 'batch-edit'; ?>" data-tablesaw-mode="stack">
     <thead>
         <tr>
             <th>
-                <?= $translate('Contribution') ?>
+                <?= $translate('Generation') ?>
                 <?php /*
-                <span class="contribution-id">#<?= $contribution->id() ?></span>
+                <span class="generation-id">#<?= $generation->id() ?></span>
                 */ ?>
-                <?php if ($email = $contribution->email()): ?>
-                <span class="contribution-email"><?= $hyperlink($email, 'mailto:' . $email) ?></span>
+                <?php if ($email = $generation->email()): ?>
+                <span class="generation-email"><?= $hyperlink($email, 'mailto:' . $email) ?></span>
                 <?php endif; ?>
 
-                <span class="contribution-date"><?= $this->i18n()->dateFormat($contribution->created(), 'medium', 'medium') ?></span>
+                <span class="generation-date"><?= $this->i18n()->dateFormat($generation->created(), 'medium', 'medium') ?></span>
 
-                <?php if ($contribution->created() != $contribution->modified()): // Don't use !==. ?>
-                <span class="contribution-date-modified"><?= $translate('(modified)') ?></span>
+                <?php if ($generation->created() != $generation->modified()): // Don't use !==. ?>
+                <span class="generation-date-modified"><?= $translate('(modified)') ?></span>
                 <?php endif; ?>
 
                 <?php if ($token): ?>
                 <span> / </span>
-                <span class="contribution-token"><?= $hyperlink($token->token(), $token->siteUrl($siteSlug, true)) ?></span>
+                <span class="generation-token"><?= $hyperlink($token->token(), $token->siteUrl($siteSlug, true)) ?></span>
                 <?php endif; ?>
 
-                <?php if ($contribution->isPatch()): // Only patchs should be validated individually. ?>
+                <?php if ($generation->isPatch()): // Only patchs should be validated individually. ?>
 
                 <?php if ($editRight): ?>
                 <?php // TODO Check if all values are the same to change the default icon to "validated". ?>
                 <span class="single actions"><a href="#"
                     class="validate o-icon-validate"
-                    data-validate-url="<?= $escape($contribution->adminUrl('validate')) ?>"
+                    data-validate-url="<?= $escape($generation->adminUrl('validate')) ?>"
                     data-status="validate"
                     aria-label="<?= $escape($translate('Validate all values')) ?>"
                     title="<?= $escape($translate('Validate all values')) ?>"></a></span>
                 <span class="single actions"><a href="#"
-                    class="status-toggle o-icon-<?= $contribution->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                    data-status-toggle-url="<?= $escape($contribution->adminUrl('toggle-status')) ?>"
-                    data-status="<?= $contribution->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    class="status-toggle o-icon-<?= $generation->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    data-status-toggle-url="<?= $escape($generation->adminUrl('toggle-status')) ?>"
+                    data-status="<?= $generation->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
                     aria-label="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"
                     title="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"></a></span>
                 <?php endif; ?>
@@ -105,7 +105,7 @@ $editRight = $resource->userIsAllowed('update');
                 <?php elseif ($token): ?>
                 <span class="single single-action"><a href="#"
                     class="expire-token o-icon-expire-token"
-                    data-expire-token-url="<?= $escape($contribution->adminUrl('expire-token')) ?>"
+                    data-expire-token-url="<?= $escape($generation->adminUrl('expire-token')) ?>"
                     aria-label="<?= $escape($translate('Expire token')) ?>"
                     title="<?= $escape($translate('Expire token')) ?>"></a></span>
                 <?php endif; ?>
@@ -113,9 +113,9 @@ $editRight = $resource->userIsAllowed('update');
                 <?php else: ?>
 
                 <span class="single actions"><a href="#"
-                    class="status-toggle o-icon-<?= $contribution->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                    data-status-toggle-url="<?= $escape($contribution->adminUrl('toggle-status')) ?>"
-                    data-status="<?= $contribution->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    class="status-toggle o-icon-<?= $generation->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    data-status-toggle-url="<?= $escape($generation->adminUrl('toggle-status')) ?>"
+                    data-status="<?= $generation->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
                     aria-label="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"
                     title="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"></a></span>
 
@@ -124,10 +124,10 @@ $editRight = $resource->userIsAllowed('update');
         </tr>
     </thead>
     <tbody>
-        <tr class="contribution-value">
+        <tr class="generation-value">
             <td>
                 <?php
-                $proposal = $contribution->proposalNormalizeForValidation();
+                $proposal = $generation->proposalNormalizeForValidation();
                 $vars = $this->vars();
                 $varsBase = $vars->getArrayCopy();
                 $varsBase['api'] = $api;
@@ -135,20 +135,20 @@ $editRight = $resource->userIsAllowed('update');
                 $varsBase['translate'] = $translate;
                 $varsBase['hyperlink'] = $hyperlink;
                 $varsBase['escapeAttr'] = $escapeAttr;
-                $varsBase['contribution'] = $contribution;
+                $varsBase['generation'] = $generation;
                 $varsBase['editRight'] = $editRight;
                 $varsBase['labelInfo'] = $setting('property_label_information');
                 $varsBase['values'] = $resource->values();
                 $varsBase['isSubProposal'] = false;
                 $varsBase['proposal'] = $proposal;
-                echo $this->partial('common/admin/contribute-list-part', $varsBase);
+                echo $this->partial('common/admin/generate-list-part', $varsBase);
                 if (isset($proposal['media']) && count($proposal['media'])):
                     // No upper div to simplify admin theme.
                     ?>
-                    <div class="contribution-medias">
-                        <h4 class="contribution-medias-label"><?= $translate('Medias') ?></h4>
+                    <div class="generation-medias">
+                        <h4 class="generation-medias-label"><?= $translate('Medias') ?></h4>
                         <?php
-                        // TODO Currently, only new media are managed as sub-resource: contribution for new resource, not contribution for existing item with media at the same time.
+                        // TODO Currently, only new media are managed as sub-resource: generation for new resource, not generation for existing item with media at the same time.
                         $varsBase['values'] = [];
                         $varsBase['isSubProposal'] = true;
                         $varsForLoop = [];
@@ -156,7 +156,7 @@ $editRight = $resource->userIsAllowed('update');
                             $varsBase['proposal'] = $subProposal;
                             $varsForLoop[] = $varsBase;
                         }
-                        echo $this->partialLoop('common/admin/contribute-list-part', $varsForLoop);
+                        echo $this->partialLoop('common/admin/generate-list-part', $varsForLoop);
                         ?>
                     </div>
                 <?php endif; ?>
@@ -171,7 +171,7 @@ $editRight = $resource->userIsAllowed('update');
 
 <?php if ($unusedTokens): ?>
 <h4><?= $translate('Unused tokens') ?></h4>
-<?= $this->partial('common/admin/contribute-token-list', [
+<?= $this->partial('common/admin/generate-token-list', [
     'resource' => $resource,
     'tokens' => $unusedTokens,
     'siteSlug' => $siteSlug,

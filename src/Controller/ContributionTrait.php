@@ -1,34 +1,34 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Controller;
+namespace Generate\Controller;
 
 use Common\Stdlib\PsrMessage;
-use Contribute\Api\Representation\ContributionRepresentation;
+use Generate\Api\Representation\GenerationRepresentation;
 use Laminas\View\Model\JsonModel;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Stdlib\ErrorStore;
 
 /**
- * @todo Move ContributionTrait to controller plugins.
+ * @todo Move GenerationTrait to controller plugins.
  */
-trait ContributionTrait
+trait GenerationTrait
 {
     /**
      * Create or update a resource from data.
      */
     protected function validateOrCreateOrUpdate(
-        ContributionRepresentation $contribution,
+        GenerationRepresentation $generation,
         array $resourceData,
         ErrorStore $errorStore,
         bool $reviewed = false,
         bool $validateOnly = false,
         bool $useMessenger = false
     ): ?AbstractResourceEntityRepresentation {
-        $contributionResource = $contribution->resource();
+        $generationResource = $generation->resource();
 
         // Nothing to update or create.
         if (!$resourceData) {
-            return $contributionResource;
+            return $generationResource;
         }
 
         // Prepare the api to throw a validation exception with error store.
@@ -39,11 +39,11 @@ trait ContributionTrait
         // @see proposalToResourceData()
         unset($resourceData['file']);
 
-        // TODO This is a new contribution, so a new item for now.
-        $resourceName = $contributionResource ? $contributionResource->resourceName() : 'items';
+        // TODO This is a new generation, so a new item for now.
+        $resourceName = $generationResource ? $generationResource->resourceName() : 'items';
 
         // Validate only: the simplest way is to skip flushing.
-        // Nevertheless, a simple contributor has no right to create a resource.
+        // Nevertheless, a simple generator has no right to create a resource.
         // So skip rights before and remove skip after.
         // But some other modules can persist it inadvertently (?)
         // So use api, and add an event to add an error to the error store and
@@ -57,7 +57,7 @@ trait ContributionTrait
             $this->entityManager->flush();
 
             /** * @var \Omeka\Permissions\Acl $acl */
-            $acl = $contribution->getServiceLocator()->get('Omeka\Acl');
+            $acl = $generation->getServiceLocator()->get('Omeka\Acl');
             $classes = [
                 'items' => 'Item',
                 'item_sets' => 'ItemSet',
@@ -65,7 +65,7 @@ trait ContributionTrait
             ];
             $class = $classes[$resourceName] ?? 'Item';
             $entityClass = 'Omeka\Entity\\' . $class;
-            $action = $contributionResource ? 'update' : 'create';
+            $action = $generationResource ? 'update' : 'create';
             $isAllowed = $acl->userIsAllowed($entityClass, $action);
             if (!$isAllowed) {
                 $user = $this->identity();
@@ -79,16 +79,16 @@ trait ContributionTrait
                 ];
                 $acl->allow($user ? $user->getRole() : null, $classes, [$action, 'change-owner']);
             }
-            $apiOptions = ['flushEntityManager' => false, 'validateOnly' => true, 'isContribution' => true];
+            $apiOptions = ['flushEntityManager' => false, 'validateOnly' => true, 'isGeneration' => true];
         } else {
             $apiOptions = [];
         }
 
         try {
-            if ($contributionResource) {
+            if ($generationResource) {
                 // During an update of items, keep existing media in any cases.
                 // TODO Move this check in proposalToResourceData(). Do it for item sets and sites too.
-                // @link https://gitlab.com/Daniel-KM/Omeka-S-module-Contribute/-/issues/3
+                // @link https://gitlab.com/Daniel-KM/Omeka-S-module-Generate/-/issues/3
                 if ($resourceName === 'items') {
                     unset(
                         $resourceData['o:media'],
@@ -99,11 +99,11 @@ trait ContributionTrait
                 }
                 $apiOptions['isPartial'] = true;
                 $response = $api
-                    ->update($resourceName, $contributionResource->id(), $resourceData, [], $apiOptions);
+                    ->update($resourceName, $generationResource->id(), $resourceData, [], $apiOptions);
             } else {
-                // The validator is not the contributor.
+                // The validator is not the generator.
                 // The validator will be added automatically for anonymous.
-                $owner = $contribution->owner() ?: null;
+                $owner = $generation->owner() ?: null;
                 $resourceData['o:owner'] = $owner ? ['o:id' => $owner->id()] : null;
                 $resourceData['o:is_public'] = false;
                 $response = $api
@@ -159,7 +159,7 @@ trait ContributionTrait
         } catch (\Exception $e) {
             $this->entityManager->clear();
             $message = new PsrMessage(
-                'Unable to store the resource of the contribution: {message}', // @translate
+                'Unable to store the resource of the generation: {message}', // @translate
                 ['message' => $e->getMessage()]
             );
             $this->logger()->err($message);
@@ -185,15 +185,15 @@ trait ContributionTrait
         }
 
         // The exception is thrown in the api, there is always a response.
-        $contributionResource = $response->getContent();
+        $generationResource = $response->getContent();
 
         $data = [];
-        $data['o:resource'] = $validateOnly || !$contributionResource ? null : ['o:id' => $contributionResource->id()];
-        $data['o-module-contribute:reviewed'] = $reviewed;
+        $data['o:resource'] = $validateOnly || !$generationResource ? null : ['o:id' => $generationResource->id()];
+        $data['o-module-generate:reviewed'] = $reviewed;
         $response = $this->api()
-            ->update('contributions', $contribution->id(), $data, [], ['isPartial' => true]);
+            ->update('generations', $generation->id(), $data, [], ['isPartial' => true]);
 
-        return $contributionResource;
+        return $generationResource;
     }
 
     protected function jsonErrorUnauthorized($message = null, $errors = null): JsonModel

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Api\Adapter;
+namespace Generate\Api\Adapter;
 
 use Doctrine\ORM\QueryBuilder;
 use Omeka\Api\Adapter\AbstractEntityAdapter;
@@ -32,30 +32,31 @@ class TokenAdapter extends AbstractEntityAdapter
 
     public function getResourceName()
     {
-        return 'contribution_tokens';
+        return 'generation_tokens';
     }
 
     public function getRepresentationClass()
     {
-        return \Contribute\Api\Representation\TokenRepresentation::class;
+        return \Generate\Api\Representation\TokenRepresentation::class;
     }
 
     public function getEntityClass()
     {
-        return \Contribute\Entity\Token::class;
+        return \Generate\Entity\Token::class;
     }
 
     public function hydrate(Request $request, EntityInterface $entity, ErrorStore $errorStore): void
     {
-        /** @var \Contribute\Entity\Token $entity */
+        /** @var \Generate\Entity\Token $entity */
+
         $data = $request->getContent();
         if (Request::CREATE === $request->getOperation()) {
             $resource = $this->getAdapter('resources')->findEntity($data['o:resource']['o:id']);
-            $token = empty($data['o-module-contribute:token'])
+            $token = empty($data['o-module-generate:token'])
                 ? $this->createToken()
-                : $data['o-module-contribute:token'];
+                : $data['o-module-generate:token'];
             $email = empty($data['o:email']) ? null : $data['o:email'];
-            $expire = empty($data['o-module-contribute:expire']) ? null : $data['o-module-contribute:expire'];
+            $expire = empty($data['o-module-generate:expire']) ? null : $data['o-module-generate:expire'];
             $entity
                 ->setResource($resource)
                 ->setToken($token)
@@ -64,16 +65,16 @@ class TokenAdapter extends AbstractEntityAdapter
                 ->setCreated(new \DateTime('now'))
                 ->setAccessed(null);
         } elseif (Request::UPDATE === $request->getOperation()) {
-            if (array_key_exists('o-module-contribute:expire', $data)) {
-                $expire = strtotime($data['o-module-contribute:expire'])
-                    ? $data['o-module-contribute:expire']
+            if (array_key_exists('o-module-generate:expire', $data)) {
+                $expire = strtotime($data['o-module-generate:expire'])
+                    ? $data['o-module-generate:expire']
                     : 'now';
                 $entity
                     ->setExpire(new \DateTime($expire));
             }
-            if (array_key_exists('o-module-contribute:accessed', $data)) {
-                $accessed = strtotime($data['o-module-contribute:accessed'])
-                    ? $data['o-module-contribute:accessed']
+            if (array_key_exists('o-module-generate:accessed', $data)) {
+                $accessed = strtotime($data['o-module-generate:accessed'])
+                    ? $data['o-module-generate:accessed']
                     : 'now';
                 $entity
                     ->setAccessed(new \DateTime($accessed));
@@ -118,14 +119,14 @@ class TokenAdapter extends AbstractEntityAdapter
             $resourceAlias = $this->createAlias();
             if ($query['used']) {
                 $qb->innerJoin(
-                    \Contribute\Entity\Contribution::class,
+                    \Generate\Entity\Generation::class,
                     $resourceAlias,
                     'WITH',
                     $expr->eq($resourceAlias . '.token', 'omeka_root.id')
                 );
             } else {
                 $qb->leftJoin(
-                    \Contribute\Entity\Contribution::class,
+                    \Generate\Entity\Generation::class,
                     $resourceAlias,
                     'WITH',
                     $expr->eq($resourceAlias . '.token', 'omeka_root.id')
@@ -144,8 +145,8 @@ class TokenAdapter extends AbstractEntityAdapter
         $rawData = $request->getContent();
         $data = parent::preprocessBatchUpdate($data, $request);
 
-        if (isset($rawData['o-module-contribute:expire'])) {
-            $data['o-module-contribute:expire'] = $rawData['o-module-contribute:expire'];
+        if (isset($rawData['o-module-generate:expire'])) {
+            $data['o-module-generate:expire'] = $rawData['o-module-generate:expire'];
         }
 
         return $data;

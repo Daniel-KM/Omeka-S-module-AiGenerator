@@ -3,9 +3,9 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
  * @var \Omeka\Entity\User|null $user
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation|null $resourceTemplate
- * @var \Contribute\Api\Representation\ContributionRepresentation|null $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation|null $generation
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null $resource
  * @var array $fields
  * @var \Omeka\Api\Representation\ResourceTemplateRepresentation|null $templateMedia A sub template for media may have no fields.
@@ -18,7 +18,7 @@
  * @var string $submitLabel
  * @var string $cancelLabel
  * @var bool $isMainForm
- * @var bool $skipContributeCss
+ * @var bool $skipGenerateCss
  *
  * When called recursively for sub-fields (media):
  * @var ?int $indexMedia
@@ -44,15 +44,15 @@
  * @var ?\Omeka\Api\Representation\ResourceTemplatePropertyRepresentation $templateProperty
  * @var ?\Omeka\Api\Representation\PropertyRepresentation $property
  * @var ?\Omeka\Api\Representation\ValueRepresentation $value
- * @var ?array $fieldContribution
- * @var ?int $indexContribution
+ * @var ?array $fieldGeneration
+ * @var ?int $indexGeneration
  * @var bool $readonly
  */
 
-$original = $fieldContribution['original'];
-$proposed = $fieldContribution['proposed'];
+$original = $fieldGeneration['original'];
+$proposed = $fieldGeneration['proposed'];
 $isPrivate = $value ? !$value->isPublic() : (isset($templateProperty) ? $templateProperty->isPrivate() : false);
-$isRequired = !empty($field['required']) && (($indexContribution ?? null) === 0);
+$isRequired = !empty($field['required']) && (($indexGeneration ?? null) === 0);
 
 $name = $isMainForm
     ? sprintf('%s[%s][@uri]', $term, $indexFieldInput)
@@ -72,7 +72,7 @@ $language = isset($proposed['@uri']) ? null : (isset($original['value']) ? $orig
     <?php if ($language): ?>
     <span class="language"><?= $language ?></span>
     <?php endif; ?>
-    <input type="text" class="form-control valuesuggest-input" data-value-key="@uri" name="<?= $name ?>" data-data-type="<?= $escapeAttr($fieldContribution['type']) ?>" data-uri="<?= $escapeAttr($val) ?>" data-value="<?= $escapeAttr($label) ?>" value="<?php if ($val): ?><a href=&quot;<?= $escapeAttr($val) ?>&quot; target=&quot;_blank&quot;><?= $escapeAttr($label) ?></a><?php endif; ?>" aria-labelledby="property-<?= $property ? $property->id() : '__PROPERTYID__' ?>-label" <?= $isRequired ? ' required="required"' : '' ?><?= empty($readonly) ? '' : ' readonly="readonly"' ?>/>
+    <input type="text" class="form-control valuesuggest-input" data-value-key="@uri" name="<?= $name ?>" data-data-type="<?= $escapeAttr($fieldGeneration['type']) ?>" data-uri="<?= $escapeAttr($val) ?>" data-value="<?= $escapeAttr($label) ?>" value="<?php if ($val): ?><a href=&quot;<?= $escapeAttr($val) ?>&quot; target=&quot;_blank&quot;><?= $escapeAttr($label) ?></a><?php endif; ?>" aria-labelledby="property-<?= $property ? $property->id() : '__PROPERTYID__' ?>-label" <?= $isRequired ? ' required="required"' : '' ?><?= empty($readonly) ? '' : ' readonly="readonly"' ?>/>
     <ul class="actions resource-edit-remove-value">
         <li><button type="button" class="o-icon-delete button remove-value" title="<?= $escapeAttr($translate('Remove value')) ?>" href="#" aria-label="<?= $escapeAttr($translate('Remove value')) ?>"></button></li>
     </ul>

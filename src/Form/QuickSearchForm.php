@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Form;
+namespace Generate\Form;
 
 use Laminas\Form\Element;
 use Laminas\Form\Form;
@@ -70,11 +70,11 @@ class QuickSearchForm extends Form
                 'name' => 'patch',
                 'type' => Element\Radio::class,
                 'options' => [
-                    'label' => 'Type of contribution', // @translate
+                    'label' => 'Type of generation', // @translate
                     'value_options' => [
                         '' => 'Any', // @translate
                         '1' => 'Correction', // @translate
-                        '00' => 'Full contribution', // @translate
+                        '00' => 'Full generation', // @translate
                     ],
                 ],
                 'attributes' => [

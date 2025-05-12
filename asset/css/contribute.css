@@ -51,29 +51,29 @@
         font-style: italic;
     }
 
-    .contribution.show .actions,
+    .generation.show .actions,
     .resource-list .actions,
-    #edit-resource .contribute-media .actions,
+    #edit-resource .generate-media .actions,
     #edit-resource .value .actions {
         display: inline-block;
         list-style: none;
         margin: 4px 0 4px 4px;
         padding: 0;
     }
-    .contribution.show .actions li,
+    .generation.show .actions li,
     .resource-list .actions li {
         display: inline-block;
     }
     #edit-resource .value .actions a {
         vertical-align: top;
     }
-    .contribution.show .actions .button::before,
+    .generation.show .actions .button::before,
     .resource-list .actions .button::before,
     #edit-resource .inputs button::before,
     #edit-resource .actions button::before {
         margin-right: 8px;
     }
-    .contribution .o-icon-submit::before {
+    .generation .o-icon-submit::before {
         content: ""; /* envelope */
     }
 

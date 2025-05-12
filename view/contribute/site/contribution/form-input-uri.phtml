@@ -3,9 +3,9 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
  * @var \Omeka\Entity\User|null $user
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation|null $resourceTemplate
- * @var \Contribute\Api\Representation\ContributionRepresentation|null $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation|null $generation
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null $resource
  * @var array $fields
  * @var \Omeka\Api\Representation\ResourceTemplateRepresentation|null $templateMedia A sub template for media may have no fields.
@@ -18,7 +18,7 @@
  * @var string $submitLabel
  * @var string $cancelLabel
  * @var bool $isMainForm
- * @var bool $skipContributeCss
+ * @var bool $skipGenerateCss
  *
  * When called recursively for sub-fields (media):
  * @var ?int $indexMedia
@@ -44,15 +44,15 @@
  * @var ?\Omeka\Api\Representation\ResourceTemplatePropertyRepresentation $templateProperty
  * @var ?\Omeka\Api\Representation\PropertyRepresentation $property
  * @var ?\Omeka\Api\Representation\ValueRepresentation $value
- * @var ?array $fieldContribution
- * @var ?int $indexContribution
+ * @var ?array $fieldGeneration
+ * @var ?int $indexGeneration
  * @var bool $readonly
  */
 
-$original = $fieldContribution['original'];
-$proposed = $fieldContribution['proposed'];
+$original = $fieldGeneration['original'];
+$proposed = $fieldGeneration['proposed'];
 $isPrivate = $value ? !$value->isPublic() : (isset($templateProperty) ? $templateProperty->isPrivate() : false);
-$isRequired = !empty($field['required']) && (($indexContribution ?? null) === 0);
+$isRequired = !empty($field['required']) && (($indexGeneration ?? null) === 0);
 
 $baseName = $isMainForm
     ? sprintf('%s[%s]', $term, $indexFieldInput)

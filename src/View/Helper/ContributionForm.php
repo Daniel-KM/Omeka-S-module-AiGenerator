@@ -1,18 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\View\Helper;
+namespace Generate\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 
-class ContributionForm extends AbstractHelper
+class GenerationForm extends AbstractHelper
 {
     /**
      * The default partial view script.
      */
-    const PARTIAL_NAME = 'contribute/site/contribution/form';
+    const PARTIAL_NAME = 'generate/site/generation/form';
 
     /**
-     * Prepare and display the form to contribute.
+     * Prepare and display the form to generate.
      *
      * For now, all the options should be passed from the view.
      *
@@ -31,7 +31,7 @@ class ContributionForm extends AbstractHelper
             'site' => null,
             'user' => null,
             'form' => null,
-            'contribution' => null,
+            'generation' => null,
             'resource' => null,
             'fields' => [],
             'templateMedia' => null,
@@ -43,7 +43,7 @@ class ContributionForm extends AbstractHelper
             'submitLabel' => $this->view->translate('Submit'),
             'cancelLabel' => $this->view->translate('Cancel'),
             'isMainForm' => true,
-            'skipContributeCss' => false,
+            'skipGenerateCss' => false,
             'template' => self::PARTIAL_NAME,
         ];
 

@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\View\Helper;
+namespace Generate\View\Helper;
 
 use CAS\Mvc\Controller\Plugin\IsCasUser;
 use Laminas\View\Helper\AbstractHelper;
 use Ldap\Mvc\Controller\Plugin\IsLdapUser;
 use SingleSignOn\Mvc\Controller\Plugin\IsSsoUser;
 
-class CanContribute extends AbstractHelper
+class CanGenerate extends AbstractHelper
 {
     /**
      * @var \CAS\Mvc\Controller\Plugin\IsCasUser
@@ -35,7 +35,7 @@ class CanContribute extends AbstractHelper
     }
 
     /**
-     * Check if the visitor or user can contribute a new resource.
+     * Check if the visitor or user can generate a new resource.
      */
     public function __invoke(bool $skipRequireToken = false): bool
     {
@@ -44,16 +44,16 @@ class CanContribute extends AbstractHelper
          */
         $view = $this->getView();
         $setting = $view->plugin('setting');
-        $contributeMode = $setting('contribute_mode') ?: 'user';
+        $generateMode = $setting('generate_mode') ?: 'user';
         $user = $view->identity();
-        switch ($contributeMode) {
+        switch ($generateMode) {
             default:
             case 'user':
                 return (bool) $user;
             case 'user_token':
                 return $user && $skipRequireToken;
             case 'role':
-                return $user && in_array($user->getRole(), $setting('contribute_roles', []) ?: []);
+                return $user && in_array($user->getRole(), $setting('generate_roles', []) ?: []);
             case 'auth_cas':
                 return $user && $this->isCasUser && $this->isCasUser($user);
             case 'auth_ldap':
@@ -61,7 +61,7 @@ class CanContribute extends AbstractHelper
             case 'auth_sso':
                 return $user && $this->isSsoUser && $this->isSsoUser($user);
             case 'email_regex':
-                $pattern = (string) $setting('contribute_email_regex');
+                $pattern = (string) $setting('generate_email_regex');
                 return $user && $pattern && preg_match($pattern, $user->getEmail());
             case 'token':
                 return $skipRequireToken;

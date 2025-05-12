@@ -2,7 +2,7 @@
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
- * @var \Contribute\Api\Representation\TokenRepresentation[] $tokens
+ * @var \Generate\Api\Representation\TokenRepresentation[] $tokens
  * @var string $siteSlug
  */
 
@@ -31,7 +31,7 @@ $adapterName = $mapResourceAdapters[$resourceName];
 $batchEditRight = $this->userIsAllowed($adapterName, 'batch-update');
 $editRight = $resource->userIsAllowed('update');
 ?>
-<div class="contribution contribution-token">
+<div class="generation generation-token">
 <table class="tablesaw <?php if ($batchEditRight) echo 'batch-edit'; ?>" data-tablesaw-mode="stack">
     <thead>
         <tr>
@@ -44,11 +44,11 @@ $editRight = $resource->userIsAllowed('update');
         <?php foreach ($tokens as $token): ?>
         <tr>
             <td>
-                <span class="contribution-token"><?= $token->siteUrl($siteSlug, true) ?></span>
+                <span class="generation-token"><?= $token->siteUrl($siteSlug, true) ?></span>
                 <?php if ($email = $token->email()): ?>
-                <span class="contribution-email"><?= $hyperlink($email, 'mailto:' . $email) ?></span>
+                <span class="generation-email"><?= $hyperlink($email, 'mailto:' . $email) ?></span>
                 <?php else: ?>
-                <span class="contribution-email"><?= $translate('[no email]') ?></span>
+                <span class="generation-email"><?= $translate('[no email]') ?></span>
                 <?php endif; ?>
                 <?php if ($token->isExpired()): ?>
                 <span class="single actions no-action o-icon-expired-token" aria-label="<?= $escape($translate('Expired token')) ?>"></span>

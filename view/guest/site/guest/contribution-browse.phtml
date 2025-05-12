@@ -3,7 +3,7 @@
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
  * @var \Omeka\Entity\User $user
- * @var \Contribute\Api\Representation\ContributionRepresentation[] $contributions
+ * @var \Generate\Api\Representation\GenerationRepresentation[] $generations
  * @var string $space "default" or "guest"
  */
 
@@ -15,17 +15,17 @@ $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
-$contributionLink = $plugins->get('contributionLink');
+$generationLink = $plugins->get('generationLink');
 $breadcrumbs = $plugins->has('breadcrumbs') ? $plugins->get('breadcrumbs') : null;
 $guestNavigation = $user && $plugins->has('guestNavigation') ? $plugins->get('guestNavigation')() : null;
 
 $hasGuestNav = $guestNavigation && $guestNavigation->getContainer()->count();
 
-$this->vars()->offsetSet('skipContributeCss', false);
-$partial('contribute/site/contribution/asset-include');
+$this->vars()->offsetSet('skipGenerateCss', false);
+$partial('generate/site/generation/asset-include');
 $siteSlug = $this->params()->fromRoute('site-slug');
 
-$this->htmlElement('body')->appendAttribute('class', 'contribution resource browse');
+$this->htmlElement('body')->appendAttribute('class', 'generation resource browse');
 ?>
 
 <?php if ($breadcrumbs && !$hasGuestNav): ?>
@@ -38,29 +38,29 @@ $this->htmlElement('body')->appendAttribute('class', 'contribution resource brow
 </nav>
 <?php endif; ?>
 
-<?= $this->pageTitle($translate('Contributions'), 2) // @translate ?>
+<?= $this->pageTitle($translate('Generations'), 2) // @translate ?>
 
-<?php if (count($contributions)): ?>
-<h3><?= sprintf($translate('%d contributions'), count($contributions)) // @translate ?></h3>
+<?php if (count($generations)): ?>
+<h3><?= sprintf($translate('%d generations'), count($generations)) // @translate ?></h3>
 
 <?php $this->trigger('view.browse.before'); ?>
-<ul class="resource-list contribution-list">
-    <?php foreach ($contributions as $contribution): ?>
-    <li class="resource contribution">
-        <?= sprintf('Contribution #%d (%s)', $contribution->id(), $i18n->dateFormat($contribution->created(), 'medium', 'medium')) ?>
-        <h4><?= $hyperlink($contribution->displayTitle(), $contribution->siteUrl($siteSlug, false, 'show', true)) ?></h4>
-        <ul class="contribution-status">
-            <li class="contribution-resource"><?= $contribution->resource() ? $contribution->resource()->linkPretty() : $escape($translate('No resource')) ?></li>
-            <li class="submitted"><?= $escape($contribution->isSubmitted() ? $translate('Is submitted') : $translate('Is not submitted')) ?></li>
-            <li class="reviewed"><?= $escape($contribution->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></li>
+<ul class="resource-list generation-list">
+    <?php foreach ($generations as $generation): ?>
+    <li class="resource generation">
+        <?= sprintf('Generation #%d (%s)', $generation->id(), $i18n->dateFormat($generation->created(), 'medium', 'medium')) ?>
+        <h4><?= $hyperlink($generation->displayTitle(), $generation->siteUrl($siteSlug, false, 'show', true)) ?></h4>
+        <ul class="generation-status">
+            <li class="generation-resource"><?= $generation->resource() ? $generation->resource()->linkPretty() : $escape($translate('No resource')) ?></li>
+            <li class="submitted"><?= $escape($generation->isSubmitted() ? $translate('Is submitted') : $translate('Is not submitted')) ?></li>
+            <li class="reviewed"><?= $escape($generation->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></li>
         </ul>
-        <?php if ($contribution->isUpdatable()): ?>
-        <ul class="actions" data-message-remove-contribution="<?= $escapeAttr($translate('Are you sure to remove this contribution?')) ?>">
-            <?php if ($contribution->userIsAllowed('update')): ?>
-            <li><a class="o-icon-edit button edit-button edit-contribution" href="<?= $escapeAttr($contribution->siteUrl($siteSlug, 'edit', false, true)) ?>"><?= $escape($translate('Edit')) ?></a></li>
+        <?php if ($generation->isUpdatable()): ?>
+        <ul class="actions" data-message-remove-generation="<?= $escapeAttr($translate('Are you sure to remove this generation?')) ?>">
+            <?php if ($generation->userIsAllowed('update')): ?>
+            <li><a class="o-icon-edit button edit-button edit-generation" href="<?= $escapeAttr($generation->siteUrl($siteSlug, 'edit', false, true)) ?>"><?= $escape($translate('Edit')) ?></a></li>
             <?php endif; ?>
-            <?php if ($contribution->userIsAllowed('delete')): ?>
-            <li><a class="o-icon-delete button delete-button remove-contribution" data-contribution-id="<?= $contribution->id() ?>" data-contribution-url="<?= $escapeAttr($contribution->siteUrl($siteSlug, false, 'delete', true)) ?>" data-redirect-url="<?= $escapeAttr($url('site/guest/contribution', ['action' => 'browse'], true)) ?>" href="#"><?= $escape($translate('Delete')) ?></a></li>
+            <?php if ($generation->userIsAllowed('delete')): ?>
+            <li><a class="o-icon-delete button delete-button remove-generation" data-generation-id="<?= $generation->id() ?>" data-generation-url="<?= $escapeAttr($generation->siteUrl($siteSlug, false, 'delete', true)) ?>" data-redirect-url="<?= $escapeAttr($url('site/guest/generation', ['action' => 'browse'], true)) ?>" href="#"><?= $escape($translate('Delete')) ?></a></li>
             <?php endif; ?>
         </ul>
         <?php endif; ?>
@@ -71,9 +71,9 @@ $this->htmlElement('body')->appendAttribute('class', 'contribution resource brow
 
 <?php else: ?>
 <p class="noresults">
-    <?= $translate('There are no contributions.') // @translate ?>
+    <?= $translate('There are no generations.') // @translate ?>
 </p>
 <?php endif; ?>
 <div>
-    <?= $contributionLink() ?>
+    <?= $generationLink() ?>
 </div>

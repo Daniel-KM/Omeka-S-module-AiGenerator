@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute;
+namespace Generate;
 
 if (!class_exists(\Common\TraitModule::class)) {
     require_once dirname(__DIR__) . '/Common/TraitModule.php';
@@ -15,7 +15,7 @@ use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Module\AbstractModule;
 
 /**
- * Contribute
+ * Generate
  *
  * @copyright Daniel Berthereau, 2019-2025
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
@@ -55,10 +55,10 @@ class Module extends AbstractModule
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
 
-        if (!$this->checkDestinationDir($basePath . '/contribution')) {
+        if (!$this->checkDestinationDir($basePath . '/generation')) {
             $message = new PsrMessage(
                 'The directory "{directory}" is not writeable.', // @translate
-                ['directory' => $basePath . '/contribution']
+                ['directory' => $basePath . '/generation']
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
         }
@@ -72,34 +72,34 @@ class Module extends AbstractModule
         $settings = $services->get('Omeka\Settings');
 
         // Store the ids of the resource templates for medias.
-        $templateNames = $settings->get('contribute_templates_media', []);
+        $templateNames = $settings->get('generate_templates_media', []);
         $templateIds = [];
         foreach ($templateNames as $templateName) {
             $templateIds[$templateName] = $api
                 ->searchOne('resource_templates', is_numeric($templateName) ? ['id' => $templateName] : ['label' => $templateName], ['returnScalar' => 'id'])->getContent();
         }
         $templateFileIds = array_filter($templateIds);
-        $settings->set('contribute_templates_media', array_values($templateFileIds));
+        $settings->set('generate_templates_media', array_values($templateFileIds));
 
         // Store the ids of the resource templates for items.
-        $templateNames = $settings->get('contribute_templates', []);
+        $templateNames = $settings->get('generate_templates', []);
         $templateIds = [];
         foreach ($templateNames as $templateName) {
             $templateIds[$templateName] = $api
                 ->searchOne('resource_templates', is_numeric($templateName) ? ['id' => $templateName] : ['label' => $templateName], ['returnScalar' => 'id'])->getContent();
         }
         $templateItemIds = array_filter($templateIds);
-        $settings->set('contribute_templates', array_values($templateItemIds));
+        $settings->set('generate_templates', array_values($templateItemIds));
 
-        // Set the tempalte Contribution File the template for media in main
-        // template Contribution.
-        $templateFile = $templateFileIds['Contribution File'] ?? null;
-        $templateItem = $templateItemIds['Contribution'] ?? null;
+        // Set the tempalte Generation File the template for media in main
+        // template Generation.
+        $templateFile = $templateFileIds['Generation File'] ?? null;
+        $templateItem = $templateItemIds['Generation'] ?? null;
         if ($templateItem && $templateFile) {
             /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
             $template = $api->read('resource_templates', ['id' => $templateItem])->getContent();
             $templateData = $template->data();
-            $templateData['contribute_templates_media'] = [$templateFile];
+            $templateData['generate_templates_media'] = [$templateFile];
             $api->update('resource_templates', $templateItem, ['o:data' => $templateData], [], ['isPartial' => true]);
         }
     }
@@ -110,7 +110,7 @@ class Module extends AbstractModule
 
         $config = $this->getServiceLocator()->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-        $this->rmDir($basePath . '/contribution');
+        $this->rmDir($basePath . '/generation');
     }
 
     /**
@@ -121,14 +121,14 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
 
-        $contributeMode = $settings->get('contribute_mode', 'user');
-        $isOpenContribution = $contributeMode === 'open' || $contributeMode === 'token';
+        $generateMode = $settings->get('generate_mode', 'user');
+        $isOpenGeneration = $generateMode === 'open' || $generateMode === 'token';
 
-        $contributeRoles = $contributeMode === 'role'
-            ? $settings->get('contribute_roles', [])
+        $generateRoles = $generateMode === 'role'
+            ? $settings->get('generate_roles', [])
             : null;
 
-        $allowUpdateMode = $settings->get('contribute_allow_update', 'submission');
+        $allowUpdateMode = $settings->get('generate_allow_update', 'submission');
 
         /**
          * For default rights:
@@ -138,7 +138,7 @@ class Module extends AbstractModule
          */
         $acl = $services->get('Omeka\Acl');
 
-        // Since Omeka 1.4, modules are ordered so Guest comes after Contribute.
+        // Since Omeka 1.4, modules are ordered so Guest comes after Generate.
         // See \Guest\Module::onBootstrap().
         if (!$acl->hasRole('guest')) {
             $acl->addRole('guest');
@@ -149,13 +149,13 @@ class Module extends AbstractModule
 
         $roles = $acl->getRoles();
 
-        $contributors = $isOpenContribution
+        $generators = $isOpenGeneration
             ? []
-            : ($contributeRoles ?? $roles);
+            : ($generateRoles ?? $roles);
 
-        $contributors = array_intersect($contributors, $acl->getRoles());
+        $generators = array_intersect($generators, $acl->getRoles());
 
-        // Users who can edit resources can update contributions.
+        // Users who can edit resources can update generations.
         // A check is done on the specific resource for some roles.
         $validators = [
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
@@ -164,7 +164,7 @@ class Module extends AbstractModule
             \Omeka\Permissions\Acl::ROLE_REVIEWER,
         ];
 
-        // Only admins can delete a contribution.
+        // Only admins can delete a generation.
         $simpleValidators = [
             \Omeka\Permissions\Acl::ROLE_REVIEWER,
         ];
@@ -174,55 +174,55 @@ class Module extends AbstractModule
             \Omeka\Permissions\Acl::ROLE_EDITOR,
         ];
 
-        // Nobody can view contributions except owner and admins.
-        // So anonymous contributor cannot view or edit a contribution.
-        // Once submitted, the contribution cannot be updated by the owner,
-        // except with option "contribute_allow_update".
-        // Once reviewed, the contribution can be viewed like the resource.
+        // Nobody can view generations except owner and admins.
+        // So anonymous generator cannot view or edit a generation.
+        // Once submitted, the generation cannot be updated by the owner,
+        // except with option "generate_allow_update".
+        // Once reviewed, the generation can be viewed like the resource.
 
-        // Contribution.
+        // Generation.
         $acl
             ->allow(
-                $contributors,
-                ['Contribute\Controller\Site\Contribution'],
+                $generators,
+                ['Generate\Controller\Site\Generation'],
                 // TODO "view" is forwarded to "show" internally (will be removed).
                 ['show', 'view', 'add', 'edit', 'delete', 'delete-confirm', 'submit']
             )
             ->allow(
-                $contributors,
-                [\Contribute\Api\Adapter\ContributionAdapter::class],
+                $generators,
+                [\Generate\Api\Adapter\GenerationAdapter::class],
                 ['search', 'read', 'create', 'update', 'delete']
             )
             ->allow(
-                $contributors,
-                [\Contribute\Entity\Contribution::class],
+                $generators,
+                [\Generate\Entity\Generation::class],
                 [
                     'create',
-                    // TODO Remove right to change owner of the contribution (only set it first time).
+                    // TODO Remove right to change owner of the generation (only set it first time).
                     'change-owner',
                 ]
             )
             ->allow(
-                $contributors,
-                [\Contribute\Entity\Contribution::class],
+                $generators,
+                [\Generate\Entity\Generation::class],
                 ['read'],
                 (new \Laminas\Permissions\Acl\Assertion\AssertionAggregate)
                     ->setMode(\Laminas\Permissions\Acl\Assertion\AssertionAggregate::MODE_AT_LEAST_ONE)
                     ->addAssertion(new \Omeka\Permissions\Assertion\OwnsEntityAssertion)
-                    ->addAssertion(new \Contribute\Permissions\Assertion\IsSubmittedAndReviewedAndHasPublicResource)
+                    ->addAssertion(new \Generate\Permissions\Assertion\IsSubmittedAndReviewedAndHasPublicResource)
             )
         ;
         if ($allowUpdateMode === 'submission' || $allowUpdateMode === 'validation') {
             $acl
                 ->allow(
-                    $contributors,
-                    [\Contribute\Entity\Contribution::class],
+                    $generators,
+                    [\Generate\Entity\Generation::class],
                     ['update', 'delete'],
                     (new \Laminas\Permissions\Acl\Assertion\AssertionAggregate)
                         ->addAssertion(new \Omeka\Permissions\Assertion\OwnsEntityAssertion)
                         ->addAssertion($allowUpdateMode === 'submission'
-                            ? new \Contribute\Permissions\Assertion\IsNotSubmitted()
-                            : new \Contribute\Permissions\Assertion\IsNotReviewed()
+                            ? new \Generate\Permissions\Assertion\IsNotSubmitted()
+                            : new \Generate\Permissions\Assertion\IsNotReviewed()
                         )
                 );
         }
@@ -230,41 +230,41 @@ class Module extends AbstractModule
         // Token.
         $acl
             ->allow(
-                $contributors,
-                [\Contribute\Api\Adapter\TokenAdapter::class],
+                $generators,
+                [\Generate\Api\Adapter\TokenAdapter::class],
                 ['search', 'read', 'update']
             )
             ->allow(
-                $contributors,
-                [\Contribute\Entity\Token::class],
+                $generators,
+                [\Generate\Entity\Token::class],
                 ['update']
             )
 
             // Administration in public side (module Guest).
             ->allow(
                 $roles,
-                ['Contribute\Controller\Site\GuestBoard'],
+                ['Generate\Controller\Site\GuestBoard'],
                 ['browse', 'show', 'view', 'add', 'edit', 'delete', 'delete-confirm', 'submit']
             )
 
             // Administration.
             ->allow(
                 $validators,
-                ['Contribute\Controller\Admin\Contribution']
+                ['Generate\Controller\Admin\Generation']
             )
             ->allow(
                 $validators,
-                [\Contribute\Api\Adapter\ContributionAdapter::class]
+                [\Generate\Api\Adapter\GenerationAdapter::class]
             )
             // TODO Give right to deletion to reviewer?
             ->allow(
                 $simpleValidators,
-                [\Contribute\Entity\Contribution::class],
+                [\Generate\Entity\Generation::class],
                 ['read', 'update']
             )
             ->allow(
                 $adminValidators,
-                [\Contribute\Entity\Contribution::class],
+                [\Generate\Entity\Generation::class],
                 ['read', 'update', 'delete']
             )
 
@@ -289,19 +289,19 @@ class Module extends AbstractModule
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.hydrate.post',
-            [$this, 'handleValidateContribution'],
+            [$this, 'handleValidateGeneration'],
             -1000
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemSetAdapter::class,
             'api.hydrate.post',
-            [$this, 'handleValidateContribution'],
+            [$this, 'handleValidateGeneration'],
             -1000
         );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\MediaAdapter::class,
             'api.hydrate.post',
-            [$this, 'handleValidateContribution'],
+            [$this, 'handleValidateGeneration'],
             -1000
         );
 
@@ -370,15 +370,15 @@ class Module extends AbstractModule
         }
 
         $sharedEventManager->attach(
-            'Contribute\Controller\Admin\Contribution',
+            'Generate\Controller\Admin\Generation',
             'view.browse.before',
             [$this, 'addHeadersAdmin']
         );
 
         $sharedEventManager->attach(
-            \Contribute\Entity\Contribution::class,
+            \Generate\Entity\Generation::class,
             'entity.remove.post',
-            [$this, 'deleteContributionFiles']
+            [$this, 'deleteGenerationFiles']
         );
 
         // Handle main settings.
@@ -408,7 +408,7 @@ class Module extends AbstractModule
     public function handleMediaIngesterRegisteredNames(Event $event): void
     {
         $names = $event->getParam('registered_names');
-        $key = array_search('contribution', $names);
+        $key = array_search('generation', $names);
         unset($names[$key]);
         $event->setParam('registered_names', $names);
     }
@@ -416,11 +416,11 @@ class Module extends AbstractModule
     /**
      * Add an error during hydration to avoid to save a resource to validate.
      */
-    public function handleValidateContribution(Event $event): void
+    public function handleValidateGeneration(Event $event): void
     {
         /** @var \Omeka\Api\Request $request */
         $request = $event->getParam('request');
-        if (!$request->getOption('isContribution')
+        if (!$request->getOption('isGeneration')
             || !$request->getOption('validateOnly')
             || $request->getOption('flushEntityManager')
         ) {
@@ -449,7 +449,7 @@ class Module extends AbstractModule
 
     public function handleViewShowAfter(Event $event): void
     {
-        echo $event->getTarget()->contributionLink();
+        echo $event->getTarget()->generationLink();
     }
 
     public function handleGuestWidgets(Event $event): void
@@ -460,9 +460,9 @@ class Module extends AbstractModule
         $partial = $helpers->get('partial');
 
         $widget = [];
-        $widget['label'] = $translate('Contributions'); // @translate
-        $widget['content'] = $partial('guest/site/guest/widget/contribution');
-        $widgets['contribute'] = $widget;
+        $widget['label'] = $translate('Generations'); // @translate
+        $widget['content'] = $partial('guest/site/guest/widget/generation');
+        $widgets['generate'] = $widget;
 
         $event->setParam('widgets', $widgets);
     }
@@ -472,16 +472,16 @@ class Module extends AbstractModule
         $view = $event->getTarget();
         $assetUrl = $view->plugin('assetUrl');
         $view->headLink()
-            ->appendStylesheet($assetUrl('css/contribute-admin.css', 'Contribute'));
+            ->appendStylesheet($assetUrl('css/generate-admin.css', 'Generate'));
         $view->headScript()
-            ->appendFile($assetUrl('js/contribute-admin.js', 'Contribute'), 'text/javascript', ['defer' => 'defer']);
+            ->appendFile($assetUrl('js/generate-admin.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
     }
 
     public function addHeadersAdminBrowse(Event $event): void
     {
         // Don't display the token form if it is not used.
-        $contributeMode = $this->getServiceLocator()->get('Omeka\Settings')->get('contribute_mode');
-        if ($contributeMode !== 'user_token' && $contributeMode !== 'token') {
+        $generateMode = $this->getServiceLocator()->get('Omeka\Settings')->get('generate_mode');
+        if ($generateMode !== 'user_token' && $generateMode !== 'token') {
             return;
         }
         $this->addHeadersAdmin($event);
@@ -492,7 +492,7 @@ class Module extends AbstractModule
         $view = $event->getTarget();
         $plugins = $view->getHelperPluginManager();
         $setting = $plugins->get('setting');
-        if (!in_array($setting('contribute_mode'), ['user_token', 'token'])) {
+        if (!in_array($setting('generate_mode'), ['user_token', 'token'])) {
             return;
         }
 
@@ -507,23 +507,23 @@ class Module extends AbstractModule
             'redirect' => $this->getCurrentUrl($view),
         ];
         $link = $view->hyperlink(
-            $translate('Create contribution token'), // @translate
-            $url('admin/contribution/default', ['action' => 'create-token'], ['query' => $query])
+            $translate('Create generation token'), // @translate
+            $url('admin/generation/default', ['action' => 'create-token'], ['query' => $query])
         );
         $htmlText = [
-            'contritube' => $translate('Contribute'), // @translate
+            'contritube' => $translate('Generate'), // @translate
             'email' => $escapeAttr($translate('Please input optional email…')), // @translate
             'token' => $escapeAttr($translate('Create token')), // @translate
         ];
         echo <<<HTML
-            <div class="meta-group create_contribution_token">
+            <div class="meta-group create_generation_token">
                 <h4>{$htmlText['contritube']}</h4>
-                <div class="value" id="create_contribution_token">$link</div>
-                <div id="create_contribution_token_dialog" class="modal" style="display:none;">
+                <div class="value" id="create_generation_token">$link</div>
+                <div id="create_generation_token_dialog" class="modal" style="display:none;">
                     <div class="modal-content">
-                        <span class="close" id="create_contribution_token_dialog_close">&times;</span>
-                        <input type="text" value="" placeholder="{$htmlText['email']}" id="create_contribution_token_dialog_email"/>
-                        <input type="button" value="{$htmlText['token']}" id="create_contribution_token_dialog_go"/>
+                        <span class="close" id="create_generation_token_dialog_close">&times;</span>
+                        <input type="text" value="" placeholder="{$htmlText['email']}" id="create_generation_token_dialog_email"/>
+                        <input type="button" value="{$htmlText['token']}" id="create_generation_token_dialog_go"/>
                     </div>
                 </div>
             </div>
@@ -538,7 +538,7 @@ class Module extends AbstractModule
     public function appendTab(Event $event): void
     {
         $sectionNav = $event->getParam('section_nav');
-        $sectionNav['contribution'] = 'Contributions'; // @translate
+        $sectionNav['generation'] = 'Generations'; // @translate
         $event->setParam('section_nav', $sectionNav);
     }
 
@@ -555,8 +555,8 @@ class Module extends AbstractModule
 
         $resource = $view->resource;
 
-        $contributions = $api
-            ->search('contributions', [
+        $generations = $api
+            ->search('generations', [
                 'resource_id' => $resource->id(),
                 'sort_by' => 'modified',
                 'sort_order' => 'DESC',
@@ -564,7 +564,7 @@ class Module extends AbstractModule
             ->getContent();
 
         $unusedTokens = $api
-            ->search('contribution_tokens', [
+            ->search('generation_tokens', [
                 'resource_id' => $resource->id(),
                 'used' => false,
             ])
@@ -574,10 +574,10 @@ class Module extends AbstractModule
         $defaultSite = $plugins->get('defaultSite');
         $siteSlug = $defaultSite('slug');
 
-        echo '<div id="contribution" class="section">';
-        echo $view->partial('common/admin/contribute-list', [
+        echo '<div id="generation" class="section">';
+        echo $view->partial('common/admin/generate-list', [
             'resource' => $resource,
-            'contributions' => $contributions,
+            'generations' => $generations,
             'unusedTokens' => $unusedTokens,
             'siteSlug' => $siteSlug,
         ]);
@@ -598,27 +598,27 @@ class Module extends AbstractModule
 
         $resource = $event->getParam('entity');
         $total = $view->api()
-            ->search('contributions', [
+            ->search('generations', [
                 'resource_id' => $resource->id(),
             ])
             ->getTotalResults();
         $totalNotReviewed = $view->api()
-            ->search('contributions', [
+            ->search('generations', [
                 'resource_id' => $resource->id(),
                 'reviewed' => '0',
             ])
             ->getTotalResults();
-        $contributions = $translate('Contributions'); // @translat
+        $generations = $translate('Generations'); // @translat
         $message = $total
             ? new PsrMessage(
-                '{total} contributions ({count} not reviewed)', // @translate
+                '{total} generations ({count} not reviewed)', // @translate
                 ['total' => $total, 'count' => $totalNotReviewed]
             )
-            : new PsrMessage('No contribution'); // @translate
+            : new PsrMessage('No generation'); // @translate
         $message->setTranslator($translator);
         echo <<<HTML
             <div class="meta-group">
-                <h4>$contributions</h4>
+                <h4>$generations</h4>
                 <div class="value">
                     $message
                 </div>
@@ -634,72 +634,72 @@ class Module extends AbstractModule
         $form = $event->getTarget();
         $fieldset = $form->get('o:data');
         $fieldset
-            // TODO Move contributive_templates_media to Advanced Resource Template.
+            // TODO Move generative_templates_media to Advanced Resource Template.
             ->add([
-                'name' => 'contribute_templates_media',
+                'name' => 'generate_templates_media',
                 // Advanced Resource Template is a required dependency.
                 'type' => \Common\Form\Element\OptionalResourceTemplateSelect::class,
                 'options' => [
-                    'label' => 'Media templates for contribution', // @translate
-                    'info' => 'If any, the templates should be in the list of allowed templates for contribution of a media. Warning: to use multiple media is supported only with specific themes for now.', // @translate
+                    'label' => 'Media templates for generation', // @translate
+                    'info' => 'If any, the templates should be in the list of allowed templates for generation of a media. Warning: to use multiple media is supported only with specific themes for now.', // @translate
                     'empty_option' => '',
                 ],
                 'attributes' => [
-                    // 'id' => 'contribute_templates_media',
+                    // 'id' => 'generate_templates_media',
                     'class' => 'setting chosen-select',
                     'multiple' => true,
-                    'data-setting-key' => 'contribute_templates_media',
+                    'data-setting-key' => 'generate_templates_media',
                     'data-placeholder' => 'Select resource templates for media…', // @translate
                 ],
             ])
-            // Specific messages for the contributor.
+            // Specific messages for the generator.
             ->add([
-                'name' => 'contribute_author_confirmation_subject',
+                'name' => 'generate_author_confirmation_subject',
                 'type' => \Laminas\Form\Element\Text::class,
                 'options' => [
-                    'label' => 'Specific confirmation subject to the contributor', // @translate
+                    'label' => 'Specific confirmation subject to the generator', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'contribute_author_confirmation_subject',
-                    'data-setting-key' => 'contribute_author_confirmation_subject',
+                    'id' => 'generate_author_confirmation_subject',
+                    'data-setting-key' => 'generate_author_confirmation_subject',
                 ],
             ])
             ->add([
-                'name' => 'contribute_author_confirmation_body',
+                'name' => 'generate_author_confirmation_body',
                 'type' => \Laminas\Form\Element\Textarea::class,
                 'options' => [
-                    'label' => 'Specific confirmation message to the contributor', // @translate
+                    'label' => 'Specific confirmation message to the generator', // @translate
                     'info' => 'Placeholders: wrap properties with "{}", for example "{dcterms:title}".', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'contribute_author_confirmation_body',
+                    'id' => 'generate_author_confirmation_body',
                     'rows' => 5,
-                    'data-setting-key' => 'contribute_author_confirmation_body',
+                    'data-setting-key' => 'generate_author_confirmation_body',
                 ],
             ])
             // Specific messages for the reviewer.
             ->add([
-                'name' => 'contribute_reviewer_confirmation_subject',
+                'name' => 'generate_reviewer_confirmation_subject',
                 'type' => \Laminas\Form\Element\Text::class,
                 'options' => [
                     'label' => 'Specific confirmation subject to the reviewer', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'contribute_reviewer_confirmation_subject',
-                    'data-setting-key' => 'contribute_reviewer_confirmation_subject',
+                    'id' => 'generate_reviewer_confirmation_subject',
+                    'data-setting-key' => 'generate_reviewer_confirmation_subject',
                 ],
             ])
             ->add([
-                'name' => 'contribute_reviewer_confirmation_body',
+                'name' => 'generate_reviewer_confirmation_body',
                 'type' => \Laminas\Form\Element\Textarea::class,
                 'options' => [
                     'label' => 'Specific confirmation message to the reviewer', // @translate
                     'info' => 'Placeholders: wrap properties with "{}", for example "{dcterms:title}".', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'contribute_reviewer_confirmation_body',
+                    'id' => 'generate_reviewer_confirmation_body',
                     'rows' => 5,
-                    'data-setting-key' => 'contribute_reviewer_confirmation_body',
+                    'data-setting-key' => 'generate_reviewer_confirmation_body',
                 ],
             ]);
     }
@@ -713,7 +713,7 @@ class Module extends AbstractModule
                 'name' => 'editable',
                 'type' => \Laminas\Form\Element\Checkbox::class,
                 'options' => [
-                    'label' => 'Contribute: Editable by contributor', // @translate
+                    'label' => 'Generate: Editable by generator', // @translate
                 ],
                 'attributes' => [
                     // 'id' => 'editable',
@@ -725,7 +725,7 @@ class Module extends AbstractModule
                 'name' => 'fillable',
                 'type' => \Laminas\Form\Element\Checkbox::class,
                 'options' => [
-                    'label' => 'Contribute: Fillable by contributor', // @translate
+                    'label' => 'Generate: Fillable by generator', // @translate
                 ],
                 'attributes' => [
                     // 'id' => 'fillable',
@@ -736,23 +736,23 @@ class Module extends AbstractModule
     }
 
     /**
-     * Delete all files associated with a removed Contribution entity.
+     * Delete all files associated with a removed Generation entity.
      *
-     * Processed via an event to be sure that the contribution is removed.
+     * Processed via an event to be sure that the generation is removed.
      */
-    public function deleteContributionFiles(Event $event): void
+    public function deleteGenerationFiles(Event $event): void
     {
         $services = $this->getServiceLocator();
 
         // Fix issue when there is no path.
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-        $dirPath = rtrim($basePath, '/') . '/contribution';
+        $dirPath = rtrim($basePath, '/') . '/generation';
         if (!$this->checkDestinationDir($dirPath)) {
             $translator = $services->get('MvcTranslator');
             $message = new PsrMessage(
                 'The directory "{directory}" is not writeable.', // @translate
-                ['directory' => $basePath . '/contribution']
+                ['directory' => $basePath . '/generation']
             );
             throw new \Omeka\File\Exception\RuntimeException((string) $message->setTranslator($translator));
         }
@@ -763,7 +763,7 @@ class Module extends AbstractModule
         foreach ($proposal['media'] ?? [] as $mediaFiles) {
             foreach ($mediaFiles['file'] ?? [] as $mediaFile) {
                 if (isset($mediaFile['proposed']['store'])) {
-                    $storagePath = 'contribution/' . $mediaFile['proposed']['store'];
+                    $storagePath = 'generation/' . $mediaFile['proposed']['store'];
                     $store->delete($storagePath);
                 }
             }
@@ -777,7 +777,7 @@ class Module extends AbstractModule
         $sql = <<<SQL
             SELECT
                 JSON_EXTRACT( proposal, "$.media[*].file[*].proposed.store" ) AS proposal_json
-            FROM contribution
+            FROM generation
             HAVING proposal_json IS NOT NULL;
             SQL;
         /** @var \Doctrine\DBAL\Connection $connection */

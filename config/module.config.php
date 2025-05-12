@@ -1,17 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace Contribute;
+namespace Generate;
 
 return [
     'service_manager' => [
         'factories' => [
-            File\Contribution::class => Service\File\ContributionFactory::class,
+            File\Generation::class => Service\File\GenerationFactory::class,
         ],
     ],
     'api_adapters' => [
         'invokables' => [
-            'contributions' => Api\Adapter\ContributionAdapter::class,
-            'contribution_tokens' => Api\Adapter\TokenAdapter::class,
+            'generations' => Api\Adapter\GenerationAdapter::class,
+            'generation_tokens' => Api\Adapter\TokenAdapter::class,
         ],
     ],
     'entity_manager' => [
@@ -25,7 +25,7 @@ return [
     'media_ingesters' => [
         'factories' => [
             // This is an internal ingester.
-            'contribution' => Service\Media\Ingester\ContributionFactory::class,
+            'generation' => Service\Media\Ingester\GenerationFactory::class,
         ],
     ],
     'view_manager' => [
@@ -38,19 +38,19 @@ return [
     ],
     'view_helpers' => [
         'invokables' => [
-            'contributionForm' => View\Helper\ContributionForm::class,
+            'generationForm' => View\Helper\GenerationForm::class,
         ],
         'factories' => [
-            'canContribute' => Service\ViewHelper\CanContributeFactory::class,
-            'contributionFields' => Service\ViewHelper\ContributionFieldsFactory::class,
-            'contributionLink' => Service\ViewHelper\ContributionLinkFactory::class,
-            'contributionSearchFilters' => Service\ViewHelper\ContributionSearchFiltersFactory::class,
+            'canGenerate' => Service\ViewHelper\CanGenerateFactory::class,
+            'generationFields' => Service\ViewHelper\GenerationFieldsFactory::class,
+            'generationLink' => Service\ViewHelper\GenerationLinkFactory::class,
+            'generationSearchFilters' => Service\ViewHelper\GenerationSearchFiltersFactory::class,
         ],
     ],
     'form_elements' => [
         'invokables' => [
             Form\Element\ArrayQueryTextarea::class => Form\Element\ArrayQueryTextarea::class,
-            Form\ContributeForm::class => Form\ContributeForm::class,
+            Form\GenerateForm::class => Form\GenerateForm::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
         ],
         'factories' => [
@@ -59,44 +59,44 @@ return [
     ],
     'resource_page_block_layouts' => [
         'invokables' => [
-            'contributeLink' => Site\ResourcePageBlockLayout\ContributionLink::class,
+            'generateLink' => Site\ResourcePageBlockLayout\GenerationLink::class,
         ],
     ],
     'controllers' => [
         'invokables' => [
-            'Contribute\Controller\Site\GuestBoard' => Controller\Site\GuestBoardController::class,
+            'Generate\Controller\Site\GuestBoard' => Controller\Site\GuestBoardController::class,
         ],
         'factories' => [
-            'Contribute\Controller\Admin\Contribution' => Service\Controller\AdminContributionControllerFactory::class,
-            'Contribute\Controller\Site\Contribution' => Service\Controller\SiteContributionControllerFactory::class,
+            'Generate\Controller\Admin\Generation' => Service\Controller\AdminGenerationControllerFactory::class,
+            'Generate\Controller\Site\Generation' => Service\Controller\SiteGenerationControllerFactory::class,
         ],
     ],
     'controller_plugins' => [
         'invokables' => [
             'checkToken' => Mvc\Controller\Plugin\CheckToken::class,
-            'contributiveData' => Mvc\Controller\Plugin\ContributiveData::class,
+            'generativeData' => Mvc\Controller\Plugin\GenerativeData::class,
         ],
         'factories' => [
-            'sendContributionEmail' => Service\ControllerPlugin\SendContributionEmailFactory::class,
+            'sendGenerationEmail' => Service\ControllerPlugin\SendGenerationEmailFactory::class,
         ],
     ],
     'navigation' => [
         'AdminResource' => [
-            'contribution' => [
-                'label' => 'Contributions', // @translate
-                'class' => 'o-icon- contributions fa-edit',
-                'route' => 'admin/contribution',
-                // 'resource' => Controller\Admin\ContributionController::class,
+            'generation' => [
+                'label' => 'Generations', // @translate
+                'class' => 'o-icon- generations fa-edit',
+                'route' => 'admin/generation',
+                // 'resource' => Controller\Admin\GenerationController::class,
                 // 'privilege' => 'browse',
                 'pages' => [
                     [
-                        'route' => 'admin/contribution/default',
-                        'controller' => Controller\Admin\ContributionController::class,
+                        'route' => 'admin/generation/default',
+                        'controller' => Controller\Admin\GenerationController::class,
                         'visible' => false,
                     ],
                     [
-                        'route' => 'admin/contribution/id',
-                        'controller' => Controller\Admin\ContributionController::class,
+                        'route' => 'admin/generation/id',
+                        'controller' => Controller\Admin\GenerationController::class,
                         'visible' => false,
                     ],
                 ],
@@ -107,39 +107,39 @@ return [
         'routes' => [
             'site' => [
                 'child_routes' => [
-                    'contribution' => [
+                    'generation' => [
                         'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => '/:resource/add',
                             'constraints' => [
-                                'resource' => 'contribution|item-set|item|media',
+                                'resource' => 'generation|item-set|item|media',
                             ],
                             'defaults' => [
-                                '__NAMESPACE__' => 'Contribute\Controller\Site',
-                                'controller' => 'contribution',
-                                'resource' => 'contribution',
+                                '__NAMESPACE__' => 'Generate\Controller\Site',
+                                'controller' => 'generation',
+                                'resource' => 'generation',
                                 'action' => 'add',
                             ],
                         ],
                     ],
-                    'contribution-id' => [
+                    'generation-id' => [
                         'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             // TODO Use controller delegator or override the default site route?
                             // Overrides core public site resources for unused actions.
                             'route' => '/:resource/:id/:action',
                             'constraints' => [
-                                'resource' => 'contribution|item-set|item|media',
+                                'resource' => 'generation|item-set|item|media',
                                 'id' => '\d+',
-                                // "show" can be used only for contribution, so use "view".
+                                // "show" can be used only for generation, so use "view".
                                 // "view" is always forwarded to "show".
                                 // "add" is added to manage complex workflow. The id is useless for it.
                                 'action' => 'add|view|edit|delete-confirm|delete|submit',
                             ],
                             'defaults' => [
-                                '__NAMESPACE__' => 'Contribute\Controller\Site',
-                                'controller' => 'contribution',
-                                'resource' => 'contribution',
+                                '__NAMESPACE__' => 'Generate\Controller\Site',
+                                'controller' => 'generation',
+                                'resource' => 'generation',
                                 // Use automatically the core routes, since it is not in the constraints.
                                 'action' => 'show',
                             ],
@@ -155,31 +155,31 @@ return [
                         ],
                         'may_terminate' => true,
                         'child_routes' => [
-                            'contribution' => [
+                            'generation' => [
                                 'type' => \Laminas\Router\Http\Segment::class,
                                 'options' => [
-                                    'route' => '/contribution[/:action]',
+                                    'route' => '/generation[/:action]',
                                     'constraints' => [
                                         'action' => 'add|browse',
                                     ],
                                     'defaults' => [
-                                        '__NAMESPACE__' => 'Contribute\Controller\Site',
+                                        '__NAMESPACE__' => 'Generate\Controller\Site',
                                         'controller' => 'guest-board',
                                         'action' => 'browse',
                                     ],
                                 ],
                             ],
-                            'contribution-id' => [
+                            'generation-id' => [
                                 'type' => \Laminas\Router\Http\Segment::class,
                                 'options' => [
-                                    'route' => '/contribution/:id[/:action]',
+                                    'route' => '/generation/:id[/:action]',
                                     'constraints' => [
                                         // TODO Remove "view".
                                         'action' => 'show|view|edit|delete-confirm|delete|submit',
                                         'id' => '\d+',
                                     ],
                                     'defaults' => [
-                                        '__NAMESPACE__' => 'Contribute\Controller\Site',
+                                        '__NAMESPACE__' => 'Generate\Controller\Site',
                                         'controller' => 'guest-board',
                                         'action' => 'show',
                                     ],
@@ -191,13 +191,13 @@ return [
             ],
             'admin' => [
                 'child_routes' => [
-                    'contribution' => [
+                    'generation' => [
                         'type' => \Laminas\Router\Http\Literal::class,
                         'options' => [
-                            'route' => '/contribution',
+                            'route' => '/generation',
                             'defaults' => [
-                                '__NAMESPACE__' => 'Contribute\Controller\Admin',
-                                'controller' => 'contribution',
+                                '__NAMESPACE__' => 'Generate\Controller\Admin',
+                                'controller' => 'generation',
                                 'action' => 'browse',
                             ],
                         ],
@@ -249,47 +249,47 @@ return [
         'views' => [
             /* No event currently.
              'item_set_show' => [
-                'Contribute',
+                'Generate',
             ],
             */
             'item_show' => [
-                'Contribute',
+                'Generate',
             ],
             /* No event currently.
              'media_show' => [
-                'Contribute',
+                'Generate',
             ],
             */
             'item_browse' => [
-                'Contribute',
+                'Generate',
             ],
         ],
     ],
-    'contribute' => [
+    'generate' => [
         'settings' => [
-            'contribute_mode' => 'user',
-            'contribute_roles' => [],
-            'contribute_email_regex' => '',
-            'contribute_templates' => [
+            'generate_mode' => 'user',
+            'generate_roles' => [],
+            'generate_email_regex' => '',
+            'generate_templates' => [
                 // The id is set during install.
-                'Contribution',
+                'Generation',
             ],
-            'contribute_templates_media' => [
+            'generate_templates_media' => [
                 // The id is set during install.
-                'Contribution File',
+                'Generation File',
             ],
             // Days.
-            'contribute_token_duration' => 60,
-            'contribute_allow_update' => 'submission',
-            'contribute_notify_recipients' => [],
-            'contribute_author_emails' => [],
-            'contribute_message_add' => '',
-            'contribute_message_edit' => '',
-            'contribute_author_confirmations' => [],
-            'contribute_author_confirmation_subject' => '',
-            'contribute_author_confirmation_body' => '',
-            'contribute_reviewer_confirmation_subject' => '',
-            'contribute_reviewer_confirmation_body' => '',
+            'generate_token_duration' => 60,
+            'generate_allow_update' => 'submission',
+            'generate_notify_recipients' => [],
+            'generate_author_emails' => [],
+            'generate_message_add' => '',
+            'generate_message_edit' => '',
+            'generate_author_confirmations' => [],
+            'generate_author_confirmation_subject' => '',
+            'generate_author_confirmation_body' => '',
+            'generate_reviewer_confirmation_subject' => '',
+            'generate_reviewer_confirmation_body' => '',
         ],
     ],
 ];

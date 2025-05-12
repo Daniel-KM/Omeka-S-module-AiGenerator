@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Api\Representation;
+namespace Generate\Api\Representation;
 
 use DateTime;
 use Omeka\Api\Representation\AbstractEntityRepresentation;
@@ -9,12 +9,12 @@ class TokenRepresentation extends AbstractEntityRepresentation
 {
     public function getControllerName()
     {
-        return 'contribution';
+        return 'generation';
     }
 
     public function getJsonLdType()
     {
-        return 'o-module-contribute:Token';
+        return 'o-module-generate:Token';
     }
 
     public function getJsonLd()
@@ -43,11 +43,11 @@ class TokenRepresentation extends AbstractEntityRepresentation
         return [
             'o:id' => $this->id(),
             'o:resource' => $this->resource()->getReference(),
-            'o-module-contribute:token' => $this->token(),
+            'o-module-generate:token' => $this->token(),
             'o:email' => $this->email(),
-            'o-module-contribute:expire' => $expire,
+            'o-module-generate:expire' => $expire,
             'o:created' => $created,
-            'o-module-contribute:accessed' => $accessed,
+            'o-module-generate:accessed' => $accessed,
         ];
     }
 
@@ -90,7 +90,7 @@ class TokenRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * In admin, the token admin url use ContributionController and the id is "0",
+     * In admin, the token admin url use GenerationController and the id is "0",
      * the token is set in the query.
      *
      * {@inheritDoc}
@@ -131,7 +131,7 @@ class TokenRepresentation extends AbstractEntityRepresentation
             }
         }
 
-        $contributionResource = $this->resource();
+        $generationResource = $this->resource();
         $query = ['token' => $this->token()];
 
         $url = $this->getViewHelper('Url');
@@ -139,8 +139,8 @@ class TokenRepresentation extends AbstractEntityRepresentation
             'site/resource-id',
             [
                 'site-slug' => $siteSlug,
-                'controller' => $contributionResource->getControllerName(),
-                'id' => $contributionResource->id(),
+                'controller' => $generationResource->getControllerName(),
+                'id' => $generationResource->id(),
                 'action' => 'edit',
             ],
             [

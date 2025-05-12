@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\File;
+namespace Generate\File;
 
 use Laminas\Log\Logger;
 use Omeka\File\Store\StoreInterface;
@@ -10,9 +10,9 @@ use Omeka\Stdlib\ErrorStore;
 use Omeka\Stdlib\Message;
 
 /**
- * File contribution service (store).
+ * File generation service (store).
  */
-class Contribution
+class Generation
 {
     /**
      * @var TempFileFactory
@@ -47,7 +47,7 @@ class Contribution
     }
 
     /**
-     * Move a file from a stored file inside "/contribution".
+     * Move a file from a stored file inside "/generation".
      *
      * Pass the $errorStore object if an error should raise an API validation
      * error.
@@ -55,7 +55,7 @@ class Contribution
      * @todo Manage direct move for store.
      * @todo Manage remote storage (extends url downloader?).
      *
-     * @param string $filename Filename relative to the store base ("/contribution").
+     * @param string $filename Filename relative to the store base ("/generation").
      * @param string $sourceName The original source name
      * @param ?ErrorStore $errorStore
      */
@@ -73,7 +73,7 @@ class Contribution
             return null;
         }
 
-        $filepath = $this->basePath . '/contribution/' . $filename;
+        $filepath = $this->basePath . '/generation/' . $filename;
 
         $fileinfo = new \SplFileInfo($filepath);
         $realPath = $this->verifyFile($fileinfo, $errorStore);

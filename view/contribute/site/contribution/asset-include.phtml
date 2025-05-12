@@ -2,7 +2,7 @@
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
- * @var bool $skipContributeCss
+ * @var bool $skipGenerateCss
  * @var string $space "default" or "guest"
  */
 
@@ -10,13 +10,13 @@ $plugins = $this->getHelperPluginManager();
 $url = $plugins->get('url');
 $assetUrl = $plugins->get('assetUrl');
 
-$js = 'const siteBaseUrl = ' . json_encode(substr($url($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'delete', 'resource' => 'contribution', 'id' => 0], true), 0, -8), 320) . ';
+$js = 'const siteBaseUrl = ' . json_encode(substr($url($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'delete', 'resource' => 'generation', 'id' => 0], true), 0, -8), 320) . ';
 const confirmFormCsrf = ' . json_encode($site->getServiceLocator()->get('FormElementManager')->get(\Omeka\Form\ConfirmForm::class)->prepare()->get('confirmform_csrf')->getValue()) . ';';
 
-if (empty($skipContributeCss)) {
+if (empty($skipGenerateCss)) {
     $this->headLink()
-        ->appendStylesheet($assetUrl('css/contribute.css', 'Contribute'));
+        ->appendStylesheet($assetUrl('css/generate.css', 'Generate'));
 }
 $this->headScript()
-    ->appendFile($assetUrl('js/contribute.js', 'Contribute'), 'text/javascript', ['defer' => 'defer'])
+    ->appendFile($assetUrl('js/generate.js', 'Generate'), 'text/javascript', ['defer' => 'defer'])
     ->appendScript($js);

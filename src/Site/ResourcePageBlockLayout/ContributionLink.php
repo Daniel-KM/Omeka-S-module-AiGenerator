@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Site\ResourcePageBlockLayout;
+namespace Generate\Site\ResourcePageBlockLayout;
 
 use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Site\ResourcePageBlockLayout\ResourcePageBlockLayoutInterface;
 
-class ContributionLink implements ResourcePageBlockLayoutInterface
+class GenerationLink implements ResourcePageBlockLayoutInterface
 {
     public function getLabel() : string
     {
-        return 'Contribute: Edit link'; // @translate
+        return 'Generate: Edit link'; // @translate
     }
 
     public function getCompatibleResourceNames() : array
@@ -23,7 +23,7 @@ class ContributionLink implements ResourcePageBlockLayoutInterface
 
     public function render(PhpRenderer $view, AbstractResourceEntityRepresentation $resource) : string
     {
-        return $view->partial('common/resource-page-block-layout/contribution-link', [
+        return $view->partial('common/resource-page-block-layout/generation-link', [
             'resource' => $resource,
         ]);
     }

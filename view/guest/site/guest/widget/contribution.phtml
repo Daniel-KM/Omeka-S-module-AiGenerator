@@ -8,21 +8,21 @@ $url = $plugins->get('url');
 $setting = $plugins->get('setting');
 $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
-$canContribute = $plugins->get('canContribute');
+$canGenerate = $plugins->get('canGenerate');
 ?>
 
 <ul>
     <li>
         <?= $hyperlink(
-            $translate('See contributions'), // @translate
-            $url('site/guest/contribution', [], true)
+            $translate('See generations'), // @translate
+            $url('site/guest/generation', [], true)
         ) ?>
     </li>
-    <?php if ($canContribute): ?>
+    <?php if ($canGenerate): ?>
     <li>
         <?= $hyperlink(
             $translate('Add a new record'),
-            $url('site/guest/contribution', ['action' => 'add'], true))
+            $url('site/guest/generation', ['action' => 'add'], true))
         ?>
     </li>
     <?php endif; ?>

@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Mvc\Controller\Plugin;
+namespace Generate\Mvc\Controller\Plugin;
 
 use ArrayObject;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 
-class ContributiveData extends AbstractPlugin
+class GenerativeData extends AbstractPlugin
 {
     /**
      * @var \ArrayObject
@@ -14,7 +14,7 @@ class ContributiveData extends AbstractPlugin
     protected $data;
 
     /**
-     * Get contributive data (editable, fillable, etc.) of a resource template.
+     * Get generative data (editable, fillable, etc.) of a resource template.
      *
      *  The list comes from the resource template if it is configured, else the
      *  list of the first allowed resource template is used.
@@ -32,7 +32,7 @@ class ContributiveData extends AbstractPlugin
     {
         $isSubTemplate = (bool) $isSubTemplate;
         $this->data = new ArrayObject([
-            'is_contributive' => false,
+            'is_generative' => false,
             'template' => null,
             'required' => false,
             'min_values' => 0,
@@ -45,11 +45,11 @@ class ContributiveData extends AbstractPlugin
             'datatypes_default' => [],
             'templates_media' => [],
             // Keep null when not checked, then array.
-            'contributive_medias' => null,
+            'generative_medias' => null,
             // Following keys are kept for compatibility with old themes.
             'is_sub_template' => $isSubTemplate,
             'template_media' => null,
-            'contributive_media' => false,
+            'generative_media' => false,
         ]);
 
         $controller = $this->getController();
@@ -68,7 +68,7 @@ class ContributiveData extends AbstractPlugin
 
         /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $resourceTemplate */
         $resourceTemplate = $this->resourceTemplate($resourceTemplate);
-        $allowedResourceTemplates = $settings->get($isSubTemplate ? 'contribute_templates_media' : 'contribute_templates', []) ?: [];
+        $allowedResourceTemplates = $settings->get($isSubTemplate ? 'generate_templates_media' : 'generate_templates', []) ?: [];
 
         // When a resource template is set, it should be allowed too.
         // Anyway, if it is not prepared, it won't be editable/fillable (below).
@@ -78,8 +78,8 @@ class ContributiveData extends AbstractPlugin
             if (!in_array($resourceTemplateId, $allowedResourceTemplates)) {
                 $controller->logger()->err(
                     $isSubTemplate
-                        ? 'The resource template #{template_id} is not in the list of allowed contribution templates for media.' // @translate
-                        : 'The resource template #{template_id} is not in the list of allowed contribution templates.', // @translate
+                        ? 'The resource template #{template_id} is not in the list of allowed generation templates for media.' // @translate
+                        : 'The resource template #{template_id} is not in the list of allowed generation templates.', // @translate
                     ['template_id' => $resourceTemplateId]
                 );
                 return $this;
@@ -90,7 +90,7 @@ class ContributiveData extends AbstractPlugin
                 $resourceTemplate = $this->resourceTemplate($resourceTemplate);
             }
             if (!$resourceTemplate) {
-                $controller->logger()->err('A resource template must be set to allow to contribute'); // @translate
+                $controller->logger()->err('A resource template must be set to allow to generate'); // @translate
                 return $this;
             }
         }
@@ -128,8 +128,8 @@ class ContributiveData extends AbstractPlugin
         // submit partially.
         if (!$isSubTemplate) {
             /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation[] $resourceTemplateMedias */
-            $resourceTemplateMediaIds = $resourceTemplate->dataValue('contribute_templates_media') ?: [];
-            $allowedResourceTemplatesMedia = $settings->get('contribute_templates_media') ?: [];
+            $resourceTemplateMediaIds = $resourceTemplate->dataValue('generate_templates_media') ?: [];
+            $allowedResourceTemplatesMedia = $settings->get('generate_templates_media') ?: [];
             foreach ($resourceTemplateMediaIds as $resourceTemplateMediaId) {
                 $resourceTemplateMedia = $this->resourceTemplate($resourceTemplateMediaId);
                 if (!$resourceTemplateMedia) {
@@ -139,7 +139,7 @@ class ContributiveData extends AbstractPlugin
                     );
                 } elseif (!in_array($resourceTemplateMedia->id(), $allowedResourceTemplatesMedia)) {
                     $controller->logger()->err(
-                        'The resource template #{template_id} is not in the list of allowed contribution templates for media.', // @translate
+                        'The resource template #{template_id} is not in the list of allowed generation templates for media.', // @translate
                         ['template_id' => $resourceTemplateMediaId]
                     );
                 } else {
@@ -153,7 +153,7 @@ class ContributiveData extends AbstractPlugin
         }
 
         // The resource template is checked above.
-        $this->data['is_contributive'] = count($this->data['datatypes_default'])
+        $this->data['is_generative'] = count($this->data['datatypes_default'])
             || count($this->data['editable'])
             || count($this->data['fillable'])
             // TODO Remove editable mode / fillable mode since a template is required now.
@@ -168,9 +168,9 @@ class ContributiveData extends AbstractPlugin
         return $this->data;
     }
 
-    public function isContributive(): bool
+    public function isGenerative(): bool
     {
-        return $this->data['is_contributive'];
+        return $this->data['is_generative'];
     }
 
     /**
@@ -238,7 +238,7 @@ class ContributiveData extends AbstractPlugin
             : $this->data['datatype'][$term];
     }
 
-    public function isTermContributive(?string $term): bool
+    public function isTermGenerative(?string $term): bool
     {
         return $this->isTermEditable($term)
             || $this->isTermFillable($term);
@@ -295,57 +295,57 @@ class ContributiveData extends AbstractPlugin
     }
 
     /**
-     * Get the contributive data for the media sub-templates.
+     * Get the generative data for the media sub-templates.
      *
      * Like main template, the media templates should have at least one property.
      *
-     * @return \Contribute\Mvc\Controller\Plugin\ContributiveData[]
+     * @return \Generate\Mvc\Controller\Plugin\GenerativeData[]
      */
-    public function contributiveMedias(): array
+    public function generativeMedias(): array
     {
-        if ($this->data['contributive_medias'] === []
-            || !$this->isContributive()
+        if ($this->data['generative_medias'] === []
+            || !$this->isGenerative()
             || empty($this->data['templates_media'])
             || $this->isSubTemplate()
         ) {
             return [];
         }
 
-        if ($this->data['contributive_medias']) {
-            return $this->data['contributive_medias'];
+        if ($this->data['generative_medias']) {
+            return $this->data['generative_medias'];
         }
 
-        $this->data['contributive_medias'] = [];
+        $this->data['generative_medias'] = [];
         foreach ($this->data['templates_media'] as $templateMediaId => $templateMedia) {
-            // Clone() allows to get to contributive data with a different config.
-            /** @var \Contribute\Mvc\Controller\Plugin\ContributiveData $contributiveMedia */
-            $contributiveMedia = clone $this->getController()->plugin('contributiveData');
-            $contributiveMedia = $contributiveMedia($templateMedia, true);
-            if ($contributiveMedia->isContributive()) {
-                $this->data['contributive_medias'][$templateMediaId] = $contributiveMedia;
+            // Clone() allows to get to generative data with a different config.
+            /** @var \Generate\Mvc\Controller\Plugin\GenerativeData $generativeMedia */
+            $generativeMedia = clone $this->getController()->plugin('generativeData');
+            $generativeMedia = $generativeMedia($templateMedia, true);
+            if ($generativeMedia->isGenerative()) {
+                $this->data['generative_medias'][$templateMediaId] = $generativeMedia;
             }
         }
 
         // Temporary keep one template for compatibility with old themes.
-        $this->data['contributive_media'] = count($this->data['contributive_medias'])
-            ? reset($this->data['contributive_medias'])
+        $this->data['generative_media'] = count($this->data['generative_medias'])
+            ? reset($this->data['generative_medias'])
             : null;
 
-        return $this->data['contributive_medias'];
+        return $this->data['generative_medias'];
     }
 
     /**
-     * Get the contributive data for the media sub-templates.
+     * Get the generative data for the media sub-templates.
      *
      * Like main template, the media template should have at least one property.
      */
-    public function contributiveMedia(?int $mediaTemplateId = null): ?\Contribute\Mvc\Controller\Plugin\ContributiveData
+    public function generativeMedia(?int $mediaTemplateId = null): ?\Generate\Mvc\Controller\Plugin\GenerativeData
     {
-        $contributiveMedias = $this->contributiveMedias();
+        $generativeMedias = $this->generativeMedias();
         if ($mediaTemplateId) {
-            return $contributiveMedias[$mediaTemplateId] ?? null;
+            return $generativeMedias[$mediaTemplateId] ?? null;
         }
-        return count($contributiveMedias) ? reset($contributiveMedias) : null;
+        return count($generativeMedias) ? reset($generativeMedias) : null;
     }
 
     /**
@@ -366,12 +366,12 @@ class ContributiveData extends AbstractPlugin
         } catch (\Omeka\Api\Exception\NotFoundException $e) {
             if (is_numeric($template)) {
                 $this->getController()->logger()->warn(
-                    'The template #{template_id} does not exist and cannot be used for contribution.', // @translate
+                    'The template #{template_id} does not exist and cannot be used for generation.', // @translate
                     ['template_id' => $template]
                 );
             } else {
                 $this->getController()->logger()->warn(
-                    'The template "{template}" does not exist and cannot be used for contribution.', // @translate
+                    'The template "{template}" does not exist and cannot be used for generation.', // @translate
                     ['template' => $template]
                 );
             }

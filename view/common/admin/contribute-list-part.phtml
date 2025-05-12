@@ -1,10 +1,10 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \Contribute\Form\ContributeForm $form
+ * @var \Generate\Form\GenerateForm $form
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
- * @var \Contribute\Api\Representation\ContributionRepresentation[] $contributions
- * @var \Contribute\Api\Representation\TokenRepresentation[] $unusedTokens
+ * @var \Generate\Api\Representation\GenerationRepresentation[] $generations
+ * @var \Generate\Api\Representation\TokenRepresentation[] $unusedTokens
  * @var string $siteSlug
  *
  * For loop:
@@ -14,7 +14,7 @@
  * @var \Omeka\View\Helper\Hyperlink $hyperlink
  * @var \Laminas\View\Helper\EscapeHtmlAttr $escapeAttr
  *
- * @var \Contribute\Api\Representation\ContributionRepresentation $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation $generation
  * @var bool $editRight
  * @var string $labelInfo
  * @var array $values
@@ -55,7 +55,7 @@ unset($proposal['template'], $proposal['media']);
         ];
     } else {
         $property = $api->searchOne('properties', ['term' => $term])->getContent();
-        // In the case the property was removed after the contribute.
+        // In the case the property was removed after the generate.
         if (empty($property)) continue;
         $propertyData = [
             'property' => $property,
@@ -126,7 +126,7 @@ unset($proposal['template'], $proposal['media']);
                     </dd>
                     <?php endif; ?>
 
-                    <?php if ($contribution->isPatch()): // Only patchs should be validated individually. ?>
+                    <?php if ($generation->isPatch()): // Only patchs should be validated individually. ?>
                     <span class="single actions">
                     <?php if ($isValidated): ?>
                         <span class="no-action o-icon-validated-value" aria-label="<?= $escapeAttr($translate('Validated')) ?>"></span>
@@ -137,7 +137,7 @@ unset($proposal['template'], $proposal['media']);
                     <?php else: ?>
                         <a href="#"
                             class="validate-value o-icon-validate-value"
-                            data-validate-value-url="<?= $escapeAttr($contribution->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
+                            data-validate-value-url="<?= $escapeAttr($generation->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                             data-status="validate-value"
                             aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
                             title="<?= $txt ?>"></a>
@@ -181,7 +181,7 @@ unset($proposal['template'], $proposal['media']);
                     <span data-name="<?= $term . '[' . $key . '][@value]' ?>" class="<?= $process ?>-value"><?= $escape($proposed_uri) ?></span>
                     <?php endif; ?>
 
-                    <?php if ($contribution->isPatch()): // Only patchs should be validated individually. ?>
+                    <?php if ($generation->isPatch()): // Only patchs should be validated individually. ?>
                     <span class="single actions">
                     <?php if ($isValidated): ?>
                         <span class="no-action o-icon-validated-value" aria-label="<?= $escapeAttr($translate('Validated')) ?>"></span>
@@ -192,7 +192,7 @@ unset($proposal['template'], $proposal['media']);
                     <?php else: ?>
                         <a href="#"
                             class="validate-value o-icon-validate-value"
-                            data-validate-value-url="<?= $escapeAttr($contribution->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
+                            data-validate-value-url="<?= $escapeAttr($generation->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                             data-status="validate-value"
                             aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
                             title="<?= $txt ?>"></a>
@@ -229,7 +229,7 @@ unset($proposal['template'], $proposal['media']);
                     <span data-name="<?= $term . '[' . $key . '][@value]' ?>" class="<?= $process ?>-value"><?= $escape($proposed) ?></span>
                     <?php endif; ?>
 
-                    <?php if ($contribution->isPatch()): // Only patchs should be validated individually. ?>
+                    <?php if ($generation->isPatch()): // Only patchs should be validated individually. ?>
                     <span class="single actions">
                     <?php if ($isValidated): ?>
                         <span class="no-action o-icon-validated-value" aria-label="<?= $escapeAttr($translate('Validated')) ?>"></span>
@@ -240,7 +240,7 @@ unset($proposal['template'], $proposal['media']);
                     <?php else: ?>
                         <a href="#"
                             class="validate-value o-icon-validate-value"
-                            data-validate-value-url="<?= $escapeAttr($contribution->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
+                            data-validate-value-url="<?= $escapeAttr($generation->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                             data-status="validate-value"
                             aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
                             title="<?= $txt ?>"></a>

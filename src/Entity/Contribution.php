@@ -27,7 +27,7 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace Contribute\Entity;
+namespace Generate\Entity;
 
 use DateTime;
 use Omeka\Entity\AbstractEntity;
@@ -39,17 +39,17 @@ use Omeka\Entity\User;
  * @Table(
  *     indexes={
  *         @Index(
- *             name="contribute_email_idx",
+ *             name="generate_email_idx",
  *             columns={"email"}
  *         ),
  *         @Index(
- *             name="contribute_modified_idx",
+ *             name="generate_modified_idx",
  *             columns={"modified"}
  *         )
  *     }
  * )
  */
-class Contribution extends AbstractEntity
+class Generation extends AbstractEntity
 {
     /**
      * @var int
@@ -61,7 +61,7 @@ class Contribution extends AbstractEntity
     protected $id;
 
     /**
-     * Contributions are not annotations in this module; nevertheless it can be
+     * Generations are not annotations in this module; nevertheless it can be
      * a new resource and they are now kept when resource is deleted.
      *
      * @var \Omeka\Entity\Resource
@@ -142,9 +142,9 @@ class Contribution extends AbstractEntity
     protected $proposal;
 
     /**
-     * @todo Allow to keep history of all contributions (ManyToOne)?
+     * @todo Allow to keep history of all generations (ManyToOne)?
      *
-     * @var \Contribute\Entity\Token
+     * @var \Generate\Entity\Token
      *
      * @OneToOne(
      *     targetEntity="Token"
@@ -263,7 +263,7 @@ class Contribution extends AbstractEntity
         return $this;
     }
 
-    public function getToken(): ?\Contribute\Entity\Token
+    public function getToken(): ?\Generate\Entity\Token
     {
         return $this->token;
     }

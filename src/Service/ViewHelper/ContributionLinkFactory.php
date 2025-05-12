@@ -1,17 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Service\ViewHelper;
+namespace Generate\Service\ViewHelper;
 
-use Contribute\View\Helper\ContributionLink;
+use Generate\View\Helper\GenerationLink;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
-class ContributionLinkFactory implements FactoryInterface
+class GenerationLinkFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $checkToken = $services->get('ControllerPluginManager')->get('checkToken');
-        return new ContributionLInk(
+        return new GenerationLInk(
             $checkToken
         );
     }

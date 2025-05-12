@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Permissions\Assertion;
+namespace Generate\Permissions\Assertion;
 
-use Contribute\Entity\Contribution;
+use Generate\Entity\Generation;
 use Laminas\Permissions\Acl\Acl;
 use Laminas\Permissions\Acl\Assertion\AssertionInterface;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
@@ -16,13 +16,13 @@ class IsSubmittedAndReviewedAndHasPublicResource implements AssertionInterface
         ResourceInterface $resource = null,
         $privilege = null
     ) {
-        if (!$resource instanceof Contribution) {
+        if (!$resource instanceof Generation) {
             return false;
         }
-        $contributedResource = $resource->getResource();
-        return $contributedResource
+        $generatedResource = $resource->getResource();
+        return $generatedResource
             && $resource->getSubmitted()
             && $resource->getReviewed()
-            && $contributedResource->isPublic();
+            && $generatedResource->isPublic();
     }
 }

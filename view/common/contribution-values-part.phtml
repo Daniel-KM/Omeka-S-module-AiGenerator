@@ -2,7 +2,7 @@
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
- * @var \Contribute\Api\Representation\ContributionRepresentation $contribution
+ * @var \Generate\Api\Representation\GenerationRepresentation $generation
  * @var array $templateProperties
  *
  * For loop:
@@ -23,14 +23,14 @@
 ?>
 
 <?php if ($isSub): ?>
-<dl class="contribution-media">
-    <h4 class="contribution-media-label"><?= sprintf($isSiteRequest ? $translate('File #%s') : $translate('Media #%s'), $this->partialLoop()->getPartialCounter()) ?></h4>
+<dl class="generation-media">
+    <h4 class="generation-media-label"><?= sprintf($isSiteRequest ? $translate('File #%s') : $translate('Media #%s'), $this->partialLoop()->getPartialCounter()) ?></h4>
 <?php else: ?>
-<dl class="contribution">
+<dl class="generation">
 <?php endif; ?>
 
 <?php foreach ($values as $term => $propertyData): ?>
-    <?php if (empty($propertyData['contributions'])) continue; ?>
+    <?php if (empty($propertyData['generations'])) continue; ?>
     <div class="property">
         <dt>
             <?= $escape($propertyData['alternate_label'] ?: $translate($propertyData['property']->label())) ?>
@@ -42,11 +42,11 @@
             <span class="field-term">(<?= $escape($propertyData['property']->vocabulary()->label()) ?>)</span>
             <?php endif; ?>
         </dt>
-        <?php foreach ($propertyData['contributions'] as $contributionData):
-            if (!empty($contributionData['empty'])) continue;
-            $valueType = $contributionData['type'];
-            $valueBaseType = $contributionData['basetype'];
-            $valueLang = $contributionData['lang'] ?? '';
+        <?php foreach ($propertyData['generations'] as $generationData):
+            if (!empty($generationData['empty'])) continue;
+            $valueType = $generationData['type'];
+            $valueBaseType = $generationData['basetype'];
+            $valueLang = $generationData['lang'] ?? '';
             $class = ['value'];
             // TODO Improve.
             if ($valueBaseType === 'resource') {
@@ -61,53 +61,53 @@
             <?php if ($showLocale && $valueLang): ?>
             <span class="language"><?= $valueLang ?></span>
             <?php endif; ?>
-            <?php if (!empty($contributionData['new'])): ?>
+            <?php if (!empty($generationData['new'])): ?>
             <span class="value-content"><?php
                     if ($valueBaseType === 'uri'):
-                        echo $escape($contributionData['proposed']['@uri'] . ' / ' . $contributionData['proposed']['@label']);
+                        echo $escape($generationData['proposed']['@uri'] . ' / ' . $generationData['proposed']['@label']);
                     elseif ($valueBaseType === 'resource'):
                         try {
-                            $res = $api->read('resources', ['id' => $contributionData['proposed']['@resource']])->getContent();
+                            $res = $api->read('resources', ['id' => $generationData['proposed']['@resource']])->getContent();
                             echo $res->link($res->displayTitle());
                         } catch (\Exception $e) {
-                            echo sprintf($translate('%s [unavailable]'), $contributionData['proposed']['@resource']);
+                            echo sprintf($translate('%s [unavailable]'), $generationData['proposed']['@resource']);
                         }
                     elseif ($term === 'file'): // File is always a new value.
-                        echo isset($contributionData['proposed']['store'])
-                            ? '<a href="' . $escapeAttr($baseUrlFiles . '/contribution/' . $contributionData['proposed']['store']) . '" download="download" target="_self">' . $escape($contributionData['proposed']['@value']) . '</a>'
-                            : sprintf('%s [missing file]', $escape($contributionData['proposed']['@value']));
+                        echo isset($generationData['proposed']['store'])
+                            ? '<a href="' . $escapeAttr($baseUrlFiles . '/generation/' . $generationData['proposed']['store']) . '" download="download" target="_self">' . $escape($generationData['proposed']['@value']) . '</a>'
+                            : sprintf('%s [missing file]', $escape($generationData['proposed']['@value']));
                     else:
-                        echo $escape($contributionData['proposed']['@value']);
+                        echo $escape($generationData['proposed']['@value']);
                     endif;
             ?></span>
                 <?php else: ?>
             <dl>
                 <dd>
                     <?php if ($valueBaseType === 'uri'):
-                        echo $escape($contributionData['original']['@uri'] . ' / ' . $contributionData['original']['@label']);
+                        echo $escape($generationData['original']['@uri'] . ' / ' . $generationData['original']['@label']);
                     elseif ($valueBaseType === 'resource'):
                         try {
-                            $res = $api->read('resources', ['id' => $contributionData['original']['@resource']])->getContent();
+                            $res = $api->read('resources', ['id' => $generationData['original']['@resource']])->getContent();
                             echo $res->link($res->displayTitle());
                         } catch (\Exception $e) {
-                            echo sprintf($translate('%s [unavailable]'), $contributionData['original']['@resource']);
+                            echo sprintf($translate('%s [unavailable]'), $generationData['original']['@resource']);
                         };
                     else:
-                        echo $escape($contributionData['original']['@value']);
+                        echo $escape($generationData['original']['@value']);
                     endif; ?>
                 </dd>
                 <dd>
                     <?php if ($valueBaseType === 'uri'):
-                        echo $escape($contributionData['proposed']['@uri'] . ' / ' . $contributionData['proposed']['@label']);
+                        echo $escape($generationData['proposed']['@uri'] . ' / ' . $generationData['proposed']['@label']);
                     elseif ($valueBaseType === 'resource'):
                         try {
-                            $res = $api->read('resources', ['id' => $contributionData['proposed']['@resource']])->getContent();
+                            $res = $api->read('resources', ['id' => $generationData['proposed']['@resource']])->getContent();
                             echo $res->link($res->displayTitle());
                         } catch (\Exception $e) {
-                            echo sprintf($translate('%s [unavailable]'), $contributionData['proposed']['@resource']);
+                            echo sprintf($translate('%s [unavailable]'), $generationData['proposed']['@resource']);
                         }
                     else:
-                        echo $escape($contributionData['proposed']['@value']);
+                        echo $escape($generationData['proposed']['@value']);
                     endif; ?>
                 </dd>
             </dl>

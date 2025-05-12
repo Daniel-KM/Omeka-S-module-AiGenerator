@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Controller\Site;
+namespace Generate\Controller\Site;
 
 use Common\Stdlib\PsrMessage;
-use Contribute\Api\Representation\ContributionRepresentation;
-use Contribute\Controller\ContributionTrait;
-use Contribute\Form\ContributeForm;
+use Generate\Api\Representation\GenerationRepresentation;
+use Generate\Controller\GenerationTrait;
+use Generate\Form\GenerateForm;
 use Doctrine\ORM\EntityManager;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\ViewModel;
@@ -16,9 +16,9 @@ use Omeka\File\TempFileFactory;
 use Omeka\File\Uploader;
 use Omeka\Stdlib\ErrorStore;
 
-class ContributionController extends AbstractActionController
+class GenerationController extends AbstractActionController
 {
-    use ContributionTrait;
+    use GenerationTrait;
 
     /**
      * @var \Doctrine\ORM\EntityManager
@@ -70,7 +70,7 @@ class ContributionController extends AbstractActionController
         $resourceId = $this->params('id');
 
         $resourceTypeMap = [
-            'contribution' => 'Contribute\Controller\Site\Contribution',
+            'generation' => 'Generate\Controller\Site\Generation',
             'item' => 'Omeka\Controller\Site\Item',
             'media' => 'Omeka\Controller\Site\Media',
             'item-set' => 'Omeka\Controller\Site\ItemSet',
@@ -81,7 +81,7 @@ class ContributionController extends AbstractActionController
         }
         $site = $this->currentSite();
 
-        if ($resourceType !== 'contribution') {
+        if ($resourceType !== 'generation') {
             // TODO Use forward dispatch to avoid the redirect, but clear event context and params, else items events are not triggered.
             // return $this->forward()->dispatch($resourceTypeMap[$resourceType], [
             return $this->redirect()->toRoute('site/resource-id', [
@@ -94,20 +94,20 @@ class ContributionController extends AbstractActionController
 
         // Rights are automatically checked.
         /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
-        $contribution = $this->api()->read('contributions', ['id' => $resourceId])->getContent();
+        $generation = $this->api()->read('generations', ['id' => $resourceId])->getContent();
 
         $space = $this->params('space', 'default');
 
         $view = new ViewModel([
             'site' => $site,
-            'resource' => $contribution->resource(),
-            'contribution' => $contribution,
+            'resource' => $generation->resource(),
+            'generation' => $generation,
             'space' => $space,
         ]);
         return $view
             ->setTemplate($space === 'guest'
-                ? 'guest/site/guest/contribution-show'
-                : 'contribute/site/contribution/show'
+                ? 'guest/site/guest/generation-show'
+                : 'generate/site/generation/show'
             );
     }
 
@@ -120,7 +120,7 @@ class ContributionController extends AbstractActionController
     {
         $params = $this->params()->fromRoute();
         $params['action'] = 'show';
-        return $this->forward()->dispatch('Contribute\Controller\Site\Contribution', $params);
+        return $this->forward()->dispatch('Generate\Controller\Site\Generation', $params);
     }
 
     public function addAction()
@@ -129,7 +129,7 @@ class ContributionController extends AbstractActionController
         $resourceType = $this->params('resource');
 
         $resourceTypeMap = [
-            'contribution' => 'items',
+            'generation' => 'items',
             'item' => 'items',
             'media' => 'media',
             'item-set' => 'item_sets',
@@ -139,16 +139,16 @@ class ContributionController extends AbstractActionController
             return $this->notFoundAction();
         }
 
-        if ($resourceType === 'contribution') {
+        if ($resourceType === 'generation') {
             $resourceType = 'item';
         }
-        // TODO Use the resource name to store the contribution (always items here for now).
+        // TODO Use the resource name to store the generation (always items here for now).
         $resourceName = $resourceTypeMap[$resourceType];
 
         $user = $this->identity();
 
-        $canContribute = $this->viewHelpers()->get('canContribute');
-        $canEditWithoutToken = $canContribute();
+        $canGenerate = $this->viewHelpers()->get('canGenerate');
+        $canEditWithoutToken = $canGenerate();
 
         // TODO Allow to use a token to add a resource.
         // $token = $this->checkToken($resource);
@@ -160,16 +160,16 @@ class ContributionController extends AbstractActionController
 
         // Prepare the resource template. Use the first if not queryied.
 
-        /** @var \Contribute\Mvc\Controller\Plugin\ContributiveData $contributiveData */
-        $contributiveData = $this->getPluginManager()->get('contributiveData');
-        $allowedResourceTemplates = $this->settings()->get('contribute_templates', []);
+        /** @var \Generate\Mvc\Controller\Plugin\GenerativeData $generativeData */
+        $generativeData = $this->getPluginManager()->get('generativeData');
+        $allowedResourceTemplates = $this->settings()->get('generate_templates', []);
         $templates = [];
         $templateLabels = [];
-        // Remove non-contributive templates.
+        // Remove non-generative templates.
         if ($allowedResourceTemplates) {
             foreach ($this->api()->search('resource_templates', ['id' => $allowedResourceTemplates])->getContent() as $template) {
-                $contributive = $contributiveData($template);
-                if ($contributive->isContributive()) {
+                $generative = $generativeData($template);
+                if ($generative->isGenerative()) {
                     $templates[$template->id()] = $template;
                     $templateLabels[$template->id()] = $template->label();
                 }
@@ -182,25 +182,25 @@ class ContributionController extends AbstractActionController
         // to edit.
         $resourceId = $params->fromRoute('id') ?? null;
         if ($resourceId) {
-            // Edition is always the right contribution or resource.
-            $resourceTypeMap['contribution'] = 'contributions';
+            // Edition is always the right generation or resource.
+            $resourceTypeMap['generation'] = 'generations';
             $resourceName = $resourceTypeMap[$this->params('resource')];
             // Rights are automatically checked.
-            /** @var \Contribute\Api\Representation\ContributionRepresentation|\Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
+            /** @var \Generate\Api\Representation\GenerationRepresentation|\Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
             $resource = $this->api()->read($resourceName, ['id' => $resourceId])->getContent();
             $resourceTemplate = $resource->resourceTemplate();
             if ($resourceTemplate) {
-                $contributive = clone $contributiveData($resourceTemplate);
-                $resourceTemplate = $contributive->template();
+                $generative = clone $generativeData($resourceTemplate);
+                $resourceTemplate = $generative->template();
             }
             $template = $resourceTemplate ? $resourceTemplate->id() : -1;
         } else {
-            // A template is required to contribute: set by query or previous form.
+            // A template is required to generate: set by query or previous form.
             $template = $params->fromQuery('template') ?: $params->fromPost('template');
-            /** @var \Contribute\Mvc\Controller\Plugin\ContributiveData $contributive */
+            /** @var \Generate\Mvc\Controller\Plugin\GenerativeData $generative */
             if ($template) {
-                $contributive = clone $contributiveData($template);
-                $resourceTemplate = $contributive->template();
+                $generative = clone $generativeData($template);
+                $resourceTemplate = $generative->template();
             }
         }
 
@@ -213,7 +213,7 @@ class ContributionController extends AbstractActionController
                 'user' => $user,
                 'form' => null,
                 'resourceTemplate' => null,
-                'contribution' => null,
+                'generation' => null,
                 'resource' => null,
                 'fields' => [],
                 'fieldsByMedia' => [],
@@ -224,15 +224,15 @@ class ContributionController extends AbstractActionController
             ]);
             return $view
                 ->setTemplate($space === 'guest'
-                    ? 'guest/site/guest/contribution-edit'
-                    : 'contribute/site/contribution/edit'
+                    ? 'guest/site/guest/generation-edit'
+                    : 'generate/site/generation/edit'
                 );
         }
 
         if (!$template) {
             if (count($templates) === 1) {
                 $resourceTemplate = reset($templates);
-                $contributive = clone $contributiveData($template);
+                $generative = clone $generativeData($template);
             } else {
                 $resourceTemplate = null;
             }
@@ -240,12 +240,12 @@ class ContributionController extends AbstractActionController
 
         $mode = $resourceId || $params->fromPost('mode', 'write') === 'read' ? 'read' : 'write';
 
-        /** @var \Contribute\Form\ContributeForm $form */
+        /** @var \Generate\Form\GenerateForm $form */
         $formOptions = [
             'templates' => $templateLabels,
             'display_select_template' => $mode === 'read' || $resourceId || !$resourceTemplate,
         ];
-        $form = $this->getForm(ContributeForm::class, $formOptions)
+        $form = $this->getForm(GenerateForm::class, $formOptions)
             // Use setOptions() + init(), not getForm(), because of the bug in csrf / getForm().
             // ->setOptions($formOptions)
             ->setAttribute('enctype', 'multipart/form-data')
@@ -270,7 +270,7 @@ class ContributionController extends AbstractActionController
                 'user' => $user,
                 'form' => $form,
                 'resourceTemplate' => $resourceTemplate,
-                'contribution' => $resourceId && $resource && $resource instanceof ContributionRepresentation ? $resource : null,
+                'generation' => $resourceId && $resource && $resource instanceof GenerationRepresentation ? $resource : null,
                 'resource' => $resourceId && $resource && $resource instanceof AbstractResourceEntityRepresentation ? $resource : null,
                 'fields' => [],
                 'fieldsByMedia' => [],
@@ -281,8 +281,8 @@ class ContributionController extends AbstractActionController
             ]);
             return $view
                 ->setTemplate($space === 'guest'
-                    ? 'guest/site/guest/contribution-edit'
-                    : 'contribute/site/contribution/edit'
+                    ? 'guest/site/guest/generation-edit'
+                    : 'generate/site/generation/edit'
                 );
         }
 
@@ -291,12 +291,12 @@ class ContributionController extends AbstractActionController
         if ($resourceId) {
             $params = $this->params()->fromRoute();
             $params['action'] = 'edit';
-            return $this->forward()->dispatch('Contribute\Controller\Site\Contribution', $params);
+            return $this->forward()->dispatch('Generate\Controller\Site\Generation', $params);
         }
 
         $step = $params->fromPost('step');
 
-        // Second step: fill the template and create a contribution, even partial.
+        // Second step: fill the template and create a generation, even partial.
         $hasError = false;
         if ($this->getRequest()->isPost() && $step !== 'template') {
             $post = $params->fromPost();
@@ -311,31 +311,31 @@ class ContributionController extends AbstractActionController
                 $data = $this->checkAndIncludeFileData($data);
                 // To simplify process, a direct submission is made with a
                 // create then an update.
-                $allowUpdate = $this->settings()->get('contribute_allow_update');
+                $allowUpdate = $this->settings()->get('generate_allow_update');
                 $isDirectSubmission = $allowUpdate === 'no';
                 if (empty($data['has_error'])) {
                     $proposal = $this->prepareProposal($data);
                     if ($proposal) {
                         // When there is a resource, it isn’t updated, but the
-                        // proposition of contribution is saved for moderation.
+                        // proposition of generation is saved for moderation.
                         $data = [
                             'o:resource' => null,
                             'o:owner' => $user ? ['o:id' => $user->getId()] : null,
-                            'o-module-contribute:token' => $token ? ['o:id' => $token->id()] : null,
+                            'o-module-generate:token' => $token ? ['o:id' => $token->id()] : null,
                             'o:email' => $token ? $token->email() : ($user ? $user->getEmail() : null),
-                            'o-module-contribute:patch' => false,
-                            'o-module-contribute:submitted' => false,
-                            'o-module-contribute:reviewed' => false,
-                            'o-module-contribute:proposal' => $proposal,
+                            'o-module-generate:patch' => false,
+                            'o-module-generate:submitted' => false,
+                            'o-module-generate:reviewed' => false,
+                            'o-module-generate:proposal' => $proposal,
                         ];
-                        $response = $this->api($form)->create('contributions', $data);
+                        $response = $this->api($form)->create('generations', $data);
                         if ($response) {
-                            /** @var \Contribute\Api\Representation\ContributionRepresentation $contribution $content */
-                            $contribution = $response->getContent();
-                            // $this->prepareContributionEmail($response->getContent(), 'prepare');
+                            /** @var \Generate\Api\Representation\GenerationRepresentation $generation $content */
+                            $generation = $response->getContent();
+                            // $this->prepareGenerationEmail($response->getContent(), 'prepare');
                             $eventManager = $this->getEventManager();
-                            $eventManager->trigger('contribute.submit', $this, [
-                                'contribution' => $contribution,
+                            $eventManager->trigger('generate.submit', $this, [
+                                'generation' => $generation,
                                 'resource' => null,
                                 'data' => $data,
                             ]);
@@ -345,24 +345,24 @@ class ContributionController extends AbstractActionController
                             // TODO Process a direct submission without full validation.
                             if ($isDirectSubmission) {
                                 $params = $this->params()->fromRoute();
-                                $params['controller'] = 'Contribute\Controller\Site\Contribution';
-                                $params['__CONTROLLER__'] = 'contribution';
+                                $params['controller'] = 'Generate\Controller\Site\Generation';
+                                $params['__CONTROLLER__'] = 'generation';
                                 $params['action'] = 'submit';
-                                $params['resource'] = 'contribution';
-                                $params['id'] = $contribution->id();
+                                $params['resource'] = 'generation';
+                                $params['id'] = $generation->id();
                                 $params['space'] = $space;
-                                return $this->forward()->dispatch('Contribute\Controller\Site\Contribution', $params);
+                                return $this->forward()->dispatch('Generate\Controller\Site\Generation', $params);
                             }
-                            $message = $this->settings()->get('contribute_message_add');
+                            $message = $this->settings()->get('generate_message_add');
                             if ($message) {
                                 $this->messenger()->addSuccess($message);
                             } else {
-                                $this->messenger()->addSuccess('Contribution successfully saved!'); // @translate
+                                $this->messenger()->addSuccess('Generation successfully saved!'); // @translate
                                 $this->messenger()->addWarning('Review it before its submission.'); // @translate
                             }
-                            return $contribution->resource()
-                                ? $this->redirect()->toUrl($contribution->resource()->siteUrl())
-                                : $this->redirectContribution($contribution);
+                            return $generation->resource()
+                                ? $this->redirect()->toUrl($generation->resource()->siteUrl())
+                                : $this->redirectGeneration($generation);
                         }
                     }
                 }
@@ -374,28 +374,28 @@ class ContributionController extends AbstractActionController
             // TODO Currently, the form has no element, so no validation and no automatic filling.
             $this->messenger()->addError('An error occurred: check your input.'); // @translate
             $this->messenger()->addFormErrors($form);
-            // So create a fake contribution to fill form.
-            $contribution = $this->fakeContribution($post);
+            // So create a fake generation to fill form.
+            $generation = $this->fakeGeneration($post);
         } else {
-            $contribution = null;
+            $generation = null;
         }
 
-        /** @var \Contribute\View\Helper\ContributionFields $contributionFields */
-        $contributionFields = $this->viewHelpers()->get('contributionFields');
-        $fields = $contributionFields(null, $contribution, $resourceTemplate);
+        /** @var \Generate\View\Helper\GenerationFields $generationFields */
+        $generationFields = $this->viewHelpers()->get('generationFields');
+        $fields = $generationFields(null, $generation, $resourceTemplate);
 
         // Only items can have a sub resource template for medias.
         // A media template may have no fields but it should be prepared anyway.
-        if (in_array($resourceName, ['contributions', 'items']) && $contributive->contributiveMedia()) {
-            $resourceTemplateMedia = $contributive->contributiveMedia()->template();
+        if (in_array($resourceName, ['generations', 'items']) && $generative->generativeMedia()) {
+            $resourceTemplateMedia = $generative->generativeMedia()->template();
             $fieldsByMedia = [];
-            foreach ($contribution ? array_keys($contribution->proposalMedias()) : [] as $indexProposalMedia) {
-                // TODO Match resource medias and contribution (for now only allowed until submission).
+            foreach ($generation ? array_keys($generation->proposalMedias()) : [] as $indexProposalMedia) {
+                // TODO Match resource medias and generation (for now only allowed until submission).
                 $indexProposalMedia = (int) $indexProposalMedia;
-                $fieldsByMedia[] = $contributionFields(null, $contribution, $resourceTemplateMedia, true, $indexProposalMedia);
+                $fieldsByMedia[] = $generationFields(null, $generation, $resourceTemplateMedia, true, $indexProposalMedia);
             }
             // Add a list of fields without values for new media.
-            $fieldsMediaBase = $contributionFields(null, $contribution, $contributive->contributiveMedia()->template(), true);
+            $fieldsMediaBase = $generationFields(null, $generation, $generative->generativeMedia()->template(), true);
         } else {
             $resourceTemplateMedia = null;
             $fieldsByMedia = [];
@@ -407,7 +407,7 @@ class ContributionController extends AbstractActionController
             'user' => $user,
             'form' => $form,
             'resourceTemplate' => $resourceTemplate,
-            'contribution' => null,
+            'generation' => null,
             'resource' => null,
             'fields' => $fields,
             'templateMedia' => $resourceTemplateMedia,
@@ -419,24 +419,24 @@ class ContributionController extends AbstractActionController
         ]);
         return $view
             ->setTemplate($space === 'guest'
-                ? 'guest/site/guest/contribution-edit'
-                : 'contribute/site/contribution/edit'
+                ? 'guest/site/guest/generation-edit'
+                : 'generate/site/generation/edit'
             );
     }
 
     /**
-     * Edit a new contribution or an existing item.
+     * Edit a new generation or an existing item.
      *
      * Indeed, there are two types of edition:
-     * - edit a contribution not yet approved, so the user is editing his
-     *   contribution, one or multiple times;
+     * - edit a generation not yet approved, so the user is editing his
+     *   generation, one or multiple times;
      * - edit an existing item or resource, so this is a correction and each
      *   correction is a new correction (or a patch).
      *
-     * It is always possible to correct an item, but a new contribution cannot
+     * It is always possible to correct an item, but a new generation cannot
      * be modified after validation.
      *
-     * Furthermore, the edition of a new contribution can be done in multi-steps
+     * Furthermore, the edition of a new generation can be done in multi-steps
      * (template choice, metadata, files and medatada of files).
      *
      * @todo Separate all possible workflows.
@@ -454,7 +454,7 @@ class ContributionController extends AbstractActionController
         if ($isModeRead && strpos($next, 'template') !== false) {
             $params = $params->fromRoute();
             $params['action'] = 'add';
-            return $this->forward()->dispatch('Contribute\Controller\Site\Contribution', $params);
+            return $this->forward()->dispatch('Generate\Controller\Site\Generation', $params);
         }
 
         $site = $this->currentSite();
@@ -462,10 +462,10 @@ class ContributionController extends AbstractActionController
         $resourceType = $params->fromRoute('resource');
         $resourceId = $params->fromRoute('id');
 
-        // Unlike addAction(), edition is always the right contribution or
+        // Unlike addAction(), edition is always the right generation or
         // resource.
         $resourceTypeMap = [
-            'contribution' => 'contributions',
+            'generation' => 'generations',
             'item' => 'items',
             'media' => 'media',
             'item-set' => 'item_sets',
@@ -483,44 +483,44 @@ class ContributionController extends AbstractActionController
 
         $user = $this->identity();
 
-        $canContribute = $this->viewHelpers()->get('canContribute');
-        $canEditWithoutToken = $canContribute();
+        $canGenerate = $this->viewHelpers()->get('canGenerate');
+        $canEditWithoutToken = $canGenerate();
 
-        // This is a contribution or a correction.
-        $isContribution = $resourceName === 'contributions';
-        if ($isContribution) {
+        // This is a generation or a correction.
+        $isGeneration = $resourceName === 'generations';
+        if ($isGeneration) {
             /**
-             * @var \Contribute\Api\Representation\ContributionRepresentation|null $contribution
+             * @var \Generate\Api\Representation\GenerationRepresentation|null $generation
              * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null $resource
              */
-            $contribution = $resource;
-            $resource = $contribution->resource();
-            $resourceTemplate = $contribution->resourceTemplate();
+            $generation = $resource;
+            $resource = $generation->resource();
+            $resourceTemplate = $generation->resourceTemplate();
             $currentUrl = $this->url()->fromRoute(null, [], true);
         } else {
-            $contribution = null;
+            $generation = null;
             $token = $this->checkToken($resource);
             if (!$token && !$canEditWithoutToken) {
                 return $this->viewError403();
             }
 
-            // There may be no contribution when it is a correction.
-            // But if a user edit a resource, the last contribution is used.
+            // There may be no generation when it is a correction.
+            // But if a user edit a resource, the last generation is used.
             // Nevertheless, the user should be able to see previous corrections
             // and to do a new correction.
             if ($token) {
-                $contribution = $api
-                    ->searchOne('contributions', ['resource_id' => $resourceId, 'token_id' => $token->id(), 'patch' => true, 'sort_by' => 'id', 'sort_order' => 'desc'])
+                $generation = $api
+                    ->searchOne('generations', ['resource_id' => $resourceId, 'token_id' => $token->id(), 'patch' => true, 'sort_by' => 'id', 'sort_order' => 'desc'])
                     ->getContent();
                 $currentUrl = $this->url()->fromRoute(null, [], ['query' => ['token' => $token->token()]], true);
             } elseif ($user) {
-                $contribution = $api
-                    ->searchOne('contributions', ['resource_id' => $resourceId, 'owner_id' => $user->getId(), 'patch' => true, 'sort_by' => 'id', 'sort_order' => 'desc'])
+                $generation = $api
+                    ->searchOne('generations', ['resource_id' => $resourceId, 'owner_id' => $user->getId(), 'patch' => true, 'sort_by' => 'id', 'sort_order' => 'desc'])
                     ->getContent();
                 $currentUrl = $this->url()->fromRoute(null, [], true);
             } else {
-                // An anonymous user cannot see existing contributions.
-                $contribution = null;
+                // An anonymous user cannot see existing generations.
+                $generation = null;
                 $currentUrl = $this->url()->fromRoute(null, [], true);
             }
 
@@ -529,16 +529,16 @@ class ContributionController extends AbstractActionController
 
         $space = $this->params('space', 'default');
 
-        /** @var \Contribute\Mvc\Controller\Plugin\ContributiveData $contributive */
-        $contributive = clone $this->contributiveData($resourceTemplate);
-        if (!$resourceTemplate || !$contributive->isContributive()) {
+        /** @var \Generate\Mvc\Controller\Plugin\GenerativeData $generative */
+        $generative = clone $this->generativeData($resourceTemplate);
+        if (!$resourceTemplate || !$generative->isGenerative()) {
             $this->logger()->warn('This resource cannot be edited: no resource template, no fields, or not allowed.'); // @translate
             $view = new ViewModel([
                 'site' => $site,
                 'user' => $user,
                 'form' => null,
                 'resourceTemplate' => $resourceTemplate,
-                'contribution' => $contribution,
+                'generation' => $generation,
                 'resource' => $resource,
                 'fields' => [],
                 'templateMedia' => null,
@@ -550,16 +550,16 @@ class ContributionController extends AbstractActionController
             ]);
             return $view
                 ->setTemplate($space === 'guest'
-                    ? 'guest/site/guest/contribution-edit'
-                    : 'contribute/site/contribution/edit'
+                    ? 'guest/site/guest/generation-edit'
+                    : 'generate/site/generation/edit'
                 );
         }
 
         // $formOptions = [
         // ];
 
-        /** @var \Contribute\Form\ContributeForm $form */
-        $form = $this->getForm(ContributeForm::class)
+        /** @var \Generate\Form\GenerateForm $form */
+        $form = $this->getForm(GenerateForm::class)
             ->setAttribute('action', $currentUrl)
             ->setAttribute('enctype', 'multipart/form-data')
             ->setAttribute('id', 'edit-resource');
@@ -571,36 +571,36 @@ class ContributionController extends AbstractActionController
             $form->get('mode')->setValue('read');
         }
 
-        $allowUpdate = $this->settings()->get('contribute_allow_update');
+        $allowUpdate = $this->settings()->get('generate_allow_update');
         $allowUpdateUntilValidation = $allowUpdate === 'validation';
-        $isCorrection = !$contribution || $contribution->isPatch();
+        $isCorrection = !$generation || $generation->isPatch();
 
         // TODO Use method isUpdatable().
         if (!$isCorrection
             && $isModeWrite
             && !$allowUpdateUntilValidation
-            && $contribution
-            && $contribution->isSubmitted()
+            && $generation
+            && $generation->isSubmitted()
         ) {
-            $this->messenger()->addWarning('This contribution has been submitted and cannot be edited.'); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+            $this->messenger()->addWarning('This generation has been submitted and cannot be edited.'); // @translate
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
 
         // When a user wants to edit a resource, create a new correction.
         if ($isCorrection
             && $isModeWrite
             && !$allowUpdateUntilValidation
-            && $contribution
-            && $contribution->isSubmitted()
+            && $generation
+            && $generation->isSubmitted()
         ) {
-            $contribution = null;
+            $generation = null;
         } elseif ($isCorrection
             && $isModeWrite
             && $allowUpdateUntilValidation
-            && $contribution
-            && $contribution->isReviewed()
+            && $generation
+            && $generation->isReviewed()
         ) {
-            $contribution = null;
+            $generation = null;
         }
 
         // No need to set the template, but simplify view for form.
@@ -623,60 +623,60 @@ class ContributionController extends AbstractActionController
                     $proposal = $this->prepareProposal($data, $resource);
                     if ($proposal) {
                         // The resource isn’t updated, but the proposition of
-                        // contribute is saved for moderation.
+                        // generate is saved for moderation.
                         $response = null;
-                        if (empty($contribution)) {
+                        if (empty($generation)) {
                             $data = [
                                 'o:resource' => $resourceId ? ['o:id' => $resourceId] : null,
                                 'o:owner' => $user ? ['o:id' => $user->getId()] : null,
-                                'o-module-contribute:token' => $token ? ['o:id' => $token->id()] : null,
+                                'o-module-generate:token' => $token ? ['o:id' => $token->id()] : null,
                                 'o:email' => $token ? $token->email() : ($user ? $user->getEmail() : null),
                                 // Here, it's always a patch, else use "add".
-                                'o-module-contribute:patch' => true,
+                                'o-module-generate:patch' => true,
                                 // A patch is always a submission.
-                                'o-module-contribute:submitted' => true,
-                                'o-module-contribute:reviewed' => false,
-                                'o-module-contribute:proposal' => $proposal,
+                                'o-module-generate:submitted' => true,
+                                'o-module-generate:reviewed' => false,
+                                'o-module-generate:proposal' => $proposal,
                             ];
-                            $response = $this->api($form)->create('contributions', $data);
+                            $response = $this->api($form)->create('generations', $data);
                             if ($response) {
-                                $this->messenger()->addSuccess('Contribution successfully submitted!'); // @translate
-                                // $this->prepareContributionEmail($response->getContent(), 'submit');
+                                $this->messenger()->addSuccess('Generation successfully submitted!'); // @translate
+                                // $this->prepareGenerationEmail($response->getContent(), 'submit');
                             }
-                        } elseif ($contribution->isSubmitted() && !$allowUpdateUntilValidation) {
-                            $this->messenger()->addWarning('This contribution is already submitted and cannot be updated.'); // @translate
-                            $response = $this->api()->read('contributions', $contribution->id());
-                        } elseif ($proposal === $contribution->proposal()) {
+                        } elseif ($generation->isSubmitted() && !$allowUpdateUntilValidation) {
+                            $this->messenger()->addWarning('This generation is already submitted and cannot be updated.'); // @translate
+                            $response = $this->api()->read('generations', $generation->id());
+                        } elseif ($proposal === $generation->proposal()) {
                             $this->messenger()->addWarning('No change.'); // @translate
-                            $response = $this->api()->read('contributions', $contribution->id());
+                            $response = $this->api()->read('generations', $generation->id());
                         } else {
                             $data = [
-                                'o-module-contribute:reviewed' => false,
-                                'o-module-contribute:proposal' => $proposal,
+                                'o-module-generate:reviewed' => false,
+                                'o-module-generate:proposal' => $proposal,
                             ];
-                            $response = $this->api($form)->update('contributions', $contribution->id(), $data, [], ['isPartial' => true]);
+                            $response = $this->api($form)->update('generations', $generation->id(), $data, [], ['isPartial' => true]);
                             if ($response) {
-                                $message = $this->settings()->get('contribute_message_edit');
+                                $message = $this->settings()->get('generate_message_edit');
                                 if ($message) {
                                     $this->messenger()->addSuccess($message);
                                 } else {
-                                    $this->messenger()->addSuccess('Contribution successfully updated!'); // @translate
+                                    $this->messenger()->addSuccess('Generation successfully updated!'); // @translate
                                 }
-                                // $this->prepareContributionEmail($response->getContent(), 'update');
+                                // $this->prepareGenerationEmail($response->getContent(), 'update');
                             }
                         }
                         if ($response) {
                             $eventManager = $this->getEventManager();
-                            $eventManager->trigger('contribute.submit', $this, [
-                                'contribution' => $contribution,
+                            $eventManager->trigger('generate.submit', $this, [
+                                'generation' => $generation,
                                 'resource' => $resource,
                                 'data' => $data,
                             ]);
-                            /** @var \Contribute\Api\Representation\ContributionRepresentation $contribution $content */
-                            $contribution = $response->getContent();
-                            return $contribution->resource()
-                                ? $this->redirect()->toUrl($contribution->resource()->siteUrl())
-                                : $this->redirectContribution($contribution);
+                            /** @var \Generate\Api\Representation\GenerationRepresentation $generation $content */
+                            $generation = $response->getContent();
+                            return $generation->resource()
+                                ? $this->redirect()->toUrl($generation->resource()->siteUrl())
+                                : $this->redirectGeneration($generation);
                         }
                     }
                 }
@@ -687,33 +687,33 @@ class ContributionController extends AbstractActionController
         if (strpos($next, 'template') !== false) {
             $params = $params->fromRoute();
             $params['action'] = 'add';
-            return $this->forward()->dispatch('Contribute\Controller\Site\Contribution', $params);
+            return $this->forward()->dispatch('Generate\Controller\Site\Generation', $params);
         }
 
         if ($hasError) {
             // TODO Currently, the form has no element, so no validation and no automatic filling.
             $this->messenger()->addError('An error occurred: check your input.'); // @translate
             $this->messenger()->addFormErrors($form);
-            // So create a fake contribution to fill form.
-            $contribution = $this->fakeContribution($post, $contribution);
+            // So create a fake generation to fill form.
+            $generation = $this->fakeGeneration($post, $generation);
         }
 
-        /** @var \Contribute\View\Helper\ContributionFields $contributionFields */
-        $contributionFields = $this->viewHelpers()->get('contributionFields');
-        $fields = $contributionFields($resource, $contribution);
+        /** @var \Generate\View\Helper\GenerationFields $generationFields */
+        $generationFields = $this->viewHelpers()->get('generationFields');
+        $fields = $generationFields($resource, $generation);
 
         // Only items can have a sub resource template for medias.
         // A media template may have no fields but it should be prepared anyway.
-        if (in_array($resourceName, ['contributions', 'items']) && $contributive->contributiveMedia()) {
-            $resourceTemplateMedia = $contributive->contributiveMedia()->template();
+        if (in_array($resourceName, ['generations', 'items']) && $generative->generativeMedia()) {
+            $resourceTemplateMedia = $generative->generativeMedia()->template();
             $fieldsByMedia = [];
-            foreach ($contribution ? array_keys($contribution->proposalMedias()) : [] as $indexProposalMedia) {
-                // TODO Match resource medias and contribution (for now only allowed until submission).
+            foreach ($generation ? array_keys($generation->proposalMedias()) : [] as $indexProposalMedia) {
+                // TODO Match resource medias and generation (for now only allowed until submission).
                 $indexProposalMedia = (int) $indexProposalMedia;
-                $fieldsByMedia[] = $contributionFields(null, $contribution, $resourceTemplateMedia, true, $indexProposalMedia);
+                $fieldsByMedia[] = $generationFields(null, $generation, $resourceTemplateMedia, true, $indexProposalMedia);
             }
             // Add a list of fields without values for new media.
-            $fieldsMediaBase = $contributionFields(null, null, $contributive->contributiveMedia()->template(), true);
+            $fieldsMediaBase = $generationFields(null, null, $generative->generativeMedia()->template(), true);
         } else {
             $resourceTemplateMedia = null;
             $fieldsByMedia = [];
@@ -725,7 +725,7 @@ class ContributionController extends AbstractActionController
             'user' => $user,
             'form' => $form,
             'resourceTemplate' => $resourceTemplate,
-            'contribution' => $contribution,
+            'generation' => $generation,
             'resource' => $resource,
             'fields' => $fields,
             'templateMedia' => $resourceTemplateMedia,
@@ -737,8 +737,8 @@ class ContributionController extends AbstractActionController
         ]);
         return $view
             ->setTemplate($space === 'guest'
-                ? 'guest/site/guest/contribution-edit'
-                : 'contribute/site/contribution/edit'
+                ? 'guest/site/guest/generation-edit'
+                : 'generate/site/generation/edit'
             );
     }
 
@@ -754,37 +754,37 @@ class ContributionController extends AbstractActionController
 
         if (!$this->getRequest()->isPost()) {
             $this->messenger()->addError(new PsrMessage('Deletion can be processed only with a post.')); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'show'], true);
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'show'], true);
         }
 
-        $allowUpdate = $this->settings()->get('contribute_allow_update') ?: 'submission';
+        $allowUpdate = $this->settings()->get('generate_allow_update') ?: 'submission';
         if ($allowUpdate === 'no') {
-            $this->messenger()->addWarning('A contribution cannot be updated or deleted.'); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+            $this->messenger()->addWarning('A generation cannot be updated or deleted.'); // @translate
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
 
-        $resource = $this->api()->read('contributions', $id)->getContent();
+        $resource = $this->api()->read('generations', $id)->getContent();
 
         if ($allowUpdate !== 'validation' && $resource->isSubmitted()) {
-            $this->messenger()->addWarning('This contribution has been submitted and cannot be deleted.'); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+            $this->messenger()->addWarning('This generation has been submitted and cannot be deleted.'); // @translate
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
         if ($allowUpdate === 'validation' && $resource->isReviewed()) {
-            $this->messenger()->addWarning('This contribution has been reviewed and cannot be deleted.'); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+            $this->messenger()->addWarning('This generation has been reviewed and cannot be deleted.'); // @translate
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
 
-        $response = $this->api()->delete('contributions', $id);
+        $response = $this->api()->delete('generations', $id);
         if ($response) {
-            $this->messenger()->addSuccess('Contribution successfully deleted.'); // @translate
+            $this->messenger()->addSuccess('Generation successfully deleted.'); // @translate
         } else {
-            $this->messenger()->addError('An issue occurred and the contribution was not deleted.'); // @translate
+            $this->messenger()->addError('An issue occurred and the generation was not deleted.'); // @translate
         }
 
         // Warning: the js reload the page, so this redirect is not used.
         return $space === 'guest'
-            ? $this->redirect()->toRoute('site/guest/contribution', ['controller' => 'guest-board', 'action' => 'browse'], true)
-            // TODO Update route when a main public browse of contributions will be available.
+            ? $this->redirect()->toRoute('site/guest/generation', ['controller' => 'guest-board', 'action' => 'browse'], true)
+            // TODO Update route when a main public browse of generations will be available.
             // TODO Check this redirect. Is it delete?
             : $this->redirect()->toRoute('site', [], true);
     }
@@ -795,10 +795,10 @@ class ContributionController extends AbstractActionController
         $resourceId = $this->params('id');
         $space = $this->params('space', 'default');
 
-        // Unlike addAction(), submission is always the right contribution or
+        // Unlike addAction(), submission is always the right generation or
         // resource.
         $resourceTypeMap = [
-            'contribution' => 'contributions',
+            'generation' => 'generations',
             'item' => 'items',
             'media' => 'media',
             'item-set' => 'item_sets',
@@ -810,69 +810,69 @@ class ContributionController extends AbstractActionController
 
         $resourceName = $resourceTypeMap[$resourceType];
 
-        // Only whole contribution can be submitted: a patch is always submitted
+        // Only whole generation can be submitted: a patch is always submitted
         // directly.
-        if ($resourceName !== 'contributions') {
+        if ($resourceName !== 'generations') {
             // TODO The user won't see this warning.
-            $this->messenger()->addWarning('Only a whole contribution can be submitted.'); // @translate
+            $this->messenger()->addWarning('Only a whole generation can be submitted.'); // @translate
             return $this->redirect()->toRoute('site/resource-id', ['action' => 'show'], true);
         }
 
         $api = $this->api();
 
         // Rights are automatically checked.
-        /** @var \Contribute\Api\Representation\ContributionRepresentation $contribution */
-        $contribution = $api->read('contributions', ['id' => $resourceId])->getContent();
+        /** @var \Generate\Api\Representation\GenerationRepresentation $generation */
+        $generation = $api->read('generations', ['id' => $resourceId])->getContent();
 
-        $allowUpdate = $this->settings()->get('contribute_allow_update') ?: 'submission';
+        $allowUpdate = $this->settings()->get('generate_allow_update') ?: 'submission';
 
-        if (!$contribution->userIsAllowed('update')) {
-            $this->messenger()->addError('Only the contributor can update a contribution.'); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+        if (!$generation->userIsAllowed('update')) {
+            $this->messenger()->addError('Only the generator can update a generation.'); // @translate
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
 
-        if ($allowUpdate !== 'validation' && $contribution->isSubmitted()) {
-            $this->messenger()->addWarning('This contribution has already been submitted.'); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+        if ($allowUpdate !== 'validation' && $generation->isSubmitted()) {
+            $this->messenger()->addWarning('This generation has already been submitted.'); // @translate
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
-        if ($allowUpdate === 'validation' && $contribution->isReviewed()) {
-            $this->messenger()->addWarning('This contribution has already been reviewed.'); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+        if ($allowUpdate === 'validation' && $generation->isReviewed()) {
+            $this->messenger()->addWarning('This generation has already been reviewed.'); // @translate
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
 
-        // Validate the contribution with the contribution process.
-        $resourceData = $contribution->proposalToResourceData();
+        // Validate the generation with the generation process.
+        $resourceData = $generation->proposalToResourceData();
         if (!$resourceData) {
             $message = new PsrMessage(
-                'Contribution is not valid: check template.' // @translate
+                'Generation is not valid: check template.' // @translate
             );
             $this->messenger()->addError($message); // @translate
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
 
-        // Validate the contribution with the api process.
+        // Validate the generation with the api process.
         $errorStore = new ErrorStore();
-        $this->validateOrCreateOrUpdate($contribution, $resourceData, $errorStore, false, true, true);
+        $this->validateOrCreateOrUpdate($generation, $resourceData, $errorStore, false, true, true);
         if ($errorStore->hasErrors()) {
-            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+            return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
         }
 
         $data = [];
-        $data['o-module-contribute:submitted'] = true;
+        $data['o-module-generate:submitted'] = true;
         $response = $api
-            ->update('contributions', $resourceId, $data, [], ['isPartial' => true]);
+            ->update('generations', $resourceId, $data, [], ['isPartial' => true]);
         if (!$response) {
             $this->messenger()->addError('An error occurred: check your submission or ask an administrator.'); // @translate
             return $this->jsonErrorUpdate();
         }
 
-        $this->messenger()->addSuccess('Contribution successfully submitted!'); // @translate
-        $contribution = $response->getContent();
+        $this->messenger()->addSuccess('Generation successfully submitted!'); // @translate
+        $generation = $response->getContent();
         $this
-            ->notifyContribution($contribution, 'submit')
-            ->confirmContribution($contribution, 'submit');
+            ->notifyGeneration($generation, 'submit')
+            ->confirmGeneration($generation, 'submit');
 
-        return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/contribution-id' : 'site/contribution-id', ['action' => 'view'], true);
+        return $this->redirect()->toRoute($space === 'guest' ? 'site/guest/generation-id' : 'site/generation-id', ['action' => 'view'], true);
     }
 
     /**
@@ -886,13 +886,13 @@ class ContributionController extends AbstractActionController
      * Next step can be another "add", "edit" or "show" (default).
      * A query can be appended, separated with a "-", to be used in theme.
      */
-    protected function redirectContribution(ContributionRepresentation $contribution)
+    protected function redirectGeneration(GenerationRepresentation $generation)
     {
         $params = $this->params();
         $next = $params->fromQuery('next') ?? $params->fromPost('next') ?? '';
         $space = $this->params('space', 'default');
         if (!$next) {
-            return $this->redirect()->toUrl($contribution->siteUrl(null, false, 'view', $space === 'guest'));
+            return $this->redirect()->toUrl($generation->siteUrl(null, false, 'view', $space === 'guest'));
         }
         [$nextAction, $nextQuery] = strpos($next, '-') === false ? [$next, null] : explode('-', $next, 2);
         if (!$nextAction || $nextAction === 'show' || $nextAction === 'view') {
@@ -901,40 +901,40 @@ class ContributionController extends AbstractActionController
         if ($nextQuery) {
             $nextQuery = '?next=' . rawurlencode($next);
         }
-        return $this->redirect()->toUrl($contribution->siteUrl(null, false, $nextAction, $space === 'guest') . $nextQuery);
+        return $this->redirect()->toUrl($generation->siteUrl(null, false, $nextAction, $space === 'guest') . $nextQuery);
     }
 
     /**
-     * Create a fake contribution with data proposal.
+     * Create a fake generation with data proposal.
      *
      * Should be used only for post issue: only data proposal are set and should
      * be used.
      *
-     * @todo Remove fake contribution with a real form.
+     * @todo Remove fake generation with a real form.
      */
-    protected function fakeContribution(array $data, ?ContributionRepresentation $contribution = null): ContributionRepresentation
+    protected function fakeGeneration(array $data, ?GenerationRepresentation $generation = null): GenerationRepresentation
     {
         $adapterManager = $this->currentSite()->getServiceLocator()->get('Omeka\ApiAdapterManager');
-        $contributionAdapter = $adapterManager->get('contributions');
+        $generationAdapter = $adapterManager->get('generations');
 
-        $entity = new \Contribute\Entity\Contribution();
-        if ($contribution) {
-            if ($resource = $contribution->resource()) {
+        $entity = new \Generate\Entity\Generation();
+        if ($generation) {
+            if ($resource = $generation->resource()) {
                 $entity->setResource($this->api()->read('resources', ['id' => $resource->id()], ['responseContent' => 'resource'])->getContent());
             }
-            $entity->setReviewed($contribution->isReviewed());
+            $entity->setReviewed($generation->isReviewed());
         }
 
         unset($data['csrf'], $data['edit-resource-submit']);
         $proposal = $this->prepareProposal($data) ?: [];
         $entity->setProposal($proposal);
 
-        return new ContributionRepresentation($entity, $contributionAdapter);
+        return new GenerationRepresentation($entity, $generationAdapter);
     }
 
-    protected function notifyContribution(ContributionRepresentation $contribution, string $action = 'update'): self
+    protected function notifyGeneration(GenerationRepresentation $generation, string $action = 'update'): self
     {
-        $emails = $this->filterEmails($contribution);
+        $emails = $this->filterEmails($generation);
         if (empty($emails)) {
             return $this;
         }
@@ -948,52 +948,52 @@ class ContributionController extends AbstractActionController
 
         $action = isset($actions[$action]) ? $action : 'update';
         $actionMsg = $actions[$action];
-        $contributionResource = $contribution->resource();
+        $generationResource = $generation->resource();
         $user = $this->identity();
 
         $settings = $this->settings();
-        $subject = $settings->get('contribute_reviewer_confirmation_subject') ?: sprintf($translate('[Omeka] Contribution %s'), $action);
-        $message = $settings->get('contribute_reviewer_confirmation_body');
+        $subject = $settings->get('generate_reviewer_confirmation_subject') ?: sprintf($translate('[Omeka] Generation %s'), $action);
+        $message = $settings->get('generate_reviewer_confirmation_body');
 
         /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
-        $template = $contribution->resourceTemplate();
+        $template = $generation->resourceTemplate();
         if ($template) {
-            $subject = $template->dataValue('contribute_reviewer_confirmation_subject') ?: $subject;
-            $message = $template->dataValue('contribute_reviewer_confirmation_body') ?: $message;
+            $subject = $template->dataValue('generate_reviewer_confirmation_subject') ?: $subject;
+            $message = $template->dataValue('generate_reviewer_confirmation_body') ?: $message;
         }
 
         if ($message) {
-            $message = $this->replacePlaceholders($message, $contribution);
-            $this->sendContributionEmail($emails, $subject, $message); // @translate
+            $message = $this->replacePlaceholders($message, $generation);
+            $this->sendGenerationEmail($emails, $subject, $message); // @translate
             return $this;
         }
 
         // Default message.
         switch (true) {
-            case $contributionResource && $user:
+            case $generationResource && $user:
                 $message = '<p>' . new PsrMessage(
-                    'User {user} has made a contribution for resource #{resource} ({title}) (action: {action}).', // @translate
+                    'User {user} has made a generation for resource #{resource} ({title}) (action: {action}).', // @translate
                     [
                         'user' => '<a href="' . $this->url()->fromRoute('admin/id', ['controller' => 'user', 'id' => $user->getId()], ['force_canonical' => true]) . '">' . $user->getName() . '</a>',
-                        'resource' => '<a href="' . $contributionResource->adminUrl('show', true) . '#contribution">' . $contributionResource->id() . '</a>',
-                        'title' => $contributionResource->displayTitle(),
+                        'resource' => '<a href="' . $generationResource->adminUrl('show', true) . '#generation">' . $generationResource->id() . '</a>',
+                        'title' => $generationResource->displayTitle(),
                         'action' => $actionMsg,
                     ]
                 ) . '</p>';
                 break;
-            case $contributionResource:
+            case $generationResource:
                 $message = '<p>' . new PsrMessage(
-                    'An anonymous user has made a contribution for resource {resource} ({title}) (action: {action}).', // @translate
+                    'An anonymous user has made a generation for resource {resource} ({title}) (action: {action}).', // @translate
                     [
-                        'resource' => '<a href="' . $contributionResource->adminUrl('show', true) . '#contribution">' . $contributionResource->id() . '</a>',
-                        'title' => $contributionResource->displayTitle(),
+                        'resource' => '<a href="' . $generationResource->adminUrl('show', true) . '#generation">' . $generationResource->id() . '</a>',
+                        'title' => $generationResource->displayTitle(),
                         'action' => $actionMsg,
                     ]
                 ) . '</p>';
                 break;
             case $user:
                 $message = '<p>' . new PsrMessage(
-                    'User {user} has made a contribution (action: {action}).', // @translate
+                    'User {user} has made a generation (action: {action}).', // @translate
                     [
                         'user' => '<a href="' . $this->url()->fromRoute('admin/id', ['controller' => 'user', 'id' => $user->getId()], ['force_canonical' => true]) . '">' . $user->getName() . '</a>',
                         'action' => $actionMsg
@@ -1002,57 +1002,57 @@ class ContributionController extends AbstractActionController
                 break;
             default:
                 $message = '<p>' . new PsrMessage(
-                    'An anonymous user has made a contribution (action: {action}).', // @translate
+                    'An anonymous user has made a generation (action: {action}).', // @translate
                     ['action' => $actionMsg]
                 ) . '</p>';
                 break;
         }
 
-        $this->sendContributionEmail($emails, $subject, $message); // @translate
+        $this->sendGenerationEmail($emails, $subject, $message); // @translate
         return $this;
     }
 
-    protected function confirmContribution(ContributionRepresentation $contribution, string $action = 'update'): self
+    protected function confirmGeneration(GenerationRepresentation $generation, string $action = 'update'): self
     {
         $settings = $this->settings();
-        $confirms = $settings->get('contribute_author_confirmations', []);
+        $confirms = $settings->get('generate_author_confirmations', []);
         if (empty($confirms) || !in_array($action, $confirms)) {
             return $this;
         }
 
-        $emails = $this->authorEmails($contribution);
+        $emails = $this->authorEmails($generation);
         if (empty($emails)) {
-            $this->messenger()->err('The author of this contribution has no valid email. Check it or check the config.'); // @translate
+            $this->messenger()->err('The author of this generation has no valid email. Check it or check the config.'); // @translate
             return $this;
         }
 
         $translate = $this->getPluginManager()->get('translate');
 
-        $subject = $settings->get('contribute_author_confirmation_subject') ?: $translate('[Omeka] Contribution');
-        $message = $settings->get('contribute_author_confirmation_body') ?: new PsrMessage(
-            "Hi,\nThanks for your contribution.\n\nThe administrators will validate it as soon as possible.\n\nSincerely," // @translate
+        $subject = $settings->get('generate_author_confirmation_subject') ?: $translate('[Omeka] Generation');
+        $message = $settings->get('generate_author_confirmation_body') ?: new PsrMessage(
+            "Hi,\nThanks for your generation.\n\nThe administrators will validate it as soon as possible.\n\nSincerely," // @translate
         );
 
         /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
-        $template = $contribution->resourceTemplate();
+        $template = $generation->resourceTemplate();
         if ($template) {
-            $subject = $template->dataValue('contribute_author_confirmation_subject') ?: $subject;
-            $message = $template->dataValue('contribute_author_confirmation_body') ?: $message;
+            $subject = $template->dataValue('generate_author_confirmation_subject') ?: $subject;
+            $message = $template->dataValue('generate_author_confirmation_body') ?: $message;
         }
 
-        $message = $this->replacePlaceholders($message, $contribution);
+        $message = $this->replacePlaceholders($message, $generation);
 
         $message = '<p>' . $message . '</p>';
 
-        $name = count($emails) === 1 && $contribution->owner() ? $contribution->owner()->name() : null;
+        $name = count($emails) === 1 && $generation->owner() ? $generation->owner()->name() : null;
 
-        $this->sendContributionEmail($emails, $subject, $message, $name); // @translate
+        $this->sendGenerationEmail($emails, $subject, $message, $name); // @translate
         return $this;
     }
 
-    protected function replacePlaceholders($message, ?ContributionRepresentation $contribution): string
+    protected function replacePlaceholders($message, ?GenerationRepresentation $generation): string
     {
-        if (strpos($message, '{') === false || !$contribution) {
+        if (strpos($message, '{') === false || !$generation) {
             return (string) $message;
         }
 
@@ -1061,7 +1061,7 @@ class ContributionController extends AbstractActionController
         $settings = $this->settings();
 
         $replace = [];
-        foreach ($contribution->proposalToResourceData() as $term => $value) {
+        foreach ($generation->proposalToResourceData() as $term => $value) {
             if (!is_array($value) || empty($value) || !isset(reset($value)['type'])) {
                 continue;
             }
@@ -1079,14 +1079,14 @@ class ContributionController extends AbstractActionController
             }
         }
 
-        if ($contribution) {
-            $replace['{resource_id}'] = $contribution->id();
-            $owner = $contribution->owner();
+        if ($generation) {
+            $replace['{resource_id}'] = $generation->id();
+            $owner = $generation->owner();
             $replace['{user_name}'] = $owner ? $owner->name() : $this->translate('[Anonymous]'); // @translate
             $replace['{user_id}'] = $owner ? $owner->id() : 0;
-            $replace['{user_email}'] = $contribution->email();
+            $replace['{user_email}'] = $generation->email();
             // Like module Contact Us.
-            $replace['{email}'] = $contribution->email();
+            $replace['{email}'] = $generation->email();
         }
 
         $replace['{main_title}'] = $settings->get('installation_title', 'Omeka S');
@@ -1100,14 +1100,14 @@ class ContributionController extends AbstractActionController
         return str_replace(array_keys($replace), array_values($replace), $message);
     }
 
-    protected function filterEmails(?ContributionRepresentation $contribution = null): array
+    protected function filterEmails(?GenerationRepresentation $generation = null): array
     {
-        $emails = $this->settings()->get('contribute_notify_recipients', []);
+        $emails = $this->settings()->get('generate_notify_recipients', []);
         if (empty($emails)) {
             return [];
         }
 
-        if (!$contribution) {
+        if (!$generation) {
             return $emails;
         }
 
@@ -1116,7 +1116,7 @@ class ContributionController extends AbstractActionController
             [$email, $query] = explode(' ', $email . ' ', 2);
             if ($email
                 && filter_var($email, FILTER_VALIDATE_EMAIL)
-                && $contribution->match($query)
+                && $generation->match($query)
             ) {
                 $result[] = $email;
             }
@@ -1125,22 +1125,22 @@ class ContributionController extends AbstractActionController
         return $result;
     }
 
-    protected function authorEmails(?ContributionRepresentation $contribution = null): array
+    protected function authorEmails(?GenerationRepresentation $generation = null): array
     {
         $emails = [];
-        $propertyEmails = $this->settings()->get('contribute_author_emails', ['owner'])  ?: ['owner'];
+        $propertyEmails = $this->settings()->get('generate_author_emails', ['owner'])  ?: ['owner'];
 
         /*
-        if ($contribution && !in_array('owner', $propertyEmails)) {
+        if ($generation && !in_array('owner', $propertyEmails)) {
             $propertyEmails[] = 'owner';
         }
         */
 
-        $resourceData = $contribution ? $contribution->proposalToResourceData() : [];
+        $resourceData = $generation ? $generation->proposalToResourceData() : [];
 
         foreach ($propertyEmails as $propertyEmail) {
             if ($propertyEmail === 'owner') {
-                $owner = $contribution ? $contribution->owner() : null;
+                $owner = $generation ? $generation->owner() : null;
                 if ($owner) {
                     $emails[] = $owner->email();
                 }
@@ -1167,9 +1167,9 @@ class ContributionController extends AbstractActionController
      *
      * The check is done comparing the keys of original values and the new ones.
      *
-     * @todo Factorize with \Contribute\View\Helper\ContributionFields
-     * @todo Factorize with \Contribute\Api\Representation\ContributionRepresentation::proposalNormalizeForValidation()
-     * @todo Factorize with \Contribute\Api\Representation\ContributionRepresentation::proposalToResourceData()
+     * @todo Factorize with \Generate\View\Helper\GenerationFields
+     * @todo Factorize with \Generate\Api\Representation\GenerationRepresentation::proposalNormalizeForValidation()
+     * @todo Factorize with \Generate\Api\Representation\GenerationRepresentation::proposalToResourceData()
      *
      * @todo Simplify when the status "is patch" or "new resource" (at least remove all original data).
      */
@@ -1196,14 +1196,14 @@ class ContributionController extends AbstractActionController
             return null;
         }
 
-        // The contribution requires a resource template in allowed templates.
-        /** @var \Contribute\Mvc\Controller\Plugin\ContributiveData $contributive */
-        $contributive = clone $this->contributiveData($resourceTemplate, $isSubTemplate);
-        if (!$contributive->isContributive()) {
+        // The generation requires a resource template in allowed templates.
+        /** @var \Generate\Mvc\Controller\Plugin\GenerativeData $generative */
+        $generative = clone $this->generativeData($resourceTemplate, $isSubTemplate);
+        if (!$generative->isGenerative()) {
             return null;
         }
 
-        $resourceTemplate = $contributive->template();
+        $resourceTemplate = $generative->template();
         $result = [
             'template' => $resourceTemplate->id(),
             'media' => [],
@@ -1263,12 +1263,12 @@ class ContributionController extends AbstractActionController
         // Process editable properties first.
         // TODO Remove whitelist/blacklist since a resource template is required (but take care of updated template).
         $matches = [];
-        switch ($contributive->editableMode()) {
+        switch ($generative->editableMode()) {
             case 'whitelist':
-                $proposalEditableTerms = array_keys(array_intersect_key($proposal, $contributive->editableProperties()));
+                $proposalEditableTerms = array_keys(array_intersect_key($proposal, $generative->editableProperties()));
                 break;
             case 'blacklist':
-                $proposalEditableTerms = array_keys(array_diff_key($proposal, $contributive->editableProperties()));
+                $proposalEditableTerms = array_keys(array_diff_key($proposal, $generative->editableProperties()));
                 break;
             case 'all':
             default:
@@ -1289,7 +1289,7 @@ class ContributionController extends AbstractActionController
                     continue;
                 }
                 $dataType = $value->type();
-                if (!$contributive->isTermDataType($term, $dataType)) {
+                if (!$generative->isTermDataType($term, $dataType)) {
                     continue;
                 }
 
@@ -1384,12 +1384,12 @@ class ContributionController extends AbstractActionController
         }
 
         // Append fillable properties.
-        switch ($contributive->fillableMode()) {
+        switch ($generative->fillableMode()) {
             case 'whitelist':
-                $proposalFillableTerms = array_keys(array_intersect_key($proposal, $contributive->fillableProperties()));
+                $proposalFillableTerms = array_keys(array_intersect_key($proposal, $generative->fillableProperties()));
                 break;
             case 'blacklist':
-                $proposalFillableTerms = array_diff_key($proposal, $contributive->fillableProperties());
+                $proposalFillableTerms = array_diff_key($proposal, $generative->fillableProperties());
                 break;
             case 'all':
             default:
@@ -1438,7 +1438,7 @@ class ContributionController extends AbstractActionController
                     $mainType = 'unknown';
                 }
 
-                if (!$contributive->isTermDataType($term, $typeTemplate ?? $mainType)) {
+                if (!$generative->isTermDataType($term, $typeTemplate ?? $mainType)) {
                     continue;
                 }
 
@@ -1521,11 +1521,11 @@ class ContributionController extends AbstractActionController
         }
 
         if (!$isSubTemplate) {
-            $contributiveMedia = $contributive->contributiveMedia();
-            if ($contributiveMedia) {
-                $templateMedia = $contributiveMedia->template()->id();
+            $generativeMedia = $generative->generativeMedia();
+            if ($generativeMedia) {
+                $templateMedia = $generativeMedia->template()->id();
                 foreach ($proposalMedias ?: [] as $indexProposalMedia => $proposalMedia) {
-                    // TODO Currently, only new media are managed as sub-resource: contribution for new resource, not contribution for existing item with media at the same time.
+                    // TODO Currently, only new media are managed as sub-resource: generation for new resource, not generation for existing item with media at the same time.
                     $proposalMedia['template'] = $templateMedia;
                     $proposalMediaClean = $this->prepareProposal($proposalMedia, null, true);
                     // Skip empty media (without keys "template" and "media").
@@ -1617,8 +1617,8 @@ class ContributionController extends AbstractActionController
     /**
      * Get the list of uris and labels of a specific custom vocab.
      *
-     * @see \Contribute\Controller\ContributionTrait::customVocabUriLabels()
-     * @see \Contribute\Api\Representation\ContributionRepresentation::customVocabUriLabels()
+     * @see \Generate\Controller\GenerationTrait::customVocabUriLabels()
+     * @see \Generate\Api\Representation\GenerationRepresentation::customVocabUriLabels()
      */
     protected function customVocabUriLabels(string $dataType): array
     {

@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\Api\Representation;
+namespace Generate\Api\Representation;
 
 use DateTime;
 use Omeka\Api\Exception;
 use Omeka\Api\Representation\AbstractEntityRepresentation;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 
-class ContributionRepresentation extends AbstractEntityRepresentation
+class GenerationRepresentation extends AbstractEntityRepresentation
 {
     /**
      * @var array
@@ -24,17 +24,17 @@ class ContributionRepresentation extends AbstractEntityRepresentation
      */
     public function resourceName(): string
     {
-        return 'contributions';
+        return 'generations';
     }
 
     public function getControllerName()
     {
-        return 'contribution';
+        return 'generation';
     }
 
     public function getJsonLdType()
     {
-        return 'o-module-contribute:Contribution';
+        return 'o-module-generate:Generation';
     }
 
     public function getJsonLd()
@@ -57,19 +57,19 @@ class ContributionRepresentation extends AbstractEntityRepresentation
             ];
         }
 
-        $contributionResource = $this->resource();
+        $generationResource = $this->resource();
         $owner = $this->owner();
 
         return [
             'o:id' => $this->id(),
-            'o:resource' => $contributionResource ? $contributionResource->getReference() : null,
+            'o:resource' => $generationResource ? $generationResource->getReference() : null,
             'o:owner' => $owner ? $owner->getReference() : null,
             'o:email' => $owner ? null : $this->email(),
-            'o-module-contribute:patch' => $this->isPatch(),
-            'o-module-contribute:submitted' => $this->isSubmitted(),
-            'o-module-contribute:reviewed' => $this->isReviewed(),
-            'o-module-contribute:proposal' => $this->proposal(),
-            'o-module-contribute:token' => $token,
+            'o-module-generate:patch' => $this->isPatch(),
+            'o-module-generate:submitted' => $this->isSubmitted(),
+            'o-module-generate:reviewed' => $this->isReviewed(),
+            'o-module-generate:proposal' => $this->proposal(),
+            'o-module-generate:token' => $token,
             'o:created' => $created,
             'o:modified' => $modified,
         ];
@@ -77,9 +77,9 @@ class ContributionRepresentation extends AbstractEntityRepresentation
 
     public function resource(): ?\Omeka\Api\Representation\AbstractResourceEntityRepresentation
     {
-        $contributionResource = $this->resource->getResource();
-        return $contributionResource
-            ? $this->getAdapter('resources')->getRepresentation($contributionResource)
+        $generationResource = $this->resource->getResource();
+        return $generationResource
+            ? $this->getAdapter('resources')->getRepresentation($generationResource)
             : null;
     }
 
@@ -114,7 +114,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     public function isUpdatable(): bool
     {
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
-        $allowUpdate = $settings->get('contribute_allow_update') ?: 'submission';
+        $allowUpdate = $settings->get('generate_allow_update') ?: 'submission';
         if ($allowUpdate === 'no') {
             return false;
         } elseif ($allowUpdate === 'validation') {
@@ -130,7 +130,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get all media proposals of this contribution.
+     * Get all media proposals of this generation.
      *
      * This is a shortcut to the key "media" of the proposal.
      */
@@ -145,9 +145,9 @@ class ContributionRepresentation extends AbstractEntityRepresentation
      */
     public function resourceTemplate(): ?ResourceTemplateRepresentation
     {
-        $contributionResource = $this->resource();
-        if ($contributionResource) {
-            $resourceTemplate = $contributionResource->resourceTemplate();
+        $generationResource = $this->resource();
+        if ($generationResource) {
+            $resourceTemplate = $generationResource->resourceTemplate();
         }
         if (empty($resourceTemplate)) {
             $proposal = $this->resource->getProposal();
@@ -165,11 +165,11 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         return $resourceTemplate;
     }
 
-    public function token(): ?\Contribute\Api\Representation\TokenRepresentation
+    public function token(): ?\Generate\Api\Representation\TokenRepresentation
     {
         $token = $this->resource->getToken();
         return $token
-            ? $this->getAdapter('contribution_tokens')->getRepresentation($token)
+            ? $this->getAdapter('generation_tokens')->getRepresentation($token)
             : null;
     }
 
@@ -184,7 +184,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get all proposed contributions for a term.
+     * Get all proposed generations for a term.
      */
     public function proposedValues(string $term): array
     {
@@ -195,7 +195,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get a specific proposed contribution for a term.
+     * Get a specific proposed generation for a term.
      *
      * @return array|null Empty string value is used when the value is removed.
      */
@@ -216,7 +216,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get a specific proposed contribution uri for a term.
+     * Get a specific proposed generation uri for a term.
      *
      * @return array|null Empty string uri is used when the value is removed.
      */
@@ -265,11 +265,11 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         if ($string === '') {
             return null;
         }
-        $contributionResource = $this->resource();
-        if (!$contributionResource) {
+        $generationResource = $this->resource();
+        if (!$generationResource) {
             return null;
         }
-        $values = $contributionResource->value($term, ['all' => true]);
+        $values = $generationResource->value($term, ['all' => true]);
         foreach ($values as $value) {
             if ((string) $value->value() === $string) {
                 return $value;
@@ -287,11 +287,11 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         if (!$int) {
             return null;
         }
-        $contributionResource = $this->resource();
-        if (!$contributionResource) {
+        $generationResource = $this->resource();
+        if (!$generationResource) {
             return null;
         }
-        $values = $contributionResource->value($term, ['all' => true]);
+        $values = $generationResource->value($term, ['all' => true]);
         $valueResource = null;
         foreach ($values as $value) {
             $valueResource = $value->valueResource();
@@ -310,12 +310,12 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         if ($string === '') {
             return null;
         }
-        $contributionResource = $this->resource();
-        if (!$contributionResource) {
+        $generationResource = $this->resource();
+        if (!$generationResource) {
             return null;
         }
         // To get only uris and value suggest/custom vocab values require to get all values.
-        $values = $contributionResource->value($term, ['all' => true]);
+        $values = $generationResource->value($term, ['all' => true]);
         foreach ($values as $value) {
             if ($value->uri() === $string) {
                 return $value;
@@ -325,27 +325,27 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Check proposed contribution against current resource and normalize it.
+     * Check proposed generation against current resource and normalize it.
      *
      * The proposal does not manage the type of the values.
-     * The sub-contributed medias are checked too via a recursive call.
+     * The sub-generated medias are checked too via a recursive call.
      *
-     * @todo Factorize with \Contribute\Site\ContributionController::prepareProposal()
-     * @todo Factorize with \Contribute\View\Helper\ContributionFields
-     * @todo Factorize with \Contribute\Api\Representation\ContributionRepresentation::proposalToResourceData()
+     * @todo Factorize with \Generate\Site\GenerationController::prepareProposal()
+     * @todo Factorize with \Generate\View\Helper\GenerationFields
+     * @todo Factorize with \Generate\Api\Representation\GenerationRepresentation::proposalToResourceData()
      *
      * @todo Simplify when the status "is patch" or "new resource" (at least remove all original data).
      */
     public function proposalNormalizeForValidation(?int $indexProposalMedia = null): array
     {
-        $contributive = $this->contributiveData();
+        $generative = $this->generativeData();
         $proposal = $this->proposal();
 
         // Normalize sub-proposal.
         $isSubTemplate = is_int($indexProposalMedia);
         if ($isSubTemplate) {
-            $contributive = $contributive->contributiveMedia();
-            if (!$contributive) {
+            $generative = $generative->generativeMedia();
+            if (!$generative) {
                 return [];
             }
             $proposal = $proposal['media'][$indexProposalMedia] ?? [];
@@ -357,7 +357,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         $propertyIds = $easyMeta->propertyIds();
 
         // Use the resource template of the resource or the default one.
-        $resourceTemplate = $contributive->template();
+        $resourceTemplate = $generative->template();
 
         // A template is required, but its check should be done somewhere else:
         // here, it's more about standardization of the proposal.
@@ -386,10 +386,10 @@ class ContributionRepresentation extends AbstractEntityRepresentation
                 continue;
             }
 
-            $isEditable = $contributive->isTermEditable($term);
-            $isFillable = $contributive->isTermFillable($term);
+            $isEditable = $generative->isTermEditable($term);
+            $isFillable = $generative->isTermFillable($term);
             if (!$isEditable && !$isFillable) {
-                // Skipped in the case options changed between contributions and moderation.
+                // Skipped in the case options changed between generations and moderation.
                 // continue;
             }
 
@@ -428,7 +428,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
                     $mainType = 'unknown';
                 }
 
-                $isTermDataType = $contributive->isTermDataType($term, $typeTemplate ?? $mainType);
+                $isTermDataType = $generative->isTermDataType($term, $typeTemplate ?? $mainType);
 
                 switch ($mainType) {
                     case 'literal':
@@ -663,7 +663,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         if (!$isSubTemplate) {
             foreach ($medias ? array_keys($medias) : [] as $indexProposalMedia) {
                 $indexProposalMedia = (int) $indexProposalMedia;
-                // TODO Currently, only new media are managed as sub-resource: contribution for new resource, not contribution for existing item with media at the same time.
+                // TODO Currently, only new media are managed as sub-resource: generation for new resource, not generation for existing item with media at the same time.
                 $proposal['media'][$indexProposalMedia] = $this->proposalNormalizeForValidation($indexProposalMedia);
             }
         }
@@ -674,9 +674,9 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     /**
      * Check values of the exiting resource with the proposal and get api data.
      *
-     * @todo Factorize with \Contribute\Site\ContributionController::prepareProposal()
-     * @todo Factorize with \Contribute\View\Helper\ContributionFields
-     * @todo Factorize with \Contribute\Api\Representation\ContributionRepresentation::proposalNormalizeForValidation()
+     * @todo Factorize with \Generate\Site\GenerationController::prepareProposal()
+     * @todo Factorize with \Generate\View\Helper\GenerationFields
+     * @todo Factorize with \Generate\Api\Representation\GenerationRepresentation::proposalNormalizeForValidation()
      *
      * @todo Simplify when the status "is patch" or "new resource" (at least remove all original data).
      *
@@ -694,17 +694,17 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         ?bool $isSubTemplate = false,
         ?int $indexProposalMedia = null
     ): ?array {
-        // The contribution requires a resource template in allowed templates.
-        $contributive = $this->contributiveData();
-        if (!$contributive->isContributive()) {
+        // The generation requires a resource template in allowed templates.
+        $generative = $this->generativeData();
+        if (!$generative->isGenerative()) {
             return null;
         }
 
         // Right to update the resource is already checked.
         // There is always a resource template.
         if ($isSubTemplate) {
-            $contributive = $contributive->contributiveMedia();
-            // TODO Currently, only new media are managed as sub-resource: contribution for new resource, not contribution for existing item with media at the same time.
+            $generative = $generative->generativeMedia();
+            // TODO Currently, only new media are managed as sub-resource: generation for new resource, not generation for existing item with media at the same time.
             $resource = null;
             $existingValues = [];
         } else {
@@ -712,7 +712,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
             $existingValues = $resource ? $resource->values() : [];
         }
 
-        $resourceTemplate = $contributive->template();
+        $resourceTemplate = $generative->template();
         $proposal = $this->proposalNormalizeForValidation($indexProposalMedia);
         $hasProposedTermAndKey = $proposedTerm && !is_null($proposedKey);
 
@@ -738,7 +738,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         // File is specific: for media only, one value only, not updatable,
         // not a property and not in resource template.
         if (isset($proposal['file'][0]['proposed']['@value']) && $proposal['file'][0]['proposed']['@value'] !== '') {
-            $data['o:ingester'] = 'contribution';
+            $data['o:ingester'] = 'generation';
             $data['o:source'] = $proposal['file'][0]['proposed']['@value'];
             $data['store'] = $proposal['file'][0]['proposed']['store'] ?? null;
         }
@@ -756,7 +756,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
             if ($hasProposedTermAndKey && $proposedTerm !== $term) {
                 continue;
             }
-            if (!$contributive->isTermContributive($term)) {
+            if (!$generative->isTermGenerative($term)) {
                 continue;
             }
             /** @var \Omeka\Api\Representation\ValueRepresentation $existingValue */
@@ -764,7 +764,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
                 if (!isset($proposal[$term])) {
                     continue;
                 }
-                if (!$contributive->isTermDataType($term, $existingValue->type())) {
+                if (!$generative->isTermDataType($term, $existingValue->type())) {
                     continue;
                 }
 
@@ -837,7 +837,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
             if ($hasProposedTermAndKey && $proposedTerm !== $term) {
                 continue;
             }
-            if (!$contributive->isTermContributive($term)) {
+            if (!$generative->isTermGenerative($term)) {
                 continue;
             }
             $propertyId = $propertyIds[$term] ?? null;
@@ -927,7 +927,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         if (!$isSubTemplate) {
             foreach ($proposalMedias ? array_keys($proposalMedias) : [] as $indexProposalMedia) {
                 $indexProposalMedia = (int) $indexProposalMedia;
-                // TODO Currently, only new media are managed as sub-resource: contribution for new resource, not contribution for existing item with media at the same time.
+                // TODO Currently, only new media are managed as sub-resource: generation for new resource, not generation for existing item with media at the same time.
                 $data['o:media'][$indexProposalMedia] = $this->proposalToResourceData($proposedTerm, $proposedKey, true, $indexProposalMedia);
                 unset($data['o:media'][$indexProposalMedia]['o:media']);
                 unset($data['o:media'][$indexProposalMedia]['file']);
@@ -938,24 +938,24 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get contributive data (editable, fillable, etc.) via resource template.
+     * Get generative data (editable, fillable, etc.) via resource template.
      */
-    public function contributiveData(): \Contribute\Mvc\Controller\Plugin\ContributiveData
+    public function generativeData(): \Generate\Mvc\Controller\Plugin\GenerativeData
     {
-        static $contributive;
-        if (!$contributive) {
-            $contributive = $this->getServiceLocator()->get('ControllerPluginManager')
-                ->get('contributiveData');
-            $contributive = clone $contributive;
-            $contributive($this->resourceTemplate());
+        static $generative;
+        if (!$generative) {
+            $generative = $this->getServiceLocator()->get('ControllerPluginManager')
+                ->get('generativeData');
+            $generative = clone $generative;
+            $generative($this->resourceTemplate());
         }
-        return $contributive;
+        return $generative;
     }
 
     /**
-     * A contribution is never public and is managed only by admins and owner.
+     * A generation is never public and is managed only by admins and owner.
      *
-     * @todo Allow to make contribution public after submission and validation.
+     * @todo Allow to make generation public after submission and validation.
      *
      * This method is added only to simplify views.
      */
@@ -1064,39 +1064,39 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get the thumbnail of this resource (the contributed one).
+     * Get the thumbnail of this resource (the generated one).
      *
      * @return \Omeka\Api\Representation\AssetRepresentation|null
      */
     public function thumbnail()
     {
-        $contributionResource = $this->resource();
-        return $contributionResource
-            ? $contributionResource->thumbnail()
+        $generationResource = $this->resource();
+        return $generationResource
+            ? $generationResource->thumbnail()
             : null;
     }
 
     /**
-     * Get the title of the contributed resource.
+     * Get the title of the generated resource.
      */
     public function title(): string
     {
-        $contributionResource = $this->resource();
-        return $contributionResource
-            ? (string) $contributionResource->getTitle()
+        $generationResource = $this->resource();
+        return $generationResource
+            ? (string) $generationResource->getTitle()
             : '';
     }
 
     /**
-     * Get the display title for this contribution.
+     * Get the display title for this generation.
      *
      * The title is the resource one if any, else the proposed one.
      */
     public function displayTitle(?string $default = null): ?string
     {
-        $contributionResource = $this->resource();
-        if ($contributionResource) {
-            return $contributionResource->displayTitle($default);
+        $generationResource = $this->resource();
+        if ($generationResource) {
+            return $generationResource->displayTitle($default);
         }
 
         $template = $this->resourceTemplate();
@@ -1113,12 +1113,12 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get all proposal of this contribution by term with template property.
+     * Get all proposal of this generation by term with template property.
      *
      * Values of the linked template (media) are not included.
      *
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
-     * @uses \Contribute\View\Helper\ContributionFields
+     * @uses \Generate\View\Helper\GenerationFields
      */
     public function values(): array
     {
@@ -1126,19 +1126,19 @@ class ContributionRepresentation extends AbstractEntityRepresentation
             return $this->values;
         }
 
-        /** @var \Contribute\View\Helper\ContributionFields $contributionFields */
-        $contributionFields = $this->getViewHelper('contributionFields');
+        /** @var \Generate\View\Helper\GenerationFields $generationFields */
+        $generationFields = $this->getViewHelper('generationFields');
         // No event triggered for now.
-        $contributionResource = $this->resource();
-        $this->values = $contributionFields($contributionResource, $this);
+        $generationResource = $this->resource();
+        $this->values = $generationFields($generationResource, $this);
         return $this->values;
     }
 
     /**
-     * Get media proposals of this contribution by term with template property.
+     * Get media proposals of this generation by term with template property.
      *
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
-     * @uses \Contribute\View\Helper\ContributionFields
+     * @uses \Generate\View\Helper\GenerationFields
      */
     public function valuesMedias(): array
     {
@@ -1149,25 +1149,25 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         $this->valuesMedias = [];
 
         // No event triggered for now.
-        $contributionResource = $this->resource();
-        if ($contributionResource && !$contributionResource instanceof \Omeka\Api\Representation\ItemRepresentation) {
+        $generationResource = $this->resource();
+        if ($generationResource && !$generationResource instanceof \Omeka\Api\Representation\ItemRepresentation) {
             return [];
         }
 
-        /** @var \Contribute\View\Helper\ContributionFields $contributionFields */
-        $contributionFields = $this->getViewHelper('contributionFields');
-        $contributive = $this->contributiveData();
-        $contributiveMedia = $contributive->contributiveMedia();
-        if (!$contributiveMedia) {
+        /** @var \Generate\View\Helper\GenerationFields $generationFields */
+        $generationFields = $this->getViewHelper('generationFields');
+        $generative = $this->generativeData();
+        $generativeMedia = $generative->generativeMedia();
+        if (!$generativeMedia) {
             return [];
         }
 
-        $resourceTemplateMedia = $contributiveMedia->template();
+        $resourceTemplateMedia = $generativeMedia->template();
         foreach (array_keys($this->proposalMedias()) as $indexProposalMedia) {
-            // TODO Currently, only new media are managed as sub-resource: contribution for new resource, not contribution for existing item with media at the same time.
+            // TODO Currently, only new media are managed as sub-resource: generation for new resource, not generation for existing item with media at the same time.
             // So, there is no resource, but a proposal for a new media.
             $indexProposalMedia = (int) $indexProposalMedia;
-            $this->valuesMedias[$indexProposalMedia] = $contributionFields(null, $this, $resourceTemplateMedia, true, $indexProposalMedia);
+            $this->valuesMedias[$indexProposalMedia] = $generationFields(null, $this, $resourceTemplateMedia, true, $indexProposalMedia);
         }
         return $this->valuesMedias;
     }
@@ -1177,15 +1177,15 @@ class ContributionRepresentation extends AbstractEntityRepresentation
      *
      * Options:
      * - viewName: Name of view script, or a view model. Default
-     *   "site/contribution-values"
+     *   "site/generation-values"
      */
     public function displayValues(array $options = []): string
     {
         $options['site'] = $this->getServiceLocator()->get('ControllerPluginManager')->get('currentSite')();
-        $options['contribution'] = $this;
+        $options['generation'] = $this;
 
         if (!isset($options['viewName'])) {
-            $options['viewName'] = 'common/contribution-values';
+            $options['viewName'] = 'common/generation-values';
         }
 
         // No event triggered for now.
@@ -1200,7 +1200,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get an HTML link to a resource (the contributed one).
+     * Get an HTML link to a resource (the generated one).
      *
      * @param string $text The text to be linked
      * @param string $action
@@ -1208,18 +1208,18 @@ class ContributionRepresentation extends AbstractEntityRepresentation
      */
     public function linkResource(string $text, ?string $action = null, array $attributes = []): string
     {
-        $contributionResource = $this->resource();
-        if (!$contributionResource) {
+        $generationResource = $this->resource();
+        if (!$generationResource) {
             return $text;
         }
-        $link = $contributionResource->link($text, $action, $attributes);
+        $link = $generationResource->link($text, $action, $attributes);
         // When the resource is a new one, go directly to the resource, since
-        // the contribution is the source of the resource.
+        // the generation is the source of the resource.
         if (!$this->isPatch()) {
             return $link;
         }
         // TODO Improve the way to append the fragment.
-        return preg_replace('~ href="(.+?)"~', ' href="$1#contribution"', $link, 1);
+        return preg_replace('~ href="(.+?)"~', ' href="$1#generation"', $link, 1);
     }
 
     /**
@@ -1267,13 +1267,13 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         $action = null,
         array $attributes = null
     ): string {
-        $contributionResource = $this->resource();
-        if (!$contributionResource) {
+        $generationResource = $this->resource();
+        if (!$generationResource) {
             return $this->displayTitle($titleDefault);
         }
-        $link = $contributionResource->linkPretty($thumbnailType, $titleDefault, $action, $attributes);
+        $link = $generationResource->linkPretty($thumbnailType, $titleDefault, $action, $attributes);
         // TODO Improve the way to append the fragment.
-        return preg_replace('~ href="(.+?)"~', ' href="$1#contribution"', $link, 1);
+        return preg_replace('~ href="(.+?)"~', ' href="$1#generation"', $link, 1);
     }
 
     /**
@@ -1297,7 +1297,7 @@ class ContributionRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get the site url of the contribution.
+     * Get the site url of the generation.
      *
      * An argument is added to set the action (add, edit, view, submit, etc.).
      *
@@ -1312,10 +1312,10 @@ class ContributionRepresentation extends AbstractEntityRepresentation
         }
         $url = $this->getViewHelper('Url');
         return $url(
-            $asGuest ? 'site/guest/contribution-id' : 'site/contribution-id',
+            $asGuest ? 'site/guest/generation-id' : 'site/generation-id',
             [
                 'site-slug' => $siteSlug,
-                'resource' => 'contribution',
+                'resource' => 'generation',
                 // TODO The default action "view" will be "show" later.
                 'action' => $action ?? 'view',
                 // Casting to integer avoids an issue when the id is not set.
@@ -1330,17 +1330,17 @@ class ContributionRepresentation extends AbstractEntityRepresentation
      */
     public function siteUrlResource($siteSlug = null, $canonical = false, $action = null): ?string
     {
-        $contributionResource = $this->resource();
-        return $contributionResource
-            ? $contributionResource->siteUrl($siteSlug, $canonical, $action)
+        $generationResource = $this->resource();
+        return $generationResource
+            ? $generationResource->siteUrl($siteSlug, $canonical, $action)
             : null;
     }
 
     /**
      * Get the list of uris and labels of a specific custom vocab.
      *
-     * @see \Contribute\Controller\ContributionTrait::customVocabUriLabels()
-     * @see \Contribute\Api\Representation\ContributionRepresentation::customVocabUriLabels()
+     * @see \Generate\Controller\GenerationTrait::customVocabUriLabels()
+     * @see \Generate\Api\Representation\GenerationRepresentation::customVocabUriLabels()
      */
     protected function customVocabUriLabels(string $dataType): array
     {

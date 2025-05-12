@@ -1,20 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace Contribute\View\Helper;
+namespace Generate\View\Helper;
 
 use Common\Stdlib\EasyMeta;
-use Contribute\Api\Representation\ContributionRepresentation;
-use Contribute\Mvc\Controller\Plugin\ContributiveData;
+use Generate\Api\Representation\GenerationRepresentation;
+use Generate\Mvc\Controller\Plugin\GenerativeData;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 
-class ContributionFields extends AbstractHelper
+class GenerationFields extends AbstractHelper
 {
     /**
-     * @var ContributiveData
+     * @var GenerativeData
      */
-    protected $contributiveData;
+    protected $generativeData;
 
     /**
      * @var \Common\Stdlib\EasyMeta
@@ -42,14 +42,14 @@ class ContributionFields extends AbstractHelper
     protected $hasValueSuggest;
 
     public function __construct(
-        ContributiveData $contributiveData,
+        GenerativeData $generativeData,
         EasyMeta $easyMeta,
         bool $hasAdvancedTemplate,
         bool $hasCustomVocab,
         bool $hasNumericDataTypes,
         bool $hasValueSuggest
     ) {
-        $this->contributiveData = $contributiveData;
+        $this->generativeData = $generativeData;
         $this->easyMeta = $easyMeta;
         $this->hasAdvancedTemplate = $hasAdvancedTemplate;
         $this->hasCustomVocab = $hasCustomVocab;
@@ -62,16 +62,16 @@ class ContributionFields extends AbstractHelper
      *
      * The order is the one of the resource template.
      *
-     * Some contributions may not have the matching fields: it means that the
+     * Some generations may not have the matching fields: it means that the
      * config changed, so the values are no more editable, so they are skipped.
      *
      * The output is similar than $resource->values(), but may contain empty
      * properties, and four more keys, editable, fillable, data types and
-     * contributions.
+     * generations.
      *
-     * Note that sub-contribution fields for media are not included here.
+     * Note that sub-generation fields for media are not included here.
      *
-     * The minimum number of contributions is managed: empty contributions may
+     * The minimum number of generations is managed: empty generations may
      * be added according to the minimal number of values.
      *
      * <code>
@@ -91,12 +91,12 @@ class ContributionFields extends AbstractHelper
      *     'values' => [
      *       {ValueRepresentation}, …
      *     ],
-     *     'contributions' => [
+     *     'generations' => [
      *       [
      *         'type' => {string},
      *         'basetype' => {string}, // To make process easier (literal, resource or uri).
      *         'new' => {bool}, // Is a new value (edited/filled by user or missing value).
-     *         'empty' => {bool}, // No contribution or removed value.
+     *         'empty' => {bool}, // No generation or removed value.
      *         'original' => [
      *           'value' => {ValueRepresentation},
      *           '@value' => {string},
@@ -120,21 +120,21 @@ class ContributionFields extends AbstractHelper
      * @todo Remove the "@" in proposition values (or build a class).
      * @todo Store language.
      *
-     * @todo Factorize with \Contribute\Site\ContributionController::prepareProposal()
-     * @todo Factorize with \Contribute\Api\Representation\ContributionRepresentation::proposalNormalizeForValidation()
-     * @todo Factorize with \Contribute\Api\Representation\ContributionRepresentation::proposalToResourceData()
+     * @todo Factorize with \Generate\Site\GenerationController::prepareProposal()
+     * @todo Factorize with \Generate\Api\Representation\GenerationRepresentation::proposalNormalizeForValidation()
+     * @todo Factorize with \Generate\Api\Representation\GenerationRepresentation::proposalToResourceData()
      *
      * @todo Simplify when the status "is patch" or "new resource" (at least remove all original data).
      *
      * @var bool $isSubTemplate Allow to check the good allowed template via
-     *   contributiveData(), so the allowed resource templates or allowed
+     *   generativeData(), so the allowed resource templates or allowed
      *   resource templages for media). No other difference, so invoke the right
-     *   resource, the right contribution part, or the right template when
+     *   resource, the right generation part, or the right template when
      *   needed.
      */
     public function __invoke(
         ?AbstractResourceEntityRepresentation $resource = null,
-        ?ContributionRepresentation $contribution = null,
+        ?GenerationRepresentation $generation = null,
         ?ResourceTemplateRepresentation $resourceTemplate = null,
         ?bool $isSubTemplate = false,
         ?int $indexProposalMedia = null
@@ -155,13 +155,13 @@ class ContributionFields extends AbstractHelper
             'fillable' => false,
             'datatypes' => [],
             'values' => [],
-            'contributions' => [],
+            'generations' => [],
         ];
 
-        // The contribution is always on the stored resource, if any.
+        // The generation is always on the stored resource, if any.
         $values = [];
-        if ($contribution) {
-            $resource = $contribution->resource();
+        if ($generation) {
+            $resource = $generation->resource();
             if ($resource) {
                 $values = $resource->values();
                 if (!$isSubTemplate) {
@@ -169,18 +169,18 @@ class ContributionFields extends AbstractHelper
                 }
             }
             if (!$isSubTemplate) {
-                $resourceTemplate = $contribution->resourceTemplate();
+                $resourceTemplate = $generation->resourceTemplate();
             }
         } elseif ($resource) {
             $resourceTemplate = $resource->resourceTemplate();
             $values = $resource->values();
         }
 
-        $contributive = clone $this->contributiveData;
-        $contributive = $contributive->__invoke($resourceTemplate, $isSubTemplate);
-        $resourceTemplate = $contributive->template();
+        $generative = clone $this->generativeData;
+        $generative = $generative->__invoke($resourceTemplate, $isSubTemplate);
+        $resourceTemplate = $generative->template();
 
-        // TODO Currently, only new media are managed as sub-resource: contribution for new resource, not contribution for existing item with media at the same time.
+        // TODO Currently, only new media are managed as sub-resource: generation for new resource, not generation for existing item with media at the same time.
         if ($isSubTemplate) {
             $values = [];
         }
@@ -207,11 +207,11 @@ class ContributionFields extends AbstractHelper
                 'min_values' => $minValues,
                 'max_values' => $maxValues,
                 'more_values' => $maxValues && count($valuesValues) < $maxValues,
-                'editable' => $contributive->isTermEditable($term),
-                'fillable' => $contributive->isTermFillable($term),
-                'datatypes' => $contributive->dataTypeTerm($term),
+                'editable' => $generative->isTermEditable($term),
+                'fillable' => $generative->isTermFillable($term),
+                'datatypes' => $generative->dataTypeTerm($term),
                 'values' => $valuesValues,
-                'contributions' => [],
+                'generations' => [],
             ];
         }
 
@@ -227,17 +227,17 @@ class ContributionFields extends AbstractHelper
                 $fields[$term]['editable'] = false;
                 $fields[$term]['fillable'] = false;
                 $fields[$term]['datatypes'] = [];
-                $fields[$term]['contributions'] = [];
+                $fields[$term]['generations'] = [];
                 $fields[$term] = array_replace($defaultField, $fields[$term]);
             }
         }
 
         // The template is required.
-        if (!$resourceTemplate || !$contributive || !$contributive->isContributive()) {
+        if (!$resourceTemplate || !$generative || !$generative->isGenerative()) {
             return $fields;
         }
 
-        // Initialize contributions with existing values, then append contributions.
+        // Initialize generations with existing values, then append generations.
 
         foreach ($fields as $term => $field) {
             if ($term === 'file') {
@@ -269,7 +269,7 @@ class ContributionFields extends AbstractHelper
                     $uri = null;
                     $label = null;
                 }
-                $fields[$term]['contributions'][] = [
+                $fields[$term]['generations'][] = [
                     // The type cannot be changed.
                     'type' => $dataType,
                     'basetype' => $baseType,
@@ -292,11 +292,11 @@ class ContributionFields extends AbstractHelper
             }
         }
 
-        if (!$contribution) {
+        if (!$generation) {
             return $this->finalize($fields);
         }
 
-        $proposals = $contribution->proposal();
+        $proposals = $generation->proposal();
         if (is_int($indexProposalMedia)) {
             $proposals = $proposals['media'][$indexProposalMedia] ?? [];
         }
@@ -355,9 +355,9 @@ class ContributionFields extends AbstractHelper
                 'fillable' => true,
                 'datatypes' => ['file'],
                 'values' => [],
-                'contributions' => [],
+                'generations' => [],
             ];
-            $fields['file']['contributions'][] = [
+            $fields['file']['generations'][] = [
                 'type' => 'file',
                 'basetype' => 'literal',
                 'lang' => null,
@@ -380,7 +380,7 @@ class ContributionFields extends AbstractHelper
             ];
         }
 
-        // Fill the proposed contributions, according to the original value.
+        // Fill the proposed generations, according to the original value.
         foreach ($fields as $term => &$field) {
             if ($term === 'file') {
                 continue;
@@ -388,10 +388,10 @@ class ContributionFields extends AbstractHelper
             if (!isset($proposals[$term])) {
                 continue;
             }
-            foreach ($field['contributions'] as &$fieldContribution) {
+            foreach ($field['generations'] as &$fieldGeneration) {
                 $proposed = null;
-                $dataType = $fieldContribution['type'];
-                if (!$contributive->isTermDataType($term, $dataType)) {
+                $dataType = $fieldGeneration['type'];
+                if (!$generative->isTermDataType($term, $dataType)) {
                     continue;
                 }
                 $baseType = $this->easyMeta->dataTypeMain($dataType);
@@ -400,8 +400,8 @@ class ContributionFields extends AbstractHelper
                         // For the customvocab, the label is static, so use the
                         // original one, but here the label is already checked.
                         if (isset($proposal['original']['@uri'])
-                            && $proposal['original']['@uri'] === $fieldContribution['original']['@uri']
-                            && $proposal['original']['@label'] === $fieldContribution['original']['@label']
+                            && $proposal['original']['@uri'] === $fieldGeneration['original']['@uri']
+                            && $proposal['original']['@label'] === $fieldGeneration['original']['@label']
                         ) {
                             $proposed = $proposal['proposed'];
                             break;
@@ -410,8 +410,8 @@ class ContributionFields extends AbstractHelper
                     if (is_null($proposed)) {
                         continue;
                     }
-                    $fieldContribution['empty'] = false;
-                    $fieldContribution['proposed'] = [
+                    $fieldGeneration['empty'] = false;
+                    $fieldGeneration['proposed'] = [
                         '@value' => null,
                         '@resource' => null,
                         '@uri' => $proposed['@uri'],
@@ -421,7 +421,7 @@ class ContributionFields extends AbstractHelper
                     foreach ($proposals[$term] as $keyProposal => $proposal) {
                         if (isset($proposal['original']['@resource'])
                             && (int) $proposal['original']['@resource']
-                            && $proposal['original']['@resource'] === $fieldContribution['original']['@resource']
+                            && $proposal['original']['@resource'] === $fieldGeneration['original']['@resource']
                         ) {
                             $proposed = $proposal['proposed'];
                             break;
@@ -430,8 +430,8 @@ class ContributionFields extends AbstractHelper
                     if (is_null($proposed)) {
                         continue;
                     }
-                    $fieldContribution['empty'] = false;
-                    $fieldContribution['proposed'] = [
+                    $fieldGeneration['empty'] = false;
+                    $fieldGeneration['proposed'] = [
                         '@value' => null,
                         '@resource' => (int) $proposed['@resource'],
                         '@uri' => null,
@@ -440,7 +440,7 @@ class ContributionFields extends AbstractHelper
                 } else {
                     foreach ($proposals[$term] as $keyProposal => $proposal) {
                         if (isset($proposal['original']['@value'])
-                            && $proposal['original']['@value'] === $fieldContribution['original']['@value']
+                            && $proposal['original']['@value'] === $fieldGeneration['original']['@value']
                         ) {
                             $proposed = $proposal['proposed'];
                             break;
@@ -449,8 +449,8 @@ class ContributionFields extends AbstractHelper
                     if (is_null($proposed)) {
                         continue;
                     }
-                    $fieldContribution['empty'] = false;
-                    $fieldContribution['proposed'] = [
+                    $fieldGeneration['empty'] = false;
+                    $fieldGeneration['proposed'] = [
                         '@value' => $proposed['@value'],
                         '@resource' => null,
                         '@uri' => null,
@@ -460,11 +460,11 @@ class ContributionFields extends AbstractHelper
                 unset($proposals[$term][$keyProposal]);
             }
         }
-        unset($field, $fieldContribution);
+        unset($field, $fieldGeneration);
 
-        // Fill the proposed contribute, according to the existing values: some
-        // contributions may have been accepted or the resource updated, so check
-        // if there are remaining contributions that were validated.
+        // Fill the proposed generate, according to the existing values: some
+        // generations may have been accepted or the resource updated, so check
+        // if there are remaining generations that were validated.
         foreach ($fields as $term => &$field) {
             if ($term === 'file') {
                 continue;
@@ -472,18 +472,18 @@ class ContributionFields extends AbstractHelper
             if (!isset($proposals[$term])) {
                 continue;
             }
-            foreach ($field['contributions'] as &$fieldContribution) {
+            foreach ($field['generations'] as &$fieldGeneration) {
                 $proposed = null;
-                $dataType = $fieldContribution['type'];
-                if (!$contributive->isTermDatatype($term, $dataType)) {
+                $dataType = $fieldGeneration['type'];
+                if (!$generative->isTermDatatype($term, $dataType)) {
                     continue;
                 }
                 $baseType = $this->easyMeta->dataTypeMain($dataType);
                 if ($baseType === 'uri') {
                     foreach ($proposals[$term] as $keyProposal => $proposal) {
                         if (isset($proposal['proposed']['@uri'])
-                            && $proposal['proposed']['@uri'] === $fieldContribution['original']['@uri']
-                            && $proposal['proposed']['@label'] === $fieldContribution['original']['@label']
+                            && $proposal['proposed']['@uri'] === $fieldGeneration['original']['@uri']
+                            && $proposal['proposed']['@label'] === $fieldGeneration['original']['@label']
                         ) {
                             $proposed = $proposal['proposed'];
                             break;
@@ -492,8 +492,8 @@ class ContributionFields extends AbstractHelper
                     if (is_null($proposed)) {
                         continue;
                     }
-                    $fieldContribution['empty'] = false;
-                    $fieldContribution['proposed'] = [
+                    $fieldGeneration['empty'] = false;
+                    $fieldGeneration['proposed'] = [
                         '@value' => null,
                         '@resource' => null,
                         '@uri' => $proposed['@uri'],
@@ -503,7 +503,7 @@ class ContributionFields extends AbstractHelper
                     foreach ($proposals[$term] as $keyProposal => $proposal) {
                         if (isset($proposal['proposed']['@resource'])
                             && (int) $proposal['proposed']['@resource']
-                            && $proposal['proposed']['@resource'] === $fieldContribution['original']['@resource']
+                            && $proposal['proposed']['@resource'] === $fieldGeneration['original']['@resource']
                         ) {
                             $proposed = $proposal['proposed'];
                             break;
@@ -512,8 +512,8 @@ class ContributionFields extends AbstractHelper
                     if (is_null($proposed)) {
                         continue;
                     }
-                    $fieldContribution['empty'] = false;
-                    $fieldContribution['proposed'] = [
+                    $fieldGeneration['empty'] = false;
+                    $fieldGeneration['proposed'] = [
                         '@value' => null,
                         '@resource' => (int) $proposed['@resource'],
                         '@uri' => null,
@@ -522,7 +522,7 @@ class ContributionFields extends AbstractHelper
                 } else {
                     foreach ($proposals[$term] as $keyProposal => $proposal) {
                         if (isset($proposal['proposed']['@value'])
-                            && $proposal['proposed']['@value'] === $fieldContribution['original']['@value']
+                            && $proposal['proposed']['@value'] === $fieldGeneration['original']['@value']
                         ) {
                             $proposed = $proposal['proposed'];
                             break;
@@ -531,8 +531,8 @@ class ContributionFields extends AbstractHelper
                     if (is_null($proposed)) {
                         continue;
                     }
-                    $fieldContribution['empty'] = false;
-                    $fieldContribution['proposed'] = [
+                    $fieldGeneration['empty'] = false;
+                    $fieldGeneration['proposed'] = [
                         '@value' => $proposed['@value'],
                         '@resource' => null,
                         '@uri' => null,
@@ -542,11 +542,11 @@ class ContributionFields extends AbstractHelper
                 unset($proposals[$term][$keyProposal]);
             }
         }
-        unset($field, $fieldContribution);
+        unset($field, $fieldGeneration);
 
-        // Append only remaining contributions that are fillable.
+        // Append only remaining generations that are fillable.
         // Other ones are related to an older config.
-        $proposals = array_intersect_key(array_filter($proposals), $contributive->fillableProperties());
+        $proposals = array_intersect_key(array_filter($proposals), $generative->fillableProperties());
         foreach ($proposals as $term => $termProposal) {
             $propertyId = $this->easyMeta->propertyId($term);
             if (!$propertyId) {
@@ -573,12 +573,12 @@ class ContributionFields extends AbstractHelper
                 } else {
                     $dataType = 'literal';
                 }
-                if (!$contributive->isTermDatatype($term, $dataType)) {
+                if (!$generative->isTermDatatype($term, $dataType)) {
                     continue;
                 }
                 $baseType = $this->easyMeta->dataTypeMain($dataType) ?? 'literal';
                 if ($baseType === 'uri') {
-                    $fields[$term]['contributions'][] = [
+                    $fields[$term]['generations'][] = [
                         'type' => $dataType,
                         'basetype' => 'uri',
                         'new' => true,
@@ -598,7 +598,7 @@ class ContributionFields extends AbstractHelper
                         ],
                     ];
                 } elseif ($baseType === 'resource') {
-                    $fields[$term]['contributions'][] = [
+                    $fields[$term]['generations'][] = [
                         'type' => $dataType,
                         'basetype' => 'resource',
                         'new' => true,
@@ -618,7 +618,7 @@ class ContributionFields extends AbstractHelper
                         ],
                     ];
                 } else {
-                    $fields[$term]['contributions'][] = [
+                    $fields[$term]['generations'][] = [
                         'type' => $dataType,
                         'basetype' => 'literal',
                         'new' => true,
@@ -645,7 +645,7 @@ class ContributionFields extends AbstractHelper
     }
 
     /**
-     * Finalize: remove invalid contributions and add empty ones when needed.
+     * Finalize: remove invalid generations and add empty ones when needed.
      */
     protected function finalize(array $fields): array
     {
@@ -653,30 +653,30 @@ class ContributionFields extends AbstractHelper
             if ($term === 'file') {
                 continue;
             }
-            // Remove contributions with an invalid or an unavailable type.
+            // Remove generations with an invalid or an unavailable type.
             // This is a security fix, but it can remove data.
-            foreach ($field['contributions'] as $key => &$fieldContribution) {
-                $dataType = $fieldContribution['type'] ?? '';
+            foreach ($field['generations'] as $key => &$fieldGeneration) {
+                $dataType = $fieldGeneration['type'] ?? '';
                 $typeColon = strtok($dataType, ':');
                 $baseType = $this->easyMeta->datatypeMain($dataType) ?? 'literal';
                 // FIXME Warning, numeric:interval and numeric:duration are not managed.
                 if (!$this->hasNumericDataTypes && $typeColon === 'numeric') {
-                    unset($field['contributions'][$key]);
+                    unset($field['generations'][$key]);
                     continue;
                 }
                 if (!$this->hasCustomVocab && $typeColon === 'customvocab') {
-                    unset($field['contributions'][$key]);
+                    unset($field['generations'][$key]);
                     continue;
                 }
                 if (!$this->hasValueSuggest && ($typeColon === 'valuesuggest' || $typeColon === 'valuesuggestall')) {
-                    unset($field['contributions'][$key]);
+                    unset($field['generations'][$key]);
                     continue;
                 }
             }
-            unset($fieldContribution);
+            unset($fieldGeneration);
 
-            // Clean indexes for old contributions.
-            $field['contributions'] = array_values($field['contributions']);
+            // Clean indexes for old generations.
+            $field['generations'] = array_values($field['generations']);
             if (!$field['fillable']) {
                 continue;
             }
@@ -689,14 +689,14 @@ class ContributionFields extends AbstractHelper
                 continue;
             }
 
-            // If editable, values and contributions are a single list, else
+            // If editable, values and generations are a single list, else
             // they are combined.
             // TODO Check for correction, with some values corrected and some appended.
             $countValues = count($field['values']);
-            $countContributions = count($field['contributions']);
+            $countGenerations = count($field['generations']);
             $countExisting = $field['editable']
-                ? max($countValues, $countContributions)
-                : $countValues + $countContributions;
+                ? max($countValues, $countGenerations)
+                : $countValues + $countGenerations;
             $missingValues = $minValues && $minValues > $countExisting
                 ? $minValues - $countExisting
                 : 0;
@@ -707,9 +707,9 @@ class ContributionFields extends AbstractHelper
 
             $dataType = reset($field['datatypes']);
             $baseType = $this->easyMeta->dataTypeMain($dataType) ?? 'literal';
-            // Prepare empty contributions to simplify theme.
+            // Prepare empty generations to simplify theme.
             while ($missingValues) {
-                $field['contributions'][] = [
+                $field['generations'][] = [
                     'type' => $dataType,
                     'basetype' => $baseType,
                     'new' => true,

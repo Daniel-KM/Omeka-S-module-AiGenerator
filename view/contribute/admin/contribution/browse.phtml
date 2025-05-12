@@ -1,9 +1,9 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \Contribute\Api\Representation\ContributionRepresentation[] $contributions
- * @var \Contribute\Api\Representation\ContributionRepresentation[] $resources
- * @var \Contribute\Form\QuickSearchForm $formSearch
+ * @var \Generate\Api\Representation\GenerationRepresentation[] $generations
+ * @var \Generate\Api\Representation\GenerationRepresentation[] $resources
+ * @var \Generate\Form\QuickSearchForm $formSearch
  * @var \Omeka\Form\ConfirmForm $formDeleteSelected
  * @var \Omeka\Form\ConfirmForm $formDeleteAll
  */
@@ -20,12 +20,12 @@ $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 
-$this->htmlElement('body')->appendAttribute('class', 'contributions browse');
+$this->htmlElement('body')->appendAttribute('class', 'generations browse');
 
 $this->headLink()
-    ->appendStylesheet($assetUrl('css/contribute-admin.css', 'Contribute'));
+    ->appendStylesheet($assetUrl('css/generate-admin.css', 'Generate'));
 $this->headScript()
-    ->appendFile($assetUrl('js/contribute-admin.js', 'Contribute'), 'text/javascript', ['defer' => 'defer']);
+    ->appendFile($assetUrl('js/generate-admin.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
 
 $sortHeadings = [
     [
@@ -42,12 +42,12 @@ $sortHeadings = [
     ],
 ];
 
-$userIsAllowedBatchDelete = $this->userIsAllowed(\Contribute\Api\Adapter\ContributionAdapter::class, 'batch_delete');
+$userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\GenerationAdapter::class, 'batch_delete');
 ?>
 
-<?= $this->pageTitle($translate('Contributions')) ?>
+<?= $this->pageTitle($translate('Generations')) ?>
 
-<?= $this->contributionSearchFilters() ?>
+<?= $this->generationSearchFilters() ?>
 
 <div class="browse-controls">
     <?= $this->pagination() ?>
@@ -59,9 +59,9 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Contribute\Api\Adapter\Contrib
 </div>
 
 <?php $this->trigger('view.browse.before'); ?>
-<?php if (count($contributions)): ?>
+<?php if (count($generations)): ?>
 <form method="post" id="batch-form" class="disable-unsaved-warning">
-    <?php if (false && $this->userIsAllowed(\Contribute\Api\Adapter\ContributionAdapter::class, 'batch_update')): ?>
+    <?php if (false && $this->userIsAllowed(\Generate\Api\Adapter\GenerationAdapter::class, 'batch_update')): ?>
     <div class="batch-inputs">
         <select class="batch-actions-select" aria-label="<?= $translate('Batch actions') ?>">
             <option value="default"><?= $translate('Batch actions') ?></option>
@@ -89,76 +89,76 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Contribute\Api\Adapter\Contrib
         <thead>
             <tr>
                 <th><input type="checkbox" class="select-all" aria-label="<?= $translate('Select all') ?>"><?= $sortLink($translate('Title'), 'resource_title') ?></th>
-                <th><?= $sortLink($translate('Contributor'), 'email') ?></th>
+                <th><?= $sortLink($translate('Generator'), 'email') ?></th>
                 <th><?= $sortLink($translate('Date'), 'created') ?></th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($contributions as $contribution):
-            $contributionResource = $contribution->resource();
-            $resourceTemplate = $contribution->resourceTemplate();
-            $owner = $contribution->owner();
+            <?php foreach ($generations as $generation):
+            $generationResource = $generation->resource();
+            $resourceTemplate = $generation->resourceTemplate();
+            $owner = $generation->owner();
             if ($owner) {
                 $ownerText = $hyperlink($owner->name(), $url('admin/id', ['controller' => 'user', 'action' => 'show', 'id' => $owner->id()]));
             } else {
-                $ownerText = $contribution->email() ?: $translate('[no owner]');
+                $ownerText = $generation->email() ?: $translate('[no owner]');
             }
             ?>
-            <tr class="contribution">
+            <tr class="generation">
                 <td>
-                    <?php if (false && $contribution->userIsAllowed('update') || $contribution->userIsAllowed('delete')): ?>
-                    <input type="checkbox" name="resource_ids[]" value="<?= $contribution->id() ?>" aria-label="<?= $translate('Select contribution') ?>">
+                    <?php if (false && $generation->userIsAllowed('update') || $generation->userIsAllowed('delete')): ?>
+                    <input type="checkbox" name="resource_ids[]" value="<?= $generation->id() ?>" aria-label="<?= $translate('Select generation') ?>">
                     <?php endif; ?>
-                    <span class="title"><?= $contribution->linkResource($contribution->displayTitle()) ?></span>
+                    <span class="title"><?= $generation->linkResource($generation->displayTitle()) ?></span>
                     <span class="template"><?= $escape($resourceTemplate ? $resourceTemplate->label() : $translate('No resource template')) ?></span>
                     <ul class="actions">
                         <li><span class="no-action"><span
-                            class="o-icon-<?= $contribution->isSubmitted() ? 'submitted' : 'unsubmitted' ?>"
-                            data-proposal="<?= $contribution->isSubmitted() ? 'submitted' : 'unsubmitted' ?>"
-                            aria-label="<?= $contribution->isSubmitted() ? $escapeAttr($translate('Is submitted')) : $escapeAttr($translate('Is not submitted')) ?>"
-                            title="<?= $contribution->isSubmitted() ? $escapeAttr($translate('Is submitted')) : $escapeAttr($translate('Is not submitted')) ?>"></span>
+                            class="o-icon-<?= $generation->isSubmitted() ? 'submitted' : 'unsubmitted' ?>"
+                            data-proposal="<?= $generation->isSubmitted() ? 'submitted' : 'unsubmitted' ?>"
+                            aria-label="<?= $generation->isSubmitted() ? $escapeAttr($translate('Is submitted')) : $escapeAttr($translate('Is not submitted')) ?>"
+                            title="<?= $generation->isSubmitted() ? $escapeAttr($translate('Is submitted')) : $escapeAttr($translate('Is not submitted')) ?>"></span>
                         </span></li>
-                        <?php if ($contributionResource && $contribution->userIsAllowed('update')): ?>
+                        <?php if ($generationResource && $generation->userIsAllowed('update')): ?>
                         <li><span class="single actions"><a href="#"
-                            class="status-toggle o-icon-<?= $contribution->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                            data-status-toggle-url="<?= $escape($contribution->adminUrl('toggle-status')) ?>"
-                            data-status="<?= $contribution->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                            class="status-toggle o-icon-<?= $generation->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                            data-status-toggle-url="<?= $escape($generation->adminUrl('toggle-status')) ?>"
+                            data-status="<?= $generation->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
                             aria-label="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"
                             title="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"></a>
                         </span></li>
                         <?php endif; ?>
                         <li>
-                        <?php if ($contributionResource): ?>
-                            <?= $contribution->linkResource('', 'show', [
+                        <?php if ($generationResource): ?>
+                            <?= $generation->linkResource('', 'show', [
                                 'class' => 'o-icon-edit',
                                 'title' => $translate('Edit'),
                             ]) ?>
                         <?php else: ?>
-                            <?= $hyperlink('', $url('admin/contribution/id', ['action' => 'create-resource', 'id' => $contribution->id()], true), [
+                            <?= $hyperlink('', $url('admin/generation/id', ['action' => 'create-resource', 'id' => $generation->id()], true), [
                                 'class' => 'o-icon-add',
-                                'data-id' => $contribution->id(),
+                                'data-id' => $generation->id(),
                                 'title' => $translate('Create resource to be validated'),
                             ]) ?>
                         </li>
                         <?php endif; ?>
-                        <?php if ($contribution->userIsAllowed('delete')): ?>
+                        <?php if ($generation->userIsAllowed('delete')): ?>
                         <li><?= $hyperlink('', '#', [
                             'data-sidebar-selector' => '#sidebar',
-                            'data-sidebar-content-url' => $contribution->adminUrl('delete-confirm'),
+                            'data-sidebar-content-url' => $generation->adminUrl('delete-confirm'),
                             'class' => 'o-icon-delete sidebar-content',
                             'title' => $translate('Delete'),
                         ]) ?></li>
                         <?php endif; ?>
                         <li><?= $hyperlink('', '#', [
                             'data-sidebar-selector' => '#sidebar',
-                            'data-sidebar-content-url' => $contribution->adminUrl('show-details'),
+                            'data-sidebar-content-url' => $generation->adminUrl('show-details'),
                             'class' => 'o-icon-more sidebar-content',
                             'title' => $translate('Details'),
                         ]) ?></li>
                     </ul>
                 </td>
                 <td><?= $ownerText ?></td>
-                <td><?= $escape($i18n->dateFormat($contribution->created(), 'medium', 'short')) ?></td>
+                <td><?= $escape($i18n->dateFormat($generation->created(), 'medium', 'short')) ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -188,10 +188,10 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Contribute\Api\Adapter\Contrib
     ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-confirm">
-            <h3><?= $translate('Delete contributions') ?></h3>
-            <p><?= $translate('Are you sure you would like to delete the selected contributions?') ?></p>
+            <h3><?= $translate('Delete generations') ?></h3>
+            <p><?= $translate('Are you sure you would like to delete the selected generations?') ?></p>
             <p class="error"><?= sprintf(
-                $translate('%1$s: this action will permanently delete %2$s contributions and cannot be undone.'),
+                $translate('%1$s: this action will permanently delete %2$s generations and cannot be undone.'),
                 sprintf('<strong>%s</strong>', $translate('Warning')),
                 '<strong><span id="delete-selected-count"></span></strong>'
             ) ?></p>
@@ -206,10 +206,10 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Contribute\Api\Adapter\Contrib
     ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-confirm">
-            <h3><?= $translate('Delete contributions') ?></h3>
-            <p><?= $translate('Are you sure you would like to delete all contributions on all pages of this result?') ?></p>
+            <h3><?= $translate('Delete generations') ?></h3>
+            <p><?= $translate('Are you sure you would like to delete all generations on all pages of this result?') ?></p>
             <p class="error"><?= sprintf(
-                $translate('%1$s: this action will permanently delete %2$s contributions and cannot be undone.'),
+                $translate('%1$s: this action will permanently delete %2$s generations and cannot be undone.'),
                 sprintf('<strong>%s</strong>', $translate('Warning')),
                 sprintf('<strong>%s</strong>', number_format($this->pagination()->getPaginator()->getTotalCount()))
             ) ?></p>
@@ -249,7 +249,7 @@ $('#sidebar-delete-all').on('click', 'input[name="confirm-delete-all-check"]', f
 <?php else: ?>
 
 <div class="no-resources">
-    <p><?= $translate('Omeka could not find any contributions.') ?></p>
+    <p><?= $translate('Omeka could not find any generations.') ?></p>
 </div>
 
 <?php endif; ?>
@@ -261,7 +261,7 @@ $('#sidebar-delete-all').on('click', 'input[name="confirm-delete-all-check"]', f
     ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-search-form" class="disable-unsaved-warning">
-            <h3><?= $translate('Search contribution') ?></h3>
+            <h3><?= $translate('Search generation') ?></h3>
             <?php // echo $hyperlink($translate('Advanced search'), $url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']) ?>
             <?= $this->form($formSearch) ?>
         </div>
