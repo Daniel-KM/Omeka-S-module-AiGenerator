@@ -11,10 +11,15 @@ class ConfigForm extends Form
     {
         $this
             ->add([
-                'name' => 'generate_chatgpt_api_key',
+                'name' => 'generate_api_key_openai',
                 'type' => Element\Text::class,
                 'options' => [
-                    'label' => 'ChatGPT api key', // @translate
+                    'label' => 'OpenAI api key', // @translate
+                    'info' => 'The api key can be created with an account on OpenAI developer platform.', // @translate
+                    'documentation' => 'https://platform.openai.com',
+                ],
+                'attributes' => [
+                    'id' => 'generate_api_key_openai',
                 ],
             ])
         ;

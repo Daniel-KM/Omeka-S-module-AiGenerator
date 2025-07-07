@@ -37,6 +37,7 @@ $editRight = $resource->userIsAllowed('update');
 
 $labelInfo = $setting('property_label_information');
 ?>
+
 <?php foreach ($generatedResources as $generatedResource): ?>
 <div class="generated-resource">
 <table class="tablesaw <?php if ($batchEditRight) echo 'batch-edit'; ?>" data-tablesaw-mode="stack">
@@ -132,7 +133,10 @@ $labelInfo = $setting('property_label_information');
 
                         <?php foreach ($propositions as $key => $proposition):
                             // TODO Manage all types.
-                            if (array_key_exists('@uri', $proposition['original'])) {
+                            if (empty($proposition['original'])) {
+                                // TODO See proposalNormalizeForValidation(), that use literal and not unknown, unlike Contribution.
+                                $type = 'literal';
+                            } elseif (array_key_exists('@uri', $proposition['original'])) {
                                 $type = 'uri';
                             } elseif (array_key_exists('@resource', $proposition['original'])) {
                                 $type = 'resource';
@@ -254,7 +258,7 @@ $labelInfo = $setting('property_label_information');
 
                             case 'literal':
                             default:
-                                $original = $proposition['original']['@value'];
+                                $original = $proposition['original']['@value'] ?? null;
                                 $proposed = $proposition['proposed']['@value'];
                                 $isValidated = $proposition['validated'];
                                 $process = $proposition['process'];

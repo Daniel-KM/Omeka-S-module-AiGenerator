@@ -135,11 +135,11 @@ return [
     ],
     'generate' => [
         'config' => [
-            'generate_chatgpt_api_key' => '',
+            'generate_api_key_openai' => '',
         ],
         'settings' => [
             'generate_roles' => [],
-            'generate_chatgpt_prompt' => 'Generate these metadata for the image and output them as json: {properties}', // @translate
+            'generate_chatgpt_prompt' => 'Analyze the following image: {url}, then generate the following metadata as json: {properties}', // @translate
         ],
     ],
 ];

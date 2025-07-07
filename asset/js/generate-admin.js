@@ -5,29 +5,24 @@
     $(document).ready(function() {
 
         /**
-         * @see ContactUs, Contribute, Guest, SearchHistory, Selection, TwoFactorAuth.
+         * @see ContactUs, Contribute, Generate, Guest, Resa, SearchHistory, Selection, TwoFactorAuth.
          */
 
         const beforeSpin = function (element) {
-            var span = $(element).find('span');
+            let span = $(element).find('span.spinner');
             if (!span.length) {
-                span = $(element).next('span.appended');
-                if (!span.length) {
-                    $('<span class="appended"></span>').insertAfter($(element));
-                    span = $(element).next('span');
-                }
+                span = $('<span class="spinner appended fas fa-sync fa-spin"></span>');
+                $(element).append(span);
+            } else {
+                span.addClass('fas fa-sync fa-spin');
             }
-            element.hide();
-            span.addClass('fas fa-sync fa-spin');
+            $(element).prop('disabled', true);
         };
 
         const afterSpin = function (element) {
-            var span = $(element).find('span');
-            if (!span.length) {
-                span = $(element).next('span.appended');
-                if (span.length) {
-                    span.remove();
-                }
+            const span = $(element).find('span.appended');
+            if (span.length) {
+                span.remove();
             } else {
                 span.removeClass('fas fa-sync fa-spin');
             }
@@ -215,7 +210,7 @@
         });
 
         // Validate a specific value of a generated resource.
-        $('#content').on('click', '.generate-resource a.validate-value', function(e) {
+        $('#content').on('click', '.generated-resource a.validate-value', function(e) {
             e.preventDefault();
 
             var button = $(this);

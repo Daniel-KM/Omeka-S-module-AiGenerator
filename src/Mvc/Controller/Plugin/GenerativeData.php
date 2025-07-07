@@ -16,8 +16,11 @@ class GenerativeData extends AbstractPlugin
     /**
      * Get generative data (editable, fillable, etc.) of a resource template.
      *
-     *  The list comes from the resource template if it is configured, else the
-     *  list of the first allowed resource template is used.
+     * Unlike module Contribute, all resource templates are allowed.
+     * Unlike module Contribute, a resource template is required.
+     *
+     * Furthermore, all properties are fillable by default, according to the
+     * resource template settings.
      *
      * The template can contain a sub-template for files. It is set in the main
      * resource template too (one level recursivity).
@@ -25,6 +28,9 @@ class GenerativeData extends AbstractPlugin
      * The input for a file is specific and not managed here.
      *
      * @todo Remove code that set fields or use default data types without resource template.
+     *
+     * @todo Add a template setting to allow property not in template.
+     * @todo Add a template property setting to follow/skip property in the list of properties (like contributive), but by default all are possible.
      *
      * @param \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation|\Omeka\Api\Representation\ResourceTemplateRepresentation|string|int|null $template
      */
@@ -53,7 +59,6 @@ class GenerativeData extends AbstractPlugin
         ]);
 
         $controller = $this->getController();
-        $settings = $controller->settings();
         $this->data['datatypes_default'] = ['literal', 'resource', 'uri'];
 
         // TODO Manage valuesuggest and custom vocab differently, because it is not a single data type.
@@ -68,31 +73,10 @@ class GenerativeData extends AbstractPlugin
 
         /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $resourceTemplate */
         $resourceTemplate = $this->resourceTemplate($resourceTemplate);
-        $allowedResourceTemplates = $settings->get($isSubTemplate ? 'generate_templates_media' : 'generate_templates', []) ?: [];
 
-        // When a resource template is set, it should be allowed too.
-        // Anyway, if it is not prepared, it won't be editable/fillable (below).
-        // Else first resource template.
-        if ($resourceTemplate) {
-            $resourceTemplateId = $resourceTemplate->id();
-            if (!in_array($resourceTemplateId, $allowedResourceTemplates)) {
-                $controller->logger()->err(
-                    $isSubTemplate
-                        ? 'The resource template #{template_id} is not in the list of allowed generation templates for media.' // @translate
-                        : 'The resource template #{template_id} is not in the list of allowed generation templates.', // @translate
-                    ['template_id' => $resourceTemplateId]
-                );
-                return $this;
-            }
-        } else {
-            $resourceTemplate = reset($allowedResourceTemplates);
-            if ($resourceTemplate) {
-                $resourceTemplate = $this->resourceTemplate($resourceTemplate);
-            }
-            if (!$resourceTemplate) {
-                $controller->logger()->err('A resource template must be set to allow to generate'); // @translate
-                return $this;
-            }
+        if (!$resourceTemplate) {
+            $controller->logger()->err('A resource template must be set to allow to generate metadata.'); // @translate
+            return $this;
         }
 
         $this->data['template'] = $resourceTemplate;
@@ -116,12 +100,16 @@ class GenerativeData extends AbstractPlugin
             // TODO Manage repeatable property.
             $this->data['min_values'] = (int) $rtpData->dataValue('min_values');
             $this->data['max_values'] = (int) $rtpData->dataValue('max_values');
+            /*
             if ($rtpData->dataValue('editable')) {
                 $this->data['editable'][$term] = $propertyId;
             }
             if ($rtpData->dataValue('fillable')) {
                 $this->data['fillable'][$term] = $propertyId;
             }
+            */
+            $this->data['editable'][$term] = $propertyId;
+            $this->data['fillable'][$term] = $propertyId;
         }
 
         // When a sub-template is not available, there is no break to allow to
@@ -129,7 +117,6 @@ class GenerativeData extends AbstractPlugin
         if (!$isSubTemplate) {
             /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation[] $resourceTemplateMedias */
             $resourceTemplateMediaIds = $resourceTemplate->dataValue('generate_templates_media') ?: [];
-            $allowedResourceTemplatesMedia = $settings->get('generate_templates_media') ?: [];
             foreach ($resourceTemplateMediaIds as $resourceTemplateMediaId) {
                 $resourceTemplateMedia = $this->resourceTemplate($resourceTemplateMediaId);
                 if (!$resourceTemplateMedia) {
@@ -137,18 +124,9 @@ class GenerativeData extends AbstractPlugin
                         'The resource template #{template_id} used for media in template {template} is not available.', // @translate
                         ['template_id' => $resourceTemplateMediaId, 'template' => $resourceTemplate->label()]
                     );
-                } elseif (!in_array($resourceTemplateMedia->id(), $allowedResourceTemplatesMedia)) {
-                    $controller->logger()->err(
-                        'The resource template #{template_id} is not in the list of allowed generation templates for media.', // @translate
-                        ['template_id' => $resourceTemplateMediaId]
-                    );
                 } else {
                     $this->data['templates_media'][$resourceTemplateMedia->id()] = $resourceTemplateMedia;
                 }
-            }
-            // Temporary keep one template for compatibility with old themes.
-            if (count($this->data['templates_media'])) {
-                $this->data['template_media'] = reset($this->data['templates_media']);
             }
         }
 

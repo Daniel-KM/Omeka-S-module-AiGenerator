@@ -216,15 +216,16 @@ class Module extends AbstractModule
             // \Annotate\Api\Adapter\AnnotationAdapter::class => \Annotate\Controller\Admin\AnnotationController::class,
         ];
         foreach ($adaptersAndControllers as $adapter => $controller) {
-            // Create metadata via llm.
+            // Create metadata via llm. Use the api post to manage file simpler:
+            // the aim is to create a Generated Resource, not a Resource.
             $sharedEventManager->attach(
                 $adapter,
-                'api.create.pre',
+                'api.create.post',
                 [$this, 'handleCreateUpdateResource']
             );
             $sharedEventManager->attach(
                 $adapter,
-                'api.update.pre',
+                'api.update.post',
                 [$this, 'handleCreateUpdateResource']
             );
 
@@ -313,9 +314,10 @@ class Module extends AbstractModule
         /**
          * @var \Omeka\Api\Request $request
          * @var \Omeka\Api\Response $response
-         * @var \Omeka\Settings\Settings $settings
          * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
-         * @var \Omeka\Entity\User $user
+         * @var \Omeka\Entity\Item|\Omeka\Entity\Media $resource
+         * @var \Omeka\Api\Adapter\ItemAdapter|\Omeka\Api\Adapter\MediaAdapter $adapter
+         * @var \Omeka\Api\Representation\ItemRepresentation|\Omeka\Api\Representation\MediaRepresentation $representation
          */
         $services = $this->getServiceLocator();
 
@@ -326,21 +328,18 @@ class Module extends AbstractModule
             return;
         }
 
-        $settings = $services->get('Omeka\Settings');
-
-        // Generating may be expensive, so there is a specific check for roles.
-        $generateRoles = $settings->get('generate_roles');
-        $user = $services->get('Omeka\AuthenticationService')->getIdentity();
-        if (!$user || !in_array($user->getRole(), $generateRoles)) {
-            return;
-        }
-
-        $prompt = $resourceData['generate_chatgpt_prompt'] ?? '';
-        unset($resourceData['generate_metadata'], $resourceData['generate_chatgpt_prompt']);
-
         $plugins = $services->get('ControllerPluginManager');
         $generateViaChatGpt = $plugins->get('generateViaChatGpt');
-        $generateViaChatGpt($resourceData, [
+
+        // This is an api-post event, so id is ready and checks are done.
+        $resource = $event->getParam('response')->getContent();
+        $adapter = $services->get('Omeka\ApiAdapterManager')->get($resource->getResourceName());
+        $representation = $adapter->getRepresentation($resource);
+
+        // Check for a specific prompt.
+        $prompt = $resourceData['generate_chatgpt_prompt'] ?? null;
+
+        $generateViaChatGpt($representation, [
             'prompt' => $prompt,
         ]);
     }
@@ -420,7 +419,7 @@ class Module extends AbstractModule
 
         $this->addHeadersAdmin($event);
 
-        $apiKey = $settings->get('generate_chatgpt_api_key');
+        $apiKey = $settings->get('generate_api_key_openai');
 
         $prompt = trim((string) $settings->get('generate_chatgpt_prompt'))
             ?: $this->getModuleConfig('settings')['generate_chatgpt_prompt'];

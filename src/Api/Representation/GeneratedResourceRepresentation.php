@@ -187,7 +187,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
             return null;
         }
         foreach ($proposed as $value) {
-            if ($value['original']['@value'] === $original) {
+            if (($value['original']['@value'] ?? null) === $original) {
                 return $value['proposed']['@value'] === $value['original']['@value'];
             }
         }
@@ -267,6 +267,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      * The proposal does not manage the type of the values.
      * The sub-generated medias are checked too via a recursive call.
      *
+     * @todo Factorize with \Contribute\Site\ContributionController::prepareProposal()
+     * @todo Factorize with \Contribute\View\Helper\ContributionFields
+     * @todo Factorize with \Contribute\Api\Representation\ContributionRepresentation::proposalToResourceData()
      * @todo Factorize with \Generate\Controller\Admin\IndexController::prepareProposal()
      * @todo Factorize with \Generate\View\Helper\GeneratedResourceFields
      * @todo Factorize with \Generate\Api\Representation\GeneratedResourceRepresentation::proposalToResourceData()
@@ -332,6 +335,11 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                 // TODO Remove management of proposition without resource template (but the template may have been modified).
                 if ($typeTemplate) {
                     $mainType = $mainTypeTemplate;
+                } elseif (empty($proposition['original'])) {
+                    // Unlike Contribution, the default main type is literal to allow property not listed in template.
+                    // It allows to display the value for a property that is not in the template.
+                    // Nevertheless, its process status is "keep", so it cannot fill the resource.
+                    $mainType = 'literal';
                 } elseif (array_key_exists('@uri', $proposition['original'])) {
                     $mainType = 'uri';
                 } elseif (array_key_exists('@resource', $proposition['original'])) {
@@ -339,7 +347,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                 } elseif (array_key_exists('@value', $proposition['original'])) {
                     $mainType = 'literal';
                 } else {
-                    $mainType = 'unknown';
+                    $mainType = 'literal';
                 }
 
                 $isTermDataType = $generative->isTermDataType($term, $typeTemplate ?? $mainType);
@@ -555,6 +563,10 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                     default:
                         $original = $proposition['original']['@value'] ?? '';
 
+                        // TODO Unlike contribution, a generative metadata for another property can be allowed when the template is open? No, too much complex and useless.
+                        // Anyway, "unknown" is not possible, since "literal" is set by default.
+                        // TODO Copy and simplify literal here?
+
                         // Nothing to do if there is no original.
                         $hasOriginal = (bool) strlen($original);
                         if (!$hasOriginal) {
@@ -670,9 +682,10 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                         continue;
                     }
 
-                    $isUri = array_key_exists('@uri', $proposition['original']);
-                    $isResource = array_key_exists('@resource', $proposition['original']);
-                    $isValue = array_key_exists('@value', $proposition['original']);
+                    $hasOriginal = !empty($proposition['original']);
+                    $isUri = $hasOriginal && array_key_exists('@uri', $proposition['original']);
+                    $isResource = $hasOriginal && array_key_exists('@resource', $proposition['original']);
+                    $isValue = $hasOriginal && array_key_exists('@value', $proposition['original']);
 
                     if ($isUri) {
                         if ($proposition['original']['@uri'] === $existingUri) {
@@ -760,6 +773,8 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
 
                 if ($typeTemplate) {
                     $mainType = $mainTypeTemplate;
+                } elseif (empty($proposition['original'])) {
+                    $mainType = 'unknown';
                 } elseif (array_key_exists('@uri', $proposition['original'])) {
                     $mainType = 'uri';
                 } elseif (array_key_exists('@resource', $proposition['original'])) {
