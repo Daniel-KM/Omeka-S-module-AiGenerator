@@ -55,6 +55,23 @@ class BatchEditFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'generate_max_tokens',
+                'type' => CommonElement\OptionalNumber::class,
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Max tokens', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate-max-tokens',
+                    'min' => 0,
+                    'class' => 'generate-settings',
+                    // Enabled via js when checkbox is on.
+                    'disabled' => 'disabled',
+                    // This attribute is required to make "batch edit all" working.
+                    'data-collection-action' => 'replace',
+                ],
+            ])
+            ->add([
                 'type' => Element\Textarea::class,
                 'name' => 'generate_prompt_system',
                 'options' => [

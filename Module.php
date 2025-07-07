@@ -358,6 +358,7 @@ class Module extends AbstractModule
         $data['generate'] = [
             'generate_metadata' => true,
             'generate_model' => $post['generate']['generate_model'] ?? null,
+            'generate_max_tokens' => $post['generate']['generate_max_tokens'] ?? null,
             'generate_prompt_system' => $post['generate']['generate_prompt_system'] ?? null,
             'generate_prompt_user' => $post['generate']['generate_prompt_user'] ?? null,
         ];
@@ -368,6 +369,7 @@ class Module extends AbstractModule
             [
                 'json' => [
                     'model' => $data['generate']['generate_model'],
+                    'max_tokens' => $data['generate']['generate_max_tokens'],
                     'prompt_system' => $data['generate']['generate_prompt_system'],
                     'prompt_user' => $data['generate']['generate_prompt_user'],
                 ],
@@ -508,6 +510,8 @@ class Module extends AbstractModule
             ?: $this->getModuleConfig('settings')['generate_models'];
         $model = trim((string) $settings->get('generate_model'))
             ?: $this->getModuleConfig('settings')['generate_model'];
+        $maxTokens = (int) $settings->get('generate_max_tokens')
+            ?: (int) $this->getModuleConfig('settings')['generate_max_tokens'];
         $promptSystem = trim((string) $settings->get('generate_prompt_system'))
             ?: $this->getModuleConfig('settings')['generate_prompt_system'];
         $promptUser = trim((string) $settings->get('generate_prompt_user'))
@@ -538,6 +542,19 @@ class Module extends AbstractModule
             ->setAttributes([
                 'id' => 'generate-model',
                 'value' => $model,
+                'class' => 'generate-settings',
+                // Enabled via js when checkbox is on.
+                'disabled' => 'disabled',
+            ]);
+
+        $elementMaxToken = new \Common\Form\Element\OptionalNumber('generate_max_tokens');
+        $elementMaxToken
+            ->setLabel('Max tokens') // @translate
+            ->setValue($maxTokens)
+            ->setAttributes([
+                'id' => 'generate-max-tokens',
+                'value' => $maxTokens,
+                'min' => 0,
                 'class' => 'generate-settings',
                 // Enabled via js when checkbox is on.
                 'disabled' => 'disabled',
@@ -601,6 +618,8 @@ class Module extends AbstractModule
             ?: $this->getModuleConfig('settings')['generate_models'];
         $model = trim((string) $settings->get('generate_model'))
             ?: $this->getModuleConfig('settings')['generate_model'];
+        $maxTokens = (int) $settings->get('generate_max_tokens')
+            ?: (int) $this->getModuleConfig('settings')['generate_max_tokens'];
         $promptSystem = trim((string) $settings->get('generate_prompt_system'))
             ?: $this->getModuleConfig('settings')['generate_prompt_system'];
         $promptUser = trim((string) $settings->get('generate_prompt_user'))
@@ -626,6 +645,9 @@ class Module extends AbstractModule
             ->get('generate_model')
             ->setValueOptions($models)
             ->setValue($model);
+        $fieldset
+            ->get('generate_max_tokens')
+            ->setValue($maxTokens);
         $fieldset
             ->get('generate_prompt_system')
             ->setValue($promptSystem);

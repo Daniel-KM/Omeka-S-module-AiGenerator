@@ -152,6 +152,7 @@ return [
                 'gpt-4.5-preview' => 'GPT 4.5 preview ($225 / 1M tokens)',
             ],
             'generate_model' => 'gpt-4.1-nano',
+            'generate_max_tokens' => 300,
             'generate_prompt_system' => <<<'TXT'
                 You are a system to analyze images. The images are stored in a database and your analyse is used to search and find these images.
                 Therefore, describe the main content of the image which might be relevant for search/find operations.

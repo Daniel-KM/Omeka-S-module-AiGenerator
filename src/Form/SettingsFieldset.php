@@ -79,6 +79,18 @@ class SettingsFieldset extends Fieldset
                     'placeholder' => 'gpt-4.1-nano',
                 ],
             ])
+            ->add([
+                'type' => Element\Text::class,
+                'name' => 'generate_max_tokens',
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Max tokens by request', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate_max_tokens',
+                    'required' => false,
+                ],
+            ])
 
             ->add([
                 'type' => Element\Textarea::class,

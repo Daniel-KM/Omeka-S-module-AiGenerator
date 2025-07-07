@@ -99,6 +99,7 @@ class GenerateViaOpenAi extends AbstractPlugin
      *
      * @var array $options
      * - model (string): the model to use.
+     * - max_tokens (int): the max tokens to use for a request (0 for no limit).
      * - prompt_system (string|false): specific prompt for the system (session).
      *   The configured prompt in settings is used by default, unless false is
      *   passed.
@@ -135,6 +136,10 @@ class GenerateViaOpenAi extends AbstractPlugin
                 ['model' => $model]
             );
         }
+
+        $maxTokens = empty($options['max_tokens'])
+            ? (int) $this->settings->get('generate_max_tokens')
+            : (int) $options['max_tokens'];
 
         // The prompt for session or for user may be skipped, not the two.
 
@@ -247,7 +252,7 @@ class GenerateViaOpenAi extends AbstractPlugin
             $response = $client->chat()->create([
                 'model' => $model,
                 'messages' => $messages,
-                'max_tokens' => 300,
+                'max_tokens' => $maxTokens,
             ]);
         } catch (\Exception $e) {
             $this->messenger->addError(new PsrMessage(
