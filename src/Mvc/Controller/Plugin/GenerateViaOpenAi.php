@@ -401,6 +401,10 @@ class GenerateViaOpenAi extends AbstractPlugin
         $data = [
             'o:resource' => ['o:id' => $resource->id()],
             'o:owner' => ['o:id' => $user->getId()],
+            'o:model' => $model,
+            'o:response_id' => (string) $response->id,
+            'o:tokens_input' => $response->usage?->promptTokens ?? 0,
+            'o:tokens_output' => $response->usage?->completionTokens ?? 0,
             'o:reviewed' => false,
             'o:proposal' => $proposal,
         ];

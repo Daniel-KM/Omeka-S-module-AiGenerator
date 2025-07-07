@@ -76,6 +76,63 @@ class GeneratedResource extends AbstractEntity
     protected $owner;
 
     /**
+     * @var string
+     *
+     * @Column(
+     *     type="string",
+     *     nullable=false,
+     *     length=190,
+     *     options={
+     *         "default": ""
+     *     }
+     * )
+     */
+    protected $model = '';
+
+    /**
+     * The field can't be called "responseId" or "response_id", else doctrine
+     * will try to make relations.
+     *
+     * @var string
+     *
+     * @Column(
+     *     type="string",
+     *     nullable=false,
+     *     length=190,
+     *     options={
+     *         "default": ""
+     *     }
+     * )
+     */
+    protected $responseid = '';
+
+    /**
+     * @var int
+     *
+     * @Column(
+     *     type="integer",
+     *     nullable=false,
+     *     options={
+     *         "default": 0
+     *     }
+     * )
+     */
+    protected $tokensInput = 0;
+
+    /**
+     * @var int
+     *
+     * @Column(
+     *     type="integer",
+     *     nullable=false,
+     *     options={
+     *         "default": 0
+     *     }
+     * )
+     */
+    protected $tokensOutput = 0;
+
+    /**
      * @var bool
      *
      * @Column(
@@ -139,9 +196,53 @@ class GeneratedResource extends AbstractEntity
         return $this;
     }
 
-    public function getOwner(): ?\Omeka\Entity\User
+    public function getOwner(): ?User
     {
         return $this->owner;
+    }
+
+    public function setModel(?string $model): self
+    {
+        $this->model = (string) $model;
+        return $this;
+    }
+
+    public function getModel(): string
+    {
+        return $this->model;
+    }
+
+    public function setResponseid(?string $responseid): self
+    {
+        $this->responseid = (string) $responseid;
+        return $this;
+    }
+
+    public function getResponseid(): string
+    {
+        return $this->responseid;
+    }
+
+    public function setTokensInput(?int $tokensInput): self
+    {
+        $this->tokensInput = (int) $tokensInput;
+        return $this;
+    }
+
+    public function getTokensInput(): int
+    {
+        return $this->tokensInput;
+    }
+
+    public function setTokensOutput(?int $tokensOutput): self
+    {
+        $this->tokensOutput = (int) $tokensOutput;
+        return $this;
+    }
+
+    public function getTokensOutput(): int
+    {
+        return $this->tokensOutput;
     }
 
     public function setReviewed($reviewed): self

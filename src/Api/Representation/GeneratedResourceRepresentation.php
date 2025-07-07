@@ -11,6 +11,11 @@ use Omeka\Api\Representation\ValueRepresentation;
 class GeneratedResourceRepresentation extends AbstractEntityRepresentation
 {
     /**
+     * @var \Generate\Entity\GeneratedResource
+     */
+    protected $resource;
+
+    /**
      * @var array
      */
     protected $values;
@@ -43,6 +48,10 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
             'o:id' => $this->id(),
             'o:resource' => $generatedResource ? $generatedResource->getReference()->jsonSerialize() : null,
             'o:owner' => $owner ? $owner->getReference()->jsonSerialize() : null,
+            'o:model' => $this->model(),
+            'o:response_id' => $this->responseId(),
+            'o:tokens_input' => $this->tokensInput(),
+            'o:tokens_output' => $this->tokensOutput(),
             'o:reviewed' => $this->isReviewed(),
             'o:proposal' => $this->proposal(),
             'o:created' => [
@@ -72,6 +81,27 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
         return $owner
             ? $this->getAdapter('users')->getRepresentation($owner)
             : null;
+    }
+
+    public function model(): string
+    {
+        return $this->resource->getModel();
+    }
+
+    public function responseId(): string
+    {
+        // The name of the method for the resource is getResponseid().
+        return $this->resource->getResponseid();
+    }
+
+    public function tokensInput(): int
+    {
+        return $this->resource->getTokensInput();
+    }
+
+    public function tokensOutput(): int
+    {
+        return $this->resource->getTokensOutput();
     }
 
     public function isReviewed(): bool

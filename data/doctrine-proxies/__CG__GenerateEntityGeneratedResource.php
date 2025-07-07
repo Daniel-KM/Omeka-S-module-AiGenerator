@@ -67,10 +67,10 @@ class GeneratedResource extends \Generate\Entity\GeneratedResource implements \D
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'id', 'resource', 'owner', 'reviewed', 'proposal', 'created', 'modified'];
+            return ['__isInitialized__', 'id', 'resource', 'owner', 'model', 'responseid', 'tokensInput', 'tokensOutput', 'reviewed', 'proposal', 'created', 'modified'];
         }
 
-        return ['__isInitialized__', 'id', 'resource', 'owner', 'reviewed', 'proposal', 'created', 'modified'];
+        return ['__isInitialized__', 'id', 'resource', 'owner', 'model', 'responseid', 'tokensInput', 'tokensOutput', 'reviewed', 'proposal', 'created', 'modified'];
     }
 
     /**
@@ -234,6 +234,94 @@ class GeneratedResource extends \Generate\Entity\GeneratedResource implements \D
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getOwner', []);
 
         return parent::getOwner();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setModel(?string $model): \Generate\Entity\GeneratedResource
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setModel', [$model]);
+
+        return parent::setModel($model);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getModel(): string
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getModel', []);
+
+        return parent::getModel();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setResponseid(?string $responseid): \Generate\Entity\GeneratedResource
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setResponseid', [$responseid]);
+
+        return parent::setResponseid($responseid);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getResponseid(): string
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getResponseid', []);
+
+        return parent::getResponseid();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setTokensInput(?int $tokensInput): \Generate\Entity\GeneratedResource
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setTokensInput', [$tokensInput]);
+
+        return parent::setTokensInput($tokensInput);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getTokensInput(): int
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getTokensInput', []);
+
+        return parent::getTokensInput();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setTokensOutput(?int $tokensOutput): \Generate\Entity\GeneratedResource
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setTokensOutput', [$tokensOutput]);
+
+        return parent::setTokensOutput($tokensOutput);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getTokensOutput(): int
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getTokensOutput', []);
+
+        return parent::getTokensOutput();
     }
 
     /**

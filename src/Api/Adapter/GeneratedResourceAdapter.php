@@ -2,7 +2,6 @@
 
 namespace Generate\Api\Adapter;
 
-use Common\Stdlib\PsrMessage;
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\QueryBuilder;
 use Omeka\Api\Adapter\AbstractEntityAdapter;
@@ -16,6 +15,10 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
         'id' => 'id',
         'resource' => 'resource',
         'owner' => 'owner',
+        'model' => 'model',
+        'responseid' => 'responseid',
+        'tokens_input' => 'tokensInput',
+        'tokens_output' => 'tokensOutput',
         'reviewed' => 'reviewed',
         'created' => 'created',
         'modified' => 'modified',
@@ -25,6 +28,10 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
         'id' => 'id',
         'resource' => 'resource',
         'owner' => 'owner',
+        'model' => 'model',
+        'responseid' => 'responseid',
+        'tokens_input' => 'tokensInput',
+        'tokens_output' => 'tokensOutput',
         'reviewed' => 'reviewed',
         'proposal' => 'proposal',
         'created' => 'created',
@@ -84,6 +91,32 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
                 "$userAlias.id",
                 $this->createNamedParameter($qb, $query['owner_id']))
             );
+        }
+
+        if (isset($query['model'])
+            && $query['model'] !== ''
+            && $query['model'] !== []
+        ) {
+            if (!is_array($query['model'])) {
+                $query['model'] = [$query['model']];
+            }
+            $qb->andWhere($expr->in(
+                'omeka_root.model',
+                $this->createNamedParameter($qb, $query['model'])
+            ));
+        }
+
+        if (isset($query['responseid'])
+            && $query['responseid'] !== ''
+            && $query['responseid'] !== []
+        ) {
+            if (!is_array($query['responseid'])) {
+                $query['responseid'] = [$query['responseid']];
+            }
+            $qb->andWhere($expr->in(
+                'omeka_root.responseid',
+                $this->createNamedParameter($qb, $query['responseid'])
+            ));
         }
 
         if (isset($query['reviewed'])
@@ -241,6 +274,10 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
             $proposal = empty($data['o:proposal']) ? [] : $data['o:proposal'];
             $entity
                 ->setResource($resource)
+                ->setModel($data['o:model'] ?? '')
+                ->setResponseid($data['o:response_id'] ?? '')
+                ->setTokensInput(empty($data['o:tokens_input']) ? 0 : (int) $data['o:tokens_input'])
+                ->setTokensOutput(empty($data['o:tokens_output']) ? 0 : (int) $data['o:tokens_output'])
                 ->setReviewed($reviewed)
                 ->setProposal($proposal);
         } elseif (Request::UPDATE === $request->getOperation()) {
