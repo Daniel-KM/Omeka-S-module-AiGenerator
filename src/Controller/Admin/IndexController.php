@@ -386,8 +386,10 @@ class IndexController extends AbstractActionController
         }
 
         // Validate and update the resource.
+        // The status "reviewed" is set to true, because a validation requires
+        // a review.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false, false, false);
+        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, true, false, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
             // Keep similar messages different to simplify debug.
@@ -468,8 +470,10 @@ class IndexController extends AbstractActionController
             ));
         }
 
+        // The status "reviewed" is not modified, because a partial validation
+        // does not imply a full review.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, true, false, false);
+        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false, false, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
             return $this->jSend(JSend::FAIL, $errorStore->getErrors() ?: null, $this->translate(
