@@ -22,8 +22,11 @@ class GenerativeData extends AbstractPlugin
      * standard data types are allowed (literal, uri, resource, resource:item, resource:media, resource:itemset).
      * So in fact, only literal and uri, because the AI doesn't know resources.
      *
-     * Furthermore, all properties are fillable by default, according to the
-     * resource template settings.
+     * "updatable" is "editable" in Contribution (for a future version).
+     * "generatable" is "fillable" in Contribution.
+     *
+     * Furthermore, a main option allow to make all properties fillable, or only
+     * specific ones or none, according to the resource template setting.
      *
      * The template can contain a sub-template for files. It is set in the main
      * resource template too (one level recursivity).
@@ -46,9 +49,8 @@ class GenerativeData extends AbstractPlugin
             'required' => false,
             'min_values' => 0,
             'max_values' => 0,
-            'editable_mode' => 'whitelist',
+            // "generatable" is "fillable" in Contribution. "updatable" is "editable" (currently not used).
             'editable' => [],
-            'fillable_mode' => 'whitelist',
             'fillable' => [],
             'datatype' => [],
             'datatypes_default' => [],
@@ -89,6 +91,12 @@ class GenerativeData extends AbstractPlugin
             return $this;
         }
 
+        // All properties are generatable when the parameter is not set.
+        $templateGeneratable = $resourceTemplate->dataValue('generatable');
+        $templateGeneratable = in_array($templateGeneratable, ['specific', 'none'])
+            ? $templateGeneratable
+            : 'all';
+
         /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplatePropertyRepresentation $resourceTemplateProperty */
         foreach ($resourceTemplate->resourceTemplateProperties() as $resourceTemplateProperty) {
             $property = $resourceTemplateProperty->property();
@@ -103,16 +111,13 @@ class GenerativeData extends AbstractPlugin
             // TODO Manage repeatable property.
             $this->data['min_values'] = (int) $rtpData->dataValue('min_values');
             $this->data['max_values'] = (int) $rtpData->dataValue('max_values');
-            /*
-            if ($rtpData->dataValue('editable')) {
+            // Currently not used in this module.
+            if ($rtpData->dataValue('updatable')) {
                 $this->data['editable'][$term] = $propertyId;
             }
-            if ($rtpData->dataValue('fillable')) {
+            if ($templateGeneratable === 'all' || $rtpData->dataValue('generatable')) {
                 $this->data['fillable'][$term] = $propertyId;
             }
-            */
-            $this->data['editable'][$term] = $propertyId;
-            $this->data['fillable'][$term] = $propertyId;
         }
 
         // When a sub-template is not available, there is no break to allow to
@@ -136,10 +141,7 @@ class GenerativeData extends AbstractPlugin
         // The resource template is checked above.
         $this->data['is_generative'] = count($this->data['datatypes_default'])
             || count($this->data['editable'])
-            || count($this->data['fillable'])
-            // TODO Remove editable mode / fillable mode since a template is required now.
-            || in_array($this->data['editable_mode'], ['all', 'blacklist'])
-            || in_array($this->data['fillable_mode'], ['all', 'blacklist']);
+            || count($this->data['fillable']);
 
         return $this;
     }
@@ -182,19 +184,9 @@ class GenerativeData extends AbstractPlugin
         return $this->data['max_values'];
     }
 
-    public function editableMode(): string
-    {
-        return $this->data['editable_mode'];
-    }
-
     public function editableProperties(): array
     {
         return $this->data['editable'];
-    }
-
-    public function fillableMode(): string
-    {
-        return $this->data['fillable_mode'];
     }
 
     public function fillableProperties(): array
@@ -231,12 +223,7 @@ class GenerativeData extends AbstractPlugin
             return isset($this->data['editable'][$term])
                 && !empty($this->data['datatype'][$term]);
         }
-        return count($this->data['datatypes_default'])
-            && (
-                ($this->data['editable_mode'] === 'all')
-                || ($this->data['editable_mode'] === 'whitelist' && isset($this->data['editable'][$term]))
-                || ($this->data['editable_mode'] === 'blacklist' && !isset($this->data['editable'][$term]))
-            );
+        return (bool) count($this->data['datatypes_default']);
     }
 
     public function isTermFillable(?string $term): bool
@@ -245,12 +232,7 @@ class GenerativeData extends AbstractPlugin
             return isset($this->data['fillable'][$term])
                 && !empty($this->data['datatype'][$term]);
         }
-        return count($this->data['datatypes_default'])
-            && (
-                ($this->data['fillable_mode'] === 'all')
-                || ($this->data['fillable_mode'] === 'whitelist' && isset($this->data['fillable'][$term]))
-                || ($this->data['fillable_mode'] === 'blacklist' && !isset($this->data['fillable'][$term]))
-            );
+        return (bool) count($this->data['datatypes_default']);
     }
 
     /**

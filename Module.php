@@ -794,21 +794,21 @@ class Module extends AbstractModule
         $fieldset = $form->get('o:data');
         $fieldset
             ->add([
-                'name' => 'generate_generable',
-                'type' => \Laminas\Form\Element\Textarea::class,
+                'name' => 'generatable',
+                'type' => \Common\Form\Element\OptionalRadio::class,
                 'options' => [
-                    'label' => 'Make properties generable', // @translate
+                    'label' => 'Make properties generatable via AI', // @translate
                     'options' => [
                         'value_options' => [
-                            'all' => 'All', // @translate
+                            'all' => 'All (default)', // @translate
                             'specific' => 'Specific properties', // @translate
                             'none' => 'None', // @translate
                         ],
                     ],
                 ],
                 'attributes' => [
-                    'id' => 'generate_generable',
-                    'data-setting-key' => 'generate_generable',
+                    'id' => 'generatable',
+                    'data-setting-key' => 'generatable',
                 ],
             ]);
     }
@@ -819,15 +819,15 @@ class Module extends AbstractModule
         $fieldset = $event->getTarget();
         $fieldset
             ->add([
-                'name' => 'generable',
+                'name' => 'generatable',
                 'type' => \Laminas\Form\Element\Checkbox::class,
                 'options' => [
-                    'label' => 'Generable', // @translate
+                    'label' => 'Generatable via AI', // @translate
                 ],
                 'attributes' => [
-                    // 'id' => 'generable',
+                    // 'id' => 'generatable',
                     'class' => 'setting',
-                    'data-setting-key' => 'generable',
+                    'data-setting-key' => 'generatable',
                 ],
             ]);
     }

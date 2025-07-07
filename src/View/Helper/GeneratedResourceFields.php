@@ -6,20 +6,26 @@ use Common\Stdlib\EasyMeta;
 use Generate\Api\Representation\GeneratedResourceRepresentation;
 use Generate\Mvc\Controller\Plugin\GenerativeData;
 use Laminas\View\Helper\AbstractHelper;
+use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 
 class GeneratedResourceFields extends AbstractHelper
 {
     /**
-     * @var GenerativeData
+     * @var \Omeka\Api\Manager
      */
-    protected $generativeData;
+    protected $api;
 
     /**
      * @var \Common\Stdlib\EasyMeta
      */
     protected $easyMeta;
+
+    /**
+     * @var GenerativeData
+     */
+    protected $generativeData;
 
     /**
      * @var bool
@@ -42,6 +48,7 @@ class GeneratedResourceFields extends AbstractHelper
     protected $hasValueSuggest;
 
     public function __construct(
+        ApiManager $api,
         GenerativeData $generativeData,
         EasyMeta $easyMeta,
         bool $hasAdvancedTemplate,
@@ -49,6 +56,7 @@ class GeneratedResourceFields extends AbstractHelper
         bool $hasNumericDataTypes,
         bool $hasValueSuggest
     ) {
+        $this->api = $api;
         $this->generativeData = $generativeData;
         $this->easyMeta = $easyMeta;
         $this->hasAdvancedTemplate = $hasAdvancedTemplate;
@@ -60,10 +68,15 @@ class GeneratedResourceFields extends AbstractHelper
     /**
      * Get all fields for this resource, updatable or not.
      *
+     * The format is the same than the module Contribution in order to simplify
+     * the maintenance, even if with this module, it can be simplified, because
+     * the proposal are always scalar.
+     *
      * The order is the one of the resource template.
      *
      * Some generations may not have the matching fields: it means that the
-     * config changed, so the values are no more editable, so they are skipped.
+     * config changed, so the values are no more editable or fillable.
+     * Unlike Contribution, these fields are displayed when the property exists.
      *
      * The output is similar than $resource->values(), but may contain empty
      * properties, and four more keys, editable, fillable, data types and
@@ -71,13 +84,17 @@ class GeneratedResourceFields extends AbstractHelper
      *
      * Note that sub-generation fields for media are not included here.
      *
+     * The key "original" is optional.
+     * "updatable" is "editable" in Contribution (for a future version).
+     * "generatable" is "fillable" in Contribution.
+     *
      * The minimum number of generations is managed: empty generations may
      * be added according to the minimal number of values.
      *
      * <code>
      * [
      *   {term} => [
-     *     'template_property' => {ResourceTemplatePropertyRepresentation},
+     *     'template_property' => {ResourceTemplatePropertyRepresentation|null},
      *     'property' => {PropertyRepresentation},
      *     'alternate_label' => {label},
      *     'alternate_comment' => {comment},
@@ -91,7 +108,7 @@ class GeneratedResourceFields extends AbstractHelper
      *     'values' => [
      *       {ValueRepresentation}, …
      *     ],
-     *     'generations' => [
+     *     'generated_resources' => [
      *       [
      *         'type' => {string},
      *         'basetype' => {string}, // To make process easier (literal, resource or uri).
@@ -151,11 +168,12 @@ class GeneratedResourceFields extends AbstractHelper
             'min_values' => 0,
             'max_values' => 0,
             'more_values' => false,
+            // "generatable" is "fillable" in Contribution. "updatable" is "editable" (currently not used).
             'editable' => false,
             'fillable' => false,
             'datatypes' => [],
             'values' => [],
-            'generations' => [],
+            'generated_resources' => [],
         ];
 
         // The generation is always on the stored resource, if any.
@@ -211,11 +229,12 @@ class GeneratedResourceFields extends AbstractHelper
                 'fillable' => $generative->isTermFillable($term),
                 'datatypes' => $generative->dataTypeTerm($term),
                 'values' => $valuesValues,
-                'generations' => [],
+                'generated_resources' => [],
             ];
         }
 
-        // The remaining values don't have a template and are never editable.
+        // The remaining values don't have a template and are never editable
+        // or fillable. Nevertheless, they are displayed.
         foreach ($values as $term => $valueInfo) {
             if (!isset($fields[$term])) {
                 // Value info includes the property and the values.
@@ -227,7 +246,7 @@ class GeneratedResourceFields extends AbstractHelper
                 $fields[$term]['editable'] = false;
                 $fields[$term]['fillable'] = false;
                 $fields[$term]['datatypes'] = [];
-                $fields[$term]['generations'] = [];
+                $fields[$term]['generated_resources'] = [];
                 $fields[$term] = array_replace($defaultField, $fields[$term]);
             }
         }
@@ -269,7 +288,7 @@ class GeneratedResourceFields extends AbstractHelper
                     $uri = null;
                     $label = null;
                 }
-                $fields[$term]['generations'][] = [
+                $fields[$term]['generated_resources'][] = [
                     // The type cannot be changed.
                     'type' => $dataType,
                     'basetype' => $baseType,
@@ -311,20 +330,20 @@ class GeneratedResourceFields extends AbstractHelper
             }
             foreach ($termProposal as $key => $proposal) {
                 if (isset($proposal['proposed']['@uri'])) {
-                    $proposal['original']['@uri'] = $this->cleanString($proposal['original']['@uri']);
-                    $proposal['original']['@label'] = $this->cleanString($proposal['original']['@label']);
+                    $proposal['original']['@uri'] = $this->cleanString($proposal['original']['@uri'] ?? '');
+                    $proposal['original']['@label'] = $this->cleanString($proposal['original']['@label'] ?? '');
                     if (($proposal['original']['@uri'] === '' && $proposal['proposed']['@uri'] === '')
                         && ($proposal['original']['@label'] === '' && $proposal['proposed']['@label'] === '')
                     ) {
                         unset($proposals[$term][$key]);
                     }
                 } elseif (isset($proposal['proposed']['@resource'])) {
-                    $proposal['original']['@resource'] = (int) $proposal['original']['@resource'];
+                    $proposal['original']['@resource'] = (int) $proposal['original']['@resource'] ?? 0;
                     if (!$proposal['original']['@resource'] && !$proposal['proposed']['@resource']) {
                         unset($proposals[$term][$key]);
                     }
                 } else {
-                    $proposal['original']['@value'] = $this->cleanString($proposal['original']['@value']);
+                    $proposal['original']['@value'] = $this->cleanString($proposal['original']['@value'] ?? '');
                     if ($proposal['original']['@value'] === '' && $proposal['proposed']['@value'] === '') {
                         unset($proposals[$term][$key]);
                     }
@@ -355,9 +374,9 @@ class GeneratedResourceFields extends AbstractHelper
                 'fillable' => true,
                 'datatypes' => ['file'],
                 'values' => [],
-                'generations' => [],
+                'generated_resources' => [],
             ];
-            $fields['file']['generations'][] = [
+            $fields['file']['generated_resources'][] = [
                 'type' => 'file',
                 'basetype' => 'literal',
                 'lang' => null,
@@ -388,7 +407,7 @@ class GeneratedResourceFields extends AbstractHelper
             if (!isset($proposals[$term])) {
                 continue;
             }
-            foreach ($field['generations'] as &$fieldGeneration) {
+            foreach ($field['generated_resources'] as &$fieldGeneration) {
                 $proposed = null;
                 $dataType = $fieldGeneration['type'];
                 if (!$generative->isTermDataType($term, $dataType)) {
@@ -472,7 +491,7 @@ class GeneratedResourceFields extends AbstractHelper
             if (!isset($proposals[$term])) {
                 continue;
             }
-            foreach ($field['generations'] as &$fieldGeneration) {
+            foreach ($field['generated_resources'] as &$fieldGeneration) {
                 $proposed = null;
                 $dataType = $fieldGeneration['type'];
                 if (!$generative->isTermDatatype($term, $dataType)) {
@@ -544,14 +563,34 @@ class GeneratedResourceFields extends AbstractHelper
         }
         unset($field, $fieldGeneration);
 
-        // Append only remaining generations that are fillable.
-        // Other ones are related to an older config.
-        $proposals = array_intersect_key(array_filter($proposals), $generative->fillableProperties());
+        // Append remaining proposed terms. They may be a property removed from
+        // the template or from vocabularies, or from an older config.
+        // Values without property are not displayed.
+        // $proposals = array_intersect_key(array_filter($proposals), $generative->fillableProperties());
         foreach ($proposals as $term => $termProposal) {
             $propertyId = $this->easyMeta->propertyId($term);
             if (!$propertyId) {
                 continue;
             }
+            if (empty($fields[$term])) {
+                $property = $this->api->read('properties', ['id' => $propertyId])->getContent();
+                $fields[$term] = [
+                    'template_property' => null,
+                    'property' => $property,
+                    'alternate_label' => null,
+                    'alternate_comment' => null,
+                    'required' => false,
+                    'min_values' => 0,
+                    'max_values' => 0,
+                    'more_values' => false,
+                    'editable' => false,
+                    'fillable' => false,
+                    'datatypes' => ['literal', 'resource', 'uri'],
+                    'values' => [],
+                    'generated_resources' => [],
+                ];
+            }
+            // $isFillable = $generative->isTermFillable($term);
             $typeTemplate = null;
             $resourceTemplateProperty = $resourceTemplate
                 ? $resourceTemplate->resourceTemplateProperty($propertyId)
@@ -573,12 +612,14 @@ class GeneratedResourceFields extends AbstractHelper
                 } else {
                     $dataType = 'literal';
                 }
+                /*
                 if (!$generative->isTermDatatype($term, $dataType)) {
                     continue;
                 }
+                */
                 $baseType = $this->easyMeta->dataTypeMain($dataType) ?? 'literal';
                 if ($baseType === 'uri') {
-                    $fields[$term]['generations'][] = [
+                    $fields[$term]['generated_resources'][] = [
                         'type' => $dataType,
                         'basetype' => 'uri',
                         'new' => true,
@@ -598,7 +639,7 @@ class GeneratedResourceFields extends AbstractHelper
                         ],
                     ];
                 } elseif ($baseType === 'resource') {
-                    $fields[$term]['generations'][] = [
+                    $fields[$term]['generated_resources'][] = [
                         'type' => $dataType,
                         'basetype' => 'resource',
                         'new' => true,
@@ -618,7 +659,7 @@ class GeneratedResourceFields extends AbstractHelper
                         ],
                     ];
                 } else {
-                    $fields[$term]['generations'][] = [
+                    $fields[$term]['generated_resources'][] = [
                         'type' => $dataType,
                         'basetype' => 'literal',
                         'new' => true,
@@ -655,28 +696,28 @@ class GeneratedResourceFields extends AbstractHelper
             }
             // Remove generations with an invalid or an unavailable type.
             // This is a security fix, but it can remove data.
-            foreach ($field['generations'] as $key => &$fieldGeneration) {
+            foreach ($field['generated_resources'] as $key => &$fieldGeneration) {
                 $dataType = $fieldGeneration['type'] ?? '';
                 $typeColon = strtok($dataType, ':');
                 $baseType = $this->easyMeta->datatypeMain($dataType) ?? 'literal';
                 // FIXME Warning, numeric:interval and numeric:duration are not managed.
                 if (!$this->hasNumericDataTypes && $typeColon === 'numeric') {
-                    unset($field['generations'][$key]);
+                    unset($field['generated_resources'][$key]);
                     continue;
                 }
                 if (!$this->hasCustomVocab && $typeColon === 'customvocab') {
-                    unset($field['generations'][$key]);
+                    unset($field['generated_resources'][$key]);
                     continue;
                 }
                 if (!$this->hasValueSuggest && ($typeColon === 'valuesuggest' || $typeColon === 'valuesuggestall')) {
-                    unset($field['generations'][$key]);
+                    unset($field['generated_resources'][$key]);
                     continue;
                 }
             }
             unset($fieldGeneration);
 
             // Clean indexes for old generations.
-            $field['generations'] = array_values($field['generations']);
+            $field['generated_resources'] = array_values($field['generated_resources']);
             if (!$field['fillable']) {
                 continue;
             }
@@ -693,7 +734,7 @@ class GeneratedResourceFields extends AbstractHelper
             // they are combined.
             // TODO Check for correction, with some values corrected and some appended.
             $countValues = count($field['values']);
-            $countGenerations = count($field['generations']);
+            $countGenerations = count($field['generated_resources']);
             $countExisting = $field['editable']
                 ? max($countValues, $countGenerations)
                 : $countValues + $countGenerations;
@@ -709,7 +750,7 @@ class GeneratedResourceFields extends AbstractHelper
             $baseType = $this->easyMeta->dataTypeMain($dataType) ?? 'literal';
             // Prepare empty generations to simplify theme.
             while ($missingValues) {
-                $field['generations'][] = [
+                $field['generated_resources'][] = [
                     'type' => $dataType,
                     'basetype' => $baseType,
                     'new' => true,

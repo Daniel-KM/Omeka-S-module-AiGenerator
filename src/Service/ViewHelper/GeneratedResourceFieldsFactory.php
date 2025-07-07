@@ -13,6 +13,7 @@ class GeneratedResourceFieldsFactory implements FactoryInterface
         $plugins = $services->get('ControllerPluginManager');
         $moduleManager = $services->get('Omeka\ModuleManager');
         return new GeneratedResourceFields(
+            $services->get('Omeka\ApiManager'),
             $plugins->get('generativeData'),
             $services->get('Common\EasyMeta'),
             // Check if modules are available.
