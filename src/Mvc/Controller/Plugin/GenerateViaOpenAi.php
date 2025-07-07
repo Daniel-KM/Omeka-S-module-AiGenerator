@@ -630,7 +630,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 $term = $property->term();
                 $tool['function']['parameters']['properties'][$term] = [
                     'type' => 'string',
-                    'description' => sprintf('Example %s', $property->label()), // @translate
+                    'description' => sprintf('%1$s: %2$s', $property->label(), $property->comment()),
                     // TODO For custom vocabs, the values may be predefined with "enum".
                     // TODO Use the data type for numeric and dates.
                 ];
