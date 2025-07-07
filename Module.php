@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace AiGenerator;
 
@@ -6,9 +8,9 @@ if (!class_exists('Common\TraitModule', false)) {
     require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
+use AiGenerator\Form\BatchEditFieldset;
 use Common\Stdlib\PsrMessage;
 use Common\TraitModule;
-use AiGenerator\Form\BatchEditFieldset;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Form\Fieldset;
@@ -29,7 +31,7 @@ class Module extends AbstractModule
 {
     use TraitModule;
 
-    const NAMESPACE = __NAMESPACE__;
+    public const NAMESPACE = __NAMESPACE__;
 
     protected $dependencies = [
         'AdvancedResourceTemplate',
@@ -356,7 +358,7 @@ class Module extends AbstractModule
         );
     }
 
-   /**
+    /**
      * Clean params for batch update and set option for individual update.
      */
     public function handleResourceBatchUpdatePreprocess(Event $event): void
@@ -496,7 +498,7 @@ class Module extends AbstractModule
 
         // The validation of the entity in the adapter is processed after event,
         // so trigger it here with a new error store.
-        $validateErrorStore = new \Omeka\Stdlib\ErrorStore;
+        $validateErrorStore = new \Omeka\Stdlib\ErrorStore();
         $adapter = $event->getTarget();
         $adapter->validateEntity($entity, $validateErrorStore);
         if ($validateErrorStore->hasErrors()) {
@@ -747,7 +749,6 @@ class Module extends AbstractModule
         $api = $services->get('Omeka\ApiManager');
         $translate = $view->plugin('translate');
         $translator = $services->get('MvcTranslator');
-
 
         $resource = $event->getParam('entity');
         $total = $api

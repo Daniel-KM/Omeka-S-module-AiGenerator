@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace AiGenerator\Job;
 
@@ -36,7 +38,7 @@ class BatchValidate extends AbstractJob
      */
     protected $aiRecordIds;
 
-    public function perform()
+    public function perform(): void
     {
         $services = $this->getServiceLocator();
 

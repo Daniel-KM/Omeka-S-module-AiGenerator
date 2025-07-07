@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace AiGenerator\Controller\Admin;
 
@@ -253,7 +255,7 @@ class IndexController extends AbstractActionController
         // Derive the query, removing limiting and sorting params.
         $query = json_decode($this->params()->fromPost('query', []), true);
         unset($query['submit'], $query['page'], $query['per_page'], $query['limit'],
-           $query['offset'], $query['sort_by'], $query['sort_order']);
+            $query['offset'], $query['sort_by'], $query['sort_order']);
 
         $form = $this->getForm(ConfirmForm::class);
         $form->setData($this->getRequest()->getPost());
@@ -355,7 +357,7 @@ class IndexController extends AbstractActionController
                 'link_job' => sprintf(
                     '<a href="%s">',
                     htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
-                    ),
+                ),
                 'job_id' => $job->getId(),
                 'link_end' => '</a>',
                 'link_log' => class_exists('Log\Module', false)
@@ -382,7 +384,7 @@ class IndexController extends AbstractActionController
                 'link_job' => sprintf(
                     '<a href="%s">',
                     htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
-                    ),
+                ),
                 'job_id' => $job->getId(),
                 'link_end' => '</a>',
                 'link_log' => class_exists('Log\Module', false)

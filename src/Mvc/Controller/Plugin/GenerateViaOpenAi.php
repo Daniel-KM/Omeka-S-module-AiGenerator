@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace AiGenerator\Mvc\Controller\Plugin;
 
+use AiGenerator\Api\Representation\AiRecordRepresentation;
 use Common\Stdlib\EasyMeta;
 use Common\Stdlib\PsrMessage;
-use AiGenerator\Api\Representation\AiRecordRepresentation;
 use Laminas\Authentication\AuthenticationServiceInterface;
 use Laminas\I18n\Translator\TranslatorInterface;
 use Laminas\Log\LoggerInterface;
@@ -144,7 +146,7 @@ class GenerateViaOpenAi extends AbstractPlugin
     protected $project;
 
     /**
-     * @var boolean
+     * @var bool
      */
     protected $skipMessenger = false;
 
@@ -691,7 +693,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                         $list[$property->term()] = $this->translator->translate($property->label());
                     }
                 }
-                $replace['{properties_sample}'] =  json_encode($list, 448);
+                $replace['{properties_sample}'] = json_encode($list, 448);
             } else {
                 $missingTemplate('{properties_sample}');
                 $replace['{properties_sample}'] = '';
@@ -801,7 +803,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         $proposal = [
-            'template' =>  $resourceTemplate ? $resourceTemplate->id() : null,
+            'template' => $resourceTemplate ? $resourceTemplate->id() : null,
         ];
 
         // Some models don't support structured output, so manage all cases.

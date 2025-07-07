@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace AiGenerator\Mvc\Controller\Plugin;
 
+use AiGenerator\Api\Representation\AiRecordRepresentation;
 use Common\Stdlib\PsrMessage;
 use Doctrine\ORM\EntityManager;
-use AiGenerator\Api\Representation\AiRecordRepresentation;
 use Laminas\Authentication\AuthenticationServiceInterface;
 use Laminas\Log\LoggerInterface;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;

@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace AiGenerator\View\Helper;
 
-use Common\Stdlib\EasyMeta;
 use AiGenerator\Api\Representation\AiRecordRepresentation;
 use AiGenerator\Mvc\Controller\Plugin\GenerativeData;
+use Common\Stdlib\EasyMeta;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
