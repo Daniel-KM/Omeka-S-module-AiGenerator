@@ -2,7 +2,7 @@
 
 namespace Generate;
 
-if (!class_exists(\Common\TraitModule::class)) {
+if (!class_exists('Common\TraitModule', false)) {
     require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
@@ -37,10 +37,18 @@ class Module extends AbstractModule
         $plugins = $services->get('ControllerPluginManager');
         $translate = $plugins->get('translate');
 
-        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.66')) {
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.70')) {
             $message = new \Omeka\Stdlib\Message(
                 $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
-                'Common', '3.4.66'
+                'Common', '3.4.70'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        }
+
+        if (!$this->checkModuleActiveVersion('AdvancedResourceTemplate', '3.4.43')) {
+            $message = new \Omeka\Stdlib\Message(
+                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                'Advanced Resource Template', '3.4.43'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
@@ -89,6 +97,8 @@ class Module extends AbstractModule
          */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
 
+        // Users who can edit resources can update generations.
+        // A check is done on the specific resource for some roles.
         $authors = [
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
             \Omeka\Permissions\Acl::ROLE_SITE_ADMIN,
@@ -96,6 +106,7 @@ class Module extends AbstractModule
             \Omeka\Permissions\Acl::ROLE_REVIEWER,
             \Omeka\Permissions\Acl::ROLE_AUTHOR,
         ];
+
         $validators = [
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
             \Omeka\Permissions\Acl::ROLE_SITE_ADMIN,
@@ -166,6 +177,8 @@ class Module extends AbstractModule
                 ],
                 new OwnsEntityAssertion()
             )
+
+            // Administration.
             ->allow(
                 $validators,
                 [
@@ -320,6 +333,12 @@ class Module extends AbstractModule
 
     /**
      * Add an error during hydration to avoid to save a resource to validate.
+     *
+     * Context: When a generated resource is converted into an item, it should be
+     * checked first. Some checks are done via events in api and hydration.
+     * So the process requires options "isGeneratedResource" and"validateOnly"
+     * At the end, an error is added to the error store to avoid to save the
+     * resource.
      */
     public function handleValidateGeneratedResource(Event $event): void
     {
@@ -486,15 +505,17 @@ class Module extends AbstractModule
         $total = $view->api()
             ->search('generated_resources', [
                 'resource_id' => $resource->id(),
+                'limit' => 0,
             ])
             ->getTotalResults();
         $totalNotReviewed = $view->api()
             ->search('generated_resources', [
                 'resource_id' => $resource->id(),
                 'reviewed' => '0',
+                'limit' => 0,
             ])
             ->getTotalResults();
-        $heading = $translate('Generated resources'); // @translat
+        $heading = $translate('Generated resources'); // @translate
         $message = $total
             ? new PsrMessage(
                 '{total} generated resources ({count} not reviewed)', // @translate

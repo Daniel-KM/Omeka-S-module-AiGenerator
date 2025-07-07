@@ -2,7 +2,7 @@ CREATE TABLE `generated_resource` (
     `id` INT AUTO_INCREMENT NOT NULL,
     `resource_id` INT DEFAULT NULL,
     `owner_id` INT DEFAULT NULL,
-    `reviewed` TINYINT(1) DEFAULT 0 NOT NULL,
+    `reviewed` TINYINT(1) DEFAULT '0' NOT NULL,
     `proposal` LONGTEXT NOT NULL COMMENT '(DC2Type:json)',
     `created` DATETIME NOT NULL,
     `modified` DATETIME DEFAULT NULL,

@@ -208,6 +208,7 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
     public function hydrate(Request $request, EntityInterface $entity, ErrorStore $errorStore): void
     {
         // TODO Use shouldHydrate() and validateEntity().
+
         /** @var \Generate\Entity\GeneratedResource $entity */
 
         $data = $request->getContent();

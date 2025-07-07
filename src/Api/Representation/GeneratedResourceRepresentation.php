@@ -741,10 +741,13 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
 
             $mainType = null;
             $typeTemplate = null;
+            $isPublic = true;
             if ($resourceTemplate) {
+                /** @var \Omeka\Api\Representation\ResourceTemplatePropertyRepresentation $resourceTemplateProperty */
                 $resourceTemplateProperty = $resourceTemplate->resourceTemplateProperty($propertyId);
                 if ($resourceTemplateProperty) {
                     $typeTemplate = $resourceTemplateProperty->dataType();
+                    $isPublic = !$resourceTemplateProperty->isPrivate();
                 }
             }
 
@@ -782,7 +785,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                             'type' => $typeTemplate ?? $mainType,
                             'property_id' => $propertyId,
                             '@value' => $proposition['proposed']['@value'],
-                            'is_public' => true,
+                            'is_public' => $isPublic,
                             '@language' => $proposition['proposed']['@language'] ?? null,
                         ];
                         break;
@@ -793,7 +796,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                             'o:label' => null,
                             'value_resource_id' => $proposition['proposed']['@resource'],
                             '@id' => null,
-                            'is_public' => true,
+                            'is_public' => $isPublic,
                             '@language' => null,
                         ];
                         break;
@@ -806,7 +809,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                             'property_id' => $propertyId,
                             'o:label' => $proposition['proposed']['@label'],
                             '@id' => $proposition['proposed']['@uri'],
-                            'is_public' => true,
+                            'is_public' => $isPublic,
                             '@language' => $proposition['proposed']['@language'] ?? null,
                         ];
                         break;
@@ -1165,11 +1168,13 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
             $uriLabels[$dataType] = [];
             $customVocabId = (int) substr($dataType, 12);
             if ($customVocabId) {
-                $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
-                /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
-                $customVocab = $api->searchOne('custom_vocabs', ['id' => $customVocabId])->getContent();
-                if ($customVocab) {
+                $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+                try {
+                    /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
+                    $customVocab = $api->read('custom_vocabs', ['id' => $customVocabId])->getContent();
                     $uriLabels[$customVocabId] = $customVocab->listUriLabels() ?: [];
+                } catch (\Exception $e) {
+                    // Skip.
                 }
             }
         }

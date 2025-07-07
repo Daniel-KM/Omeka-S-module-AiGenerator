@@ -43,6 +43,7 @@ $sortHeadings = [
 ];
 
 $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\GeneratedResourceAdapter::class, 'batch_delete');
+$userIsAllowedToCreateResource = $this->userIsAllowed(\Omeka\Api\Adapter\ItemAdapter::class, 'create');
 ?>
 
 <?= $this->pageTitle($translate('Generated resource metadata')) ?>
@@ -76,9 +77,9 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
         </select>
         <div class="batch-actions">
             <button type="button" class="button default active" disabled="disabled"><?= $translate('Go') ?></button>
-            <input type="submit" class="validate-selected" name="validate_selected" value="<?= $translate('Go') ?>" formaction="<?= $escape($url(null, ['action' => 'batch-edit'], true)) ?>">
-            <input type="submit" class="validate-all" name="validate_all" value="<?= $translate('Go') ?>" formaction="<?= $escape($url(null, ['action' => 'batch-edit-all'], true)) ?>">
-            <input type="hidden" name="query" class="batch-query" value="<?= $escape(json_encode($this->params()->fromQuery())) ?>">
+            <input type="submit" class="validate-selected" name="validate_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url(null, ['action' => 'batch-edit'], true)) ?>">
+            <input type="submit" class="validate-all" name="validate_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url(null, ['action' => 'batch-edit-all'], true)) ?>">
+            <input type="hidden" name="query" class="batch-query" value="<?= $escapeAttr(json_encode($this->params()->fromQuery())) ?>">
             <a class="delete button sidebar-content delete-selected" data-sidebar-selector="#sidebar-delete-selected"><?= $translate('Go') ?></a>
             <a class="delete button sidebar-content delete-all" data-sidebar-selector="#sidebar-delete-all"><?= $translate('Go') ?></a>
         </div>
@@ -95,7 +96,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
         </thead>
         <tbody>
             <?php foreach ($generatedResources as $generatedResource):
-            $generatedResource = $generatedResource->resource();
+            $generatedResourceResource = $generatedResource->resource();
             $resourceTemplate = $generatedResource->resourceTemplate();
             $owner = $generatedResource->owner();
             if ($owner) {
@@ -104,7 +105,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
                 $ownerText = $translate('[no owner]');
             }
             ?>
-            <tr class="generated-resource">
+            <tr class="generated-resource" data-generated-resource-id="<?= $generatedResource->id() ?>">
                 <td>
                     <?php if (false && $generatedResource->userIsAllowed('update') || $generatedResource->userIsAllowed('delete')): ?>
                     <input type="checkbox" name="resource_ids[]" value="<?= $generatedResource->id() ?>" aria-label="<?= $translate('Select generated resource') ?>">
@@ -112,22 +113,34 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
                     <span class="title"><?= $generatedResource->linkResource($generatedResource->displayTitle()) ?></span>
                     <span class="template"><?= $escape($resourceTemplate ? $resourceTemplate->label() : $translate('No resource template')) ?></span>
                     <ul class="actions">
-                        <?php if ($generatedResource && $generatedResource->userIsAllowed('update')): ?>
-                        <li><span class="single actions"><a href="#"
-                            class="status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                            data-status-toggle-url="<?= $escape($generatedResource->adminUrl('toggle-status')) ?>"
-                            data-status="<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                            aria-label="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"
-                            title="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"></a>
-                        </span></li>
+                        <?php if ($generatedResourceResource && $generatedResource->userIsAllowed('update')): ?>
+                        <li>
+                            <span class="single actions"><a href="#"
+                                class="status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                                data-status-toggle-url="<?= $escapeAttr($generatedResource->adminUrl('toggle-status')) ?>"
+                                data-status="<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                                aria-label="<?= $escapeAttr($translate('Toggle status reviewed/unreviewed')) ?>"
+                                title="<?= $escapeAttr($translate('Toggle status reviewed/unreviewed')) ?>"></a>
+                            </span>
+                        </li>
                         <?php endif; ?>
                         <li>
-                        <?php if ($generatedResource): ?>
+                            <span class="single actions"><a href="#"
+                                data-url="<?= $escapeAttr($url('admin/generated-resource/id', ['action' => 'send-message', 'id' => $generatedResource->id()], true)) ?>"
+                                class="send-message o-icon- fa-envelope"
+                                aria-label="<?= $escape($translate('Send a message to the author')) ?>"
+                                title="<?= $escape($translate('Send a message to the author')) ?>"></a>
+                            </span>
+                        </li>
+                        <?php if ($generatedResourceResource): ?>
+                        <li>
                             <?= $generatedResource->linkResource('', 'show', [
                                 'class' => 'o-icon-edit',
                                 'title' => $translate('Edit'),
                             ]) ?>
-                        <?php else: ?>
+                        </li>
+                        <?php elseif ($userIsAllowedToCreateResource): ?>
+                        <li>
                             <?= $hyperlink('', $url('admin/generated-resource/id', ['action' => 'create-resource', 'id' => $generatedResource->id()], true), [
                                 'class' => 'o-icon-add',
                                 'data-id' => $generatedResource->id(),
@@ -136,19 +149,23 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
                         </li>
                         <?php endif; ?>
                         <?php if ($generatedResource->userIsAllowed('delete')): ?>
-                        <li><?= $hyperlink('', '#', [
-                            'data-sidebar-selector' => '#sidebar',
-                            'data-sidebar-content-url' => $generatedResource->adminUrl('delete-confirm'),
-                            'class' => 'o-icon-delete sidebar-content',
-                            'title' => $translate('Delete'),
-                        ]) ?></li>
+                        <li>
+                            <?= $hyperlink('', '#', [
+                                'data-sidebar-selector' => '#sidebar',
+                                'data-sidebar-content-url' => $generatedResource->adminUrl('delete-confirm'),
+                                'class' => 'o-icon-delete sidebar-content',
+                                'title' => $translate('Delete'),
+                            ]) ?>
+                        </li>
                         <?php endif; ?>
-                        <li><?= $hyperlink('', '#', [
-                            'data-sidebar-selector' => '#sidebar',
-                            'data-sidebar-content-url' => $generatedResource->adminUrl('show-details'),
-                            'class' => 'o-icon-more sidebar-content',
-                            'title' => $translate('Details'),
-                        ]) ?></li>
+                        <li>
+                            <?= $hyperlink('', '#', [
+                                'data-sidebar-selector' => '#sidebar',
+                                'data-sidebar-content-url' => $generatedResource->adminUrl('show-details'),
+                                'class' => 'o-icon-more sidebar-content',
+                                'title' => $translate('Details'),
+                            ]) ?>
+                        </li>
                     </ul>
                 </td>
                 <td><?= $ownerText ?></td>
