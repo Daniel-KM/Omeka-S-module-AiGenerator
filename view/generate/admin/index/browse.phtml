@@ -13,6 +13,7 @@
 $plugins = $this->getHelperPluginManager();
 $url = $plugins->get('url');
 $i18n = $plugins->get('i18n');
+$setting = $plugins->get('setting');
 $escape = $plugins->get('escapeHtml');
 $sortLink = $plugins->get('sortLink');
 $assetUrl = $plugins->get('assetUrl');
@@ -42,6 +43,8 @@ $sortHeadings = [
     ],
 ];
 
+$displayFlagReview = !$setting('generate_hide_flag_review');
+
 $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\GeneratedResourceAdapter::class, 'batch_delete');
 // $userIsAllowedToCreateResource = $this->userIsAllowed(\Omeka\Api\Adapter\ItemAdapter::class, 'create');
 ?>
@@ -66,10 +69,12 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
     <div class="batch-inputs">
         <select class="batch-actions-select" aria-label="<?= $translate('Batch actions') ?>">
             <option value="default"><?= $translate('Batch actions') ?></option>
+            <?php if ($displayFlagReview): ?>
             <option value="read-selected" disabled="disabled"><?= $translate('Set status checked') ?></option>
             <option value="read-all"><?= $translate('Set status checked all') ?></option>
             <option value="unread-selected" disabled="disabled"><?= $translate('Set status unchecked') ?></option>
             <option value="unread-all"><?= $translate('Set status unchecked all') ?></option>
+            <?php endif; ?>
             <option value="validate-selected" disabled="disabled"><?= $translate('Validate selected') ?></option>
             <option value="validate-all"><?= $translate('Validate all') ?></option>
             <option value="delete-selected" disabled="disabled"><?= $translate('Delete selected') ?></option>
@@ -77,10 +82,12 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
         </select>
         <div class="batch-actions">
             <button type="button" class="button default active" disabled="disabled"><?= $translate('Go') ?></button>
+            <?php if ($displayFlagReview): ?>
             <input type="submit" class="read-selected" name="read_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
             <input type="submit" class="read-all" name="read_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
             <input type="submit" class="unread-selected" name="read_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
             <input type="submit" class="unread-all" name="read_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
+            <?php endif; ?>
             <input type="submit" class="validate-selected" name="validate_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
             <input type="submit" class="validate-all" name="validate_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
             <input type="hidden" name="query" class="batch-query" value="<?= $escapeAttr(json_encode($this->params()->fromQuery())) ?>">
@@ -118,7 +125,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
                     <span class="title"><?= $generatedResource->linkResource($generatedResource->displayTitle()) ?></span>
                     <span class="template"><?= $escape($resourceTemplate ? $resourceTemplate->label() : $translate('No resource template')) ?></span>
                     <ul class="actions">
-                        <?php if ($generatedResourceResource && $generatedResource->userIsAllowed('update')): ?>
+                        <?php if ($displayFlagReview && $generatedResourceResource && $generatedResource->userIsAllowed('update')): ?>
                         <li>
                             <a href="#"
                                 class="status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"

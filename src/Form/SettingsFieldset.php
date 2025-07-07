@@ -135,6 +135,18 @@ class SettingsFieldset extends Fieldset
                     'required' => false,
                 ],
             ])
+
+            ->add([
+                'type' => Element\Checkbox::class,
+                'name' => 'generate_hide_flag_review',
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'HIde the flag review/unreviewed', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate_hide_flag_review',
+                ],
+            ])
         ;
     }
 }

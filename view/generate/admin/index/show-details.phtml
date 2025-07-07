@@ -7,6 +7,7 @@
  */
 
 $plugins = $this->getHelperPluginManager();
+$setting = $plugins->get('setting');
 $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
 ?>
@@ -34,9 +35,11 @@ $translate = $plugins->get('translate');
         <div class="value">
             <div class="resource"><?= $resource->resource() ? $resource->resource()->linkPretty() : $escape($translate('No resource')) ?></div>
         </div>
+        <?php if (!$setting('generate_hide_flag_review')): ?>
         <div class="value">
             <div class="reviewed"><?= $escape($resource->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></div>
         </div>
+        <?php endif; ?>
     </div>
     <div class="meta-group generated-resource">
         <h4><?= $escape($translate('Proposal')) ?></h4>
