@@ -35,35 +35,26 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
 
     public function getJsonLd()
     {
-        $token = $this->token();
-        if ($token) {
-            $token = $token->getReference();
-        }
-
-        $created = [
-            '@value' => $this->getDateTime($this->created()),
-            '@type' => 'http://www.w3.org/2001/XMLSchema#dateTime',
-        ];
-
-        $modified = $this->modified();
-        if ($modified) {
-            $modified = [
-                '@value' => $this->getDateTime($modified),
-                '@type' => 'http://www.w3.org/2001/XMLSchema#dateTime',
-            ];
-        }
-
         $generatedResource = $this->resource();
         $owner = $this->owner();
+        $modified = $this->modified();
 
         return [
             'o:id' => $this->id(),
-            'o:resource' => $generatedResource ? $generatedResource->getReference() : null,
-            'o:owner' => $owner ? $owner->getReference() : null,
+            'o:resource' => $generatedResource ? $generatedResource->getReference()->jsonSerialize() : null,
+            'o:owner' => $owner ? $owner->getReference()->jsonSerialize() : null,
             'o:reviewed' => $this->isReviewed(),
             'o:proposal' => $this->proposal(),
-            'o:created' => $created,
-            'o:modified' => $modified,
+            'o:created' => [
+                '@value' => $this->getDateTime($this->created())->jsonSerialize(),
+                '@type' => 'http://www.w3.org/2001/XMLSchema#dateTime',
+            ],
+            'o:modified' => $modified
+                ? [
+                    '@value' => $this->getDateTime($modified)->jsonSerialize(),
+                    '@type' => 'http://www.w3.org/2001/XMLSchema#dateTime',
+                ]
+                : null,
         ];
     }
 
