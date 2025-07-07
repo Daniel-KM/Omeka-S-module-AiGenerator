@@ -15,6 +15,7 @@ use Laminas\Form\Fieldset;
 use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
+use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Module\AbstractModule;
 use Omeka\Permissions\Assertion\OwnsEntityAssertion;
 
@@ -412,7 +413,27 @@ class Module extends AbstractModule
         if (empty($resourceData['generate_metadata'])
             && empty($resourceData['generate']['generate_metadata'])
         ) {
-            return;
+            $settings = $services->get('Omeka\Settings');
+            $itemSetsAuto = $settings->get('generate_item_sets_auto');
+            if (!$itemSetsAuto) {
+                return;
+            }
+            $item = $representation instanceof MediaRepresentation
+                ? $representation->item()
+                : $representation;
+            if (!array_intersect_key($item->itemSets(), array_flip($itemSetsAuto))) {
+                return;
+            }
+            // Check if the record is already generated.
+            $api = $services->get('Omeka\ApiManager');
+            $total = $api->search('generated_resources', [
+                // TODO Item or media? The same for now, so item.
+                'resource_id' => $item->id(),
+                'limit' => 0,
+            ])->getTotalResults();
+            if ($total) {
+                return;
+            }
         }
 
         $plugins = $services->get('ControllerPluginManager');

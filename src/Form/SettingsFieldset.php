@@ -137,6 +137,22 @@ class SettingsFieldset extends Fieldset
             ])
 
             ->add([
+                'type' => CommonElement\OptionalItemSetSelect::class,
+                'name' => 'generate_item_sets_auto',
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Item sets for automatic generation', // @translate
+                    'empty_option' => '',
+                ],
+                'attributes' => [
+                    'id' => 'generate_item_sets_auto',
+                    'class' => 'chosen-select',
+                    'multiple' => true,
+                    'data-placeholder' => 'Select item sets…', // @translate
+                ],
+            ])
+
+            ->add([
                 'type' => Element\Checkbox::class,
                 'name' => 'generate_hide_flag_review',
                 'options' => [

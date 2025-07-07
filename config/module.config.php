@@ -163,6 +163,7 @@ return [
                 {properties_sample_json}
                 TXT, // @translate
             'generate_prompt_user' => 'Analyze the image then generate metadata as json', // @translate
+            'generate_item_sets_auto' => [],
             'generate_hide_flag_review' => false,
         ],
     ],
