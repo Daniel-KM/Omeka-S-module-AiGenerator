@@ -19,7 +19,7 @@ class IndexController extends AbstractActionController
 
         $formSearch = $this->getForm(QuickSearchForm::class);
         $formSearch
-            ->setAttribute('action', $this->url()->fromRoute(null, ['action' => 'browse'], true))
+            ->setAttribute('action', $this->url()->fromRoute('admin/generated-resource'))
             ->setAttribute('id', 'generated-resource-search');
 
         // Fix form radio for empty value and form select.
@@ -98,8 +98,7 @@ class IndexController extends AbstractActionController
         $params['controller'] = $res->getControllerName();
         $params['action'] = 'show';
         $params['id'] = $res->id();
-        $url = $this->url()->fromRoute('admin/id', $params, ['fragment' => 'generated-resource']);
-        return $this->redirect()->toUrl($url);
+        return $this->redirect()->toRoute('admin/id', $params, ['fragment' => 'generated-resource']);
     }
 
     public function showDetailsAction()
@@ -116,6 +115,72 @@ class IndexController extends AbstractActionController
         return $view
             ->setTemplate('generate/admin/index/show-details')
             ->setTerminal(true);
+    }
+
+    public function addAction()
+    {
+        /**
+         * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+         *
+         * @see \Generate\Mvc\Controller\Plugin\GenerateViaOpenAi $generateViaOpenAi
+         */
+
+        // No check for prompt: this is simple text.
+        // FIXME The form on resource/show sends a get instead of a post (js).
+        $post = $this->params()->fromPost()
+            ?: $this->params()->fromQuery();
+
+        if (isset($post['generate'])) {
+            $post = $post['generate'];
+        }
+
+        $resourceId = (int) ($post['resource_id'] ?? 0);
+        if (!$resourceId) {
+            $this->messenger()->addError(new PsrMessage(
+                'The resource id should be defined to generate a record.' // @translate
+            ));
+            return $this->redirect()->toRoute('admin/generated-resource', ['action' => 'browse'], true);
+        }
+
+        try {
+            $resource = $this->api()->read('resources', $resourceId)->getContent();
+        } catch (\Exception $e) {
+            $this->messenger()->addError(new PsrMessage(
+                'The resource to generate is not available.' // @translate
+            ));
+            return $this->redirect()->toRoute('admin/generated-resource', ['action' => 'browse'], true);
+        }
+
+        // Generating may be expensive, so there is a specific check for roles.
+        $generateRoles = $this->settings()->get('generate_roles');
+        $user = $this->identity();
+        if (!$user || !in_array($user->getRole(), $generateRoles)) {
+            $this->messenger()->addError(new PsrMessage(
+                'The user is not allowed to generate a record.' // @translate
+            ));
+            return $this->redirect()->toRoute('admin/generated-resource', ['action' => 'browse'], true);
+        }
+
+        // Check for specific prompts.
+        $promptSystem = $post['generate_prompt_system'] ?? null;
+        $promptUser = $post['generate_prompt_user'] ?? null;
+
+        $generatedResource = $this->generateViaOpenAi($resource, [
+            'prompt_system' => $promptSystem,
+            'prompt_user' => $promptUser,
+        ]);
+
+        if ($generatedResource) {
+            $this->messenger()->addSuccess(new PsrMessage(
+                'The resource was generated successfully.' // @translate
+            ));
+        }
+
+        $params = [];
+        $params['controller'] = $resource->getControllerName();
+        $params['action'] = 'show';
+        $params['id'] = $resource->id();
+        return $this->redirect()->toRoute('admin/id', $params, ['fragment' => 'generated-resource']);
     }
 
     public function deleteConfirmAction()
@@ -151,23 +216,19 @@ class IndexController extends AbstractActionController
                 $this->messenger()->addFormErrors($form);
             }
         }
-        return $this->redirect()->toRoute(
-            'admin/generated-resource',
-            ['action' => 'browse'],
-            true
-        );
+        return $this->redirect()->toRoute('admin/generated-resource', ['action' => 'browse'], true);
     }
 
     public function batchDeleteAction()
     {
         if (!$this->getRequest()->isPost()) {
-            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+            return $this->redirect()->toRoute('admin/generated-resource');
         }
 
         $resourceIds = $this->params()->fromPost('resource_ids', []);
         if (!$resourceIds) {
             $this->messenger()->addError('You must select at least one generated resource to batch delete.'); // @translate
-            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+            return $this->redirect()->toRoute('admin/generated-resource');
         }
 
         $form = $this->getForm(ConfirmForm::class);
@@ -180,13 +241,13 @@ class IndexController extends AbstractActionController
         } else {
             $this->messenger()->addFormErrors($form);
         }
-        return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        return $this->redirect()->toRoute('admin/generated-resource');
     }
 
     public function batchDeleteAllAction()
     {
         if (!$this->getRequest()->isPost()) {
-            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+            return $this->redirect()->toRoute('admin/generated-resource');
         }
 
         // Derive the query, removing limiting and sorting params.
@@ -205,13 +266,13 @@ class IndexController extends AbstractActionController
         } else {
             $this->messenger()->addFormErrors($form);
         }
-        return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        return $this->redirect()->toRoute('admin/generated-resource');
     }
 
     public function batchProcessAction()
     {
         if (!$this->getRequest()->isPost()) {
-            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+            return $this->redirect()->toRoute('admin/generated-resource');
         }
 
         // The action is the key used for submit.
@@ -225,13 +286,13 @@ class IndexController extends AbstractActionController
         $action = key(array_intersect_key($post, array_flip($actions)));
         if (!$action) {
             $this->messenger()->addError('You must select a valid action to batch process.'); // @translate
-            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+            return $this->redirect()->toRoute('admin/generated-resource');
         }
 
         $resourceIds = $post['resource_ids'] ?? [];
         if (!$resourceIds) {
             $this->messenger()->addError('You must select at least one generated resource to batch process.'); // @translate
-            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+            return $this->redirect()->toRoute('admin/generated-resource');
         }
 
         // Process validation in background in all cases.
@@ -248,13 +309,13 @@ class IndexController extends AbstractActionController
             $this->messenger()->addError('An error occurred during update'); // @translate
         }
 
-        return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        return $this->redirect()->toRoute('admin/generated-resource');
     }
 
     public function batchProcessAllAction()
     {
         if (!$this->getRequest()->isPost()) {
-            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+            return $this->redirect()->toRoute('admin/generated-resource');
         }
 
         // The action is the key used for submit.
@@ -268,7 +329,7 @@ class IndexController extends AbstractActionController
         $action = key(array_intersect_key($post, array_flip($actions)));
         if (!$action) {
             $this->messenger()->addError('You must select a valid action to batch process.'); // @translate
-            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+            return $this->redirect()->toRoute('admin/generated-resource');
         }
 
         // Derive the query, removing limiting and sorting params.
@@ -305,7 +366,7 @@ class IndexController extends AbstractActionController
         $message->setEscapeHtml(false);
         $this->messenger()->addSuccess($message);
 
-        return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        return $this->redirect()->toRoute('admin/generated-resource');
     }
 
     protected function processValidate(array $query)
@@ -332,7 +393,7 @@ class IndexController extends AbstractActionController
         $message->setEscapeHtml(false);
         $this->messenger()->addSuccess($message);
 
-        return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        return $this->redirect()->toRoute('admin/generated-resource');
     }
 
     /* Ajax */
@@ -502,14 +563,17 @@ class IndexController extends AbstractActionController
         // Validate and update the resource.
         // The status "reviewed" is set to true, because a validation requires
         // a review.
+
         $errorStore = new ErrorStore();
         $resource = $this->validateRecordOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, true, false, false);
+
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
             return $this->jSend(JSend::FAIL, $errorStore->getErrors() ?: null, $this->translate(
                 'Generated resource is not valid: check its values.' // @translate
             ));
         }
+
         if (!$resource) {
             return $this->jSend(JSend::ERROR, null, $this->translate(
                 'An internal error occurred.' // @translate

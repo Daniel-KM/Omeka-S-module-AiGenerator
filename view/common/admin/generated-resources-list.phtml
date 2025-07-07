@@ -10,8 +10,14 @@ $plugins = $this->getHelperPluginManager();
 $api = $plugins->get('api');
 $setting = $plugins->get('setting');
 $escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
 $translate = $plugins->get('translate');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
+
+$this->headLink()
+    ->appendStylesheet($assetUrl('css/generate-admin.css', 'Generate'));
+$this->headScript()
+    ->appendFile($assetUrl('js/generate-admin.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
 ?>
 
 <div class="generated-resources">

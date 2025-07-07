@@ -11,6 +11,7 @@ use Common\TraitModule;
 use Generate\Form\BatchEditFieldset;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\Form\Fieldset;
 use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
@@ -385,8 +386,10 @@ class Module extends AbstractModule
     public function handleCreateUpdateResource(Event $event): void
     {
         /**
+         * @var \Omeka\Api\Manager $api
          * @var \Omeka\Api\Request $request
          * @var \Omeka\Api\Response $response
+         * @var \Omeka\Settings\Settings $settings
          * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
          * @var \Omeka\Entity\Item|\Omeka\Entity\Media $resource
          * @var \Omeka\Api\Adapter\ItemAdapter|\Omeka\Api\Adapter\MediaAdapter $adapter
@@ -394,11 +397,17 @@ class Module extends AbstractModule
          */
         $services = $this->getServiceLocator();
 
+        // This is an api-post event, so id is ready and checks are done.
+        $resource = $event->getParam('response')->getContent();
+        $adapter = $services->get('Omeka\ApiAdapterManager')->get($resource->getResourceName());
+        $representation = $adapter->getRepresentation($resource);
+
         // Check if generation is enabled.
-        $request = $event->getParam('request');
-
         // Generation may be set via resource form or batch edit form.
+        // It may be processed automatically when the resource is in the
+        // specified item sets.
 
+        $request = $event->getParam('request');
         $resourceData = $request->getContent();
         if (empty($resourceData['generate_metadata'])
             && empty($resourceData['generate']['generate_metadata'])
@@ -408,11 +417,6 @@ class Module extends AbstractModule
 
         $plugins = $services->get('ControllerPluginManager');
         $generateViaOpenAi = $plugins->get('generateViaOpenAi');
-
-        // This is an api-post event, so id is ready and checks are done.
-        $resource = $event->getParam('response')->getContent();
-        $adapter = $services->get('Omeka\ApiAdapterManager')->get($resource->getResourceName());
-        $representation = $adapter->getRepresentation($resource);
 
         // Check for specific prompts.
         $promptSystem = $resourceData['generate_prompt_system']
@@ -482,139 +486,45 @@ class Module extends AbstractModule
             ->appendFile($assetUrl('js/generate-admin.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
     }
 
-    /**
-     * @todo Factorize addResourceFormElements and addBatchUpdateFormElements.
-     */
     public function addResourceFormElements(Event $event): void
     {
-        /**
-         * @var \Omeka\Api\Request $request
-         * @var \Omeka\Settings\Settings $settings
-         * @var \Laminas\View\Renderer\PhpRenderer $view
-         * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
-         * @var \Omeka\File\ThumbnailManager $thumbnailManager
-         * @var \Omeka\Entity\User $user
-         */
-        $services = $this->getServiceLocator();
-        $settings = $services->get('Omeka\Settings');
-
-        // Generating may be expensive, so there is a specific check for roles.
-        $generateRoles = $settings->get('generate_roles');
-        $user = $services->get('Omeka\AuthenticationService')->getIdentity();
-        if (!$user || !in_array($user->getRole(), $generateRoles)) {
+        $fieldset = $this->checkAndPrepareGenerateFieldset();
+        if (!$fieldset) {
             return;
         }
 
-        $thumbnailManager = $services->get('Omeka\File\ThumbnailManager');
-        $derivatives = $thumbnailManager->getTypes();
-        $derivatives = ['original' => 'Original']
-            + array_combine($derivatives, array_map('ucfirst', $derivatives));
+        $fieldset->get('generate_metadata')->setOption('info', null);
+
+        $view = $event->getTarget();
 
         $this->addHeadersAdmin($event);
 
-        $apiKey = $settings->get('generate_api_key_openai');
+        // TODO Add an info if the resource is in a specified item set and automatically processed?
 
-        $models = $settings->get('generate_models')
-            ?: $this->getModuleConfig('settings')['generate_models'];
-        $model = trim((string) $settings->get('generate_model'))
-            ?: $this->getModuleConfig('settings')['generate_model'];
-        $maxTokens = (int) $settings->get('generate_max_tokens')
-            ?: (int) $this->getModuleConfig('settings')['generate_max_tokens'];
-        $derivative = trim((string) $settings->get('generate_derivative'))
-            ?: trim((string) $this->getModuleConfig('settings')['generate_derivative']);
-        $promptSystem = trim((string) $settings->get('generate_prompt_system'))
-            ?: $this->getModuleConfig('settings')['generate_prompt_system'];
-        $promptUser = trim((string) $settings->get('generate_prompt_user'))
-            ?: $this->getModuleConfig('settings')['generate_prompt_user'];
-
-        // TODO Use BatchEditFieldset.
-        $elementGenerate = new \Laminas\Form\Element\Checkbox('generate_metadata');
-        $elementGenerate
-            ->setLabel(
-                empty($apiKey)
-                    ? 'Generate metadata (api key undefined)' // @translate
-                    : 'Generate metadata' // @translate
-            )
-            ->setOptions([
-                'use_hidden_element' => false,
-            ])
-            ->setAttributes([
-                'id' => 'generate-metadata',
-                'value' => 0,
-                'disabled' => empty($apiKey) ? 'disabled' : false,
-            ]);
-
-        $elementModel = new \Common\Form\Element\OptionalSelect('generate_model');
-        $elementModel
-            ->setLabel('Model') // @translate
-            ->setValueOptions($models)
-            ->setValue($model)
-            ->setAttributes([
-                'id' => 'generate-model',
-                'value' => $model,
-                'class' => 'generate-settings',
-                // Enabled via js when checkbox is on.
-                'disabled' => 'disabled',
-            ]);
-
-        $elementMaxToken = new \Common\Form\Element\OptionalNumber('generate_max_tokens');
-        $elementMaxToken
-            ->setLabel('Max tokens') // @translate
-            ->setValue($maxTokens)
-            ->setAttributes([
-                'id' => 'generate-max-tokens',
-                'value' => $maxTokens,
-                'min' => 0,
-                'class' => 'generate-settings',
-                // Enabled via js when checkbox is on.
-                'disabled' => 'disabled',
-            ]);
-
-        $elementModel = new \Common\Form\Element\OptionalRadio('generate_derivative');
-        $elementModel
-            ->setLabel('Derivative image') // @translate
-            ->setValueOptions($derivatives)
-            ->setValue($derivative)
-            ->setAttributes([
-                'id' => 'generate-derivative',
-                'value' => $derivative,
-                'class' => 'generate-settings',
-                // Enabled via js when checkbox is on.
-                'disabled' => 'disabled',
-            ]);
-
-        $elementPromptSystem = new \Laminas\Form\Element\Textarea('generate_prompt_system');
-        $elementPromptSystem
-            ->setLabel('Prompt to set context of a session for resource analysis') // @translate
-            ->setAttributes([
-                'id' => 'generate-prompt-system',
-                'value' => $promptSystem,
-                'class' => 'generate-settings',
-                'rows' => 10,
-                // Enabled via js when checkbox is on.
-                'disabled' => 'disabled',
-            ]);
-
-        $elementPromptUser = new \Laminas\Form\Element\Textarea('generate_prompt_user');
-        $elementPromptUser
-            ->setLabel('Prompt to generate resource metadata') // @translate
-            ->setAttributes([
-                'id' => 'generate-prompt-user',
-                'value' => $promptUser,
-                'class' => 'generate-settings',
-                'rows' => 10,
-                // Enabled via js when checkbox is on.
-                'disabled' => 'disabled',
-            ]);
-
-        $view = $event->getTarget();
-        echo $view->formRow($elementGenerate);
-        echo $view->formRow($elementPromptSystem);
-        echo $view->formRow($elementPromptUser);
+        echo $view->formCollection($fieldset, false);
     }
 
     public function addBatchUpdateFormElements(Event $event): void
     {
+        $fieldset = $this->checkAndPrepareGenerateFieldset();
+        if (!$fieldset) {
+            return;
+        }
+
+        // This is not a view.
+        // $this->addHeadersAdmin($event);
+
+        /** @var \Omeka\Form\ResourceBatchUpdateForm $form */
+        $form = $event->getTarget();
+        $form->add($fieldset);
+
+        $groups = $form->getOption('element_groups');
+        $groups['generate'] = 'Generate metadata'; // @translate
+        $form->setOption('element_groups', $groups);
+    }
+
+    protected function checkAndPrepareGenerateFieldset(): ?Fieldset
+    {
         /**
          * @var \Omeka\Api\Request $request
          * @var \Omeka\Settings\Settings $settings
@@ -630,16 +540,17 @@ class Module extends AbstractModule
         $generateRoles = $settings->get('generate_roles');
         $user = $services->get('Omeka\AuthenticationService')->getIdentity();
         if (!$user || !in_array($user->getRole(), $generateRoles)) {
-            return;
+            return null;
         }
 
         $thumbnailManager = $services->get('Omeka\File\ThumbnailManager');
         $derivatives = $thumbnailManager->getTypes();
         $derivatives = ['original' => 'Original']
             + array_combine($derivatives, array_map('ucfirst', $derivatives));
-
-        // This is not a view.
-        // $this->addHeadersAdmin($event);
+        // Fix issue with translation of "medium".
+        if (isset($derivatives['medium'])) {
+            $derivatives['medium'] = 'Midsized'; // @translate
+        }
 
         $apiKey = $settings->get('generate_api_key_openai');
 
@@ -656,13 +567,8 @@ class Module extends AbstractModule
         $promptUser = trim((string) $settings->get('generate_prompt_user'))
             ?: $this->getModuleConfig('settings')['generate_prompt_user'];
 
-        /** @var \Omeka\Form\ResourceBatchUpdateForm $form */
-        $form = $event->getTarget();
-        $services = $this->getServiceLocator();
-        $formElementManager = $services->get('FormElementManager');
-        // $resourceType = $form->getOption('resource_type');
-
         /** @var \Generate\Form\BatchEditFieldset $fieldset */
+        $formElementManager = $services->get('FormElementManager');
         $fieldset = $formElementManager->get(BatchEditFieldset::class);
         $fieldset
             ->get('generate_metadata')
@@ -689,11 +595,8 @@ class Module extends AbstractModule
         $fieldset
             ->get('generate_prompt_user')
             ->setValue($promptUser);
-        $form->add($fieldset);
 
-        $groups = $form->getOption('element_groups');
-        $groups['generate'] = 'Generate metadata'; // @translate
-        $form->setOption('element_groups', $groups);
+        return $fieldset;
     }
 
     /**
@@ -733,12 +636,55 @@ class Module extends AbstractModule
         $defaultSite = $plugins->get('defaultSite');
         $siteSlug = $defaultSite('slug');
 
+        $fieldset = $this->checkAndPrepareGenerateFieldset();
+        $fieldset->get('generate_metadata')->setOption('info', null);
+
         echo '<div id="generated-resource" class="section">';
+
+        if ($fieldset) {
+            $fieldset
+                ->setLabel('{__}')
+                ->add([
+                    'name' => 'resource_id',
+                    'type' => \Laminas\Form\Element\Hidden::class,
+                    'attributes' => [
+                        'value' => $resource->id(),
+                    ],
+                ])
+                ->add([
+                    'name' => 'submit',
+                    'type' => \Laminas\Form\Element\Submit::class,
+                    'options' => [
+                        'element_group' => 'generate',
+                        'label' => ' ',
+                    ],
+                    'attributes' => [
+                        'id' => 'generate-submit',
+                        'type' => 'submit',
+                        'class' => 'generate-settings',
+                        'value' => 'Submit', // @translate
+                    ],
+                ]);
+            $form = new \Laminas\Form\Form();
+            $form
+                ->setAttributes([
+                    'id' => 'generate-resource-form',
+                    'action' => $view->url('admin/generated-resource/default', ['action' => 'add'], true),
+                    'method' => '¨POST',
+                    'enctype' => 'multipart/form-data',
+                ])
+                ->add($fieldset)
+                ->prepare();
+            // TODO Find the right way to not display the label:
+            echo strtr($view->form($form, false), ['<legend>{__}</legend>' => '']);
+        }
+
         echo $view->partial('common/admin/generated-resources-list', [
             'resource' => $resource,
             'generatedResources' => $generatedResources,
             'siteSlug' => $siteSlug,
         ]);
+
         echo '</div>';
     }
 
