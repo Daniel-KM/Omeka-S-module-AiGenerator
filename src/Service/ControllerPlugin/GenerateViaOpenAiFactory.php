@@ -20,6 +20,7 @@ class GenerateViaOpenAiFactory implements FactoryInterface
             $services->get('Omeka\Logger'),
             $plugins->get('messenger'),
             $settings,
+            $services->get('Omeka\Status'),
             $services->get('MvcTranslator'),
             $settings->get('generate_openai_api_key'),
             $settings->get('generate_openai_organization'),

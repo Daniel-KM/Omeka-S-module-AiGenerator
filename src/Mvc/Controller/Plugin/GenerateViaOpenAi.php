@@ -10,12 +10,13 @@ use Laminas\I18n\Translator\TranslatorInterface;
 use Laminas\Log\LoggerInterface;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Manager as ApiManager;
-use Omeka\Settings\Settings;
-use OpenAI;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 use Omeka\Mvc\Controller\Plugin\Messenger;
+use Omeka\Mvc\Status;
+use Omeka\Settings\Settings;
+use OpenAI;
 
 class GenerateViaOpenAi extends AbstractPlugin
 {
@@ -50,6 +51,11 @@ class GenerateViaOpenAi extends AbstractPlugin
     protected $settings;
 
     /**
+     * @var \Omeka\Mvc\Status
+     */
+    protected $status;
+
+    /**
      * @var \Laminas\I18n\Translator\TranslatorInterface
      */
     protected $translator;
@@ -69,6 +75,11 @@ class GenerateViaOpenAi extends AbstractPlugin
      */
     protected $project;
 
+    /**
+     * @var boolean
+     */
+    protected $skipMessenger = false;
+
     public function __construct(
         ApiManager $api,
         AuthenticationServiceInterface $authentication,
@@ -76,6 +87,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         LoggerInterface $logger,
         Messenger $messenger,
         Settings $settings,
+        Status $status,
         TranslatorInterface $translator,
         string $apiKey,
         ?string $organization,
@@ -87,6 +99,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         $this->logger = $logger;
         $this->messenger = $messenger;
         $this->settings = $settings;
+        $this->status = $status;
         $this->translator = $translator;
         $this->apiKey = $apiKey;
         $this->organization = $organization;
@@ -124,9 +137,12 @@ class GenerateViaOpenAi extends AbstractPlugin
             return null;
         }
 
+        $this->skipMessenger = !$this->status->isAdminRequest()
+            && !$this->status->isSiteRequest();
+
         $models = $this->settings->get('generate_models') ?: [];
         if (!$models) {
-            $this->messenger->addWarning(new PsrMessage(
+            $this->useMessenger || $this->messenger->addWarning(new PsrMessage(
                 'The list of models is empty.' // @translate
             ));
             $this->logger->warn(
@@ -139,7 +155,7 @@ class GenerateViaOpenAi extends AbstractPlugin
             ? trim((string) $this->settings->get('generate_model'))
             : trim((string) $options['model']);
         if (!isset($models[$model])) {
-            $this->messenger->addWarning(new PsrMessage(
+            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                 'The model "{model}" is not in the list of allowed models.', // @translate
                 ['model' => $model]
             ));
@@ -168,7 +184,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         if (empty($options['prompt_user']) && empty($options['prompt_user'])) {
-            $this->messenger->addWarning(new PsrMessage(
+            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                 'The prompt is not defined, so the record cannot be generated.' // @translate
             ));
             $this->logger->warn('[Generate] Prompt is not defined.'); // @translate
@@ -181,7 +197,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         if ($resource instanceof ItemRepresentation) {
             $medias = $resource->media();
             if (!count($medias)) {
-                $this->messenger->addWarning(new PsrMessage(
+                $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                     'The item has no file, so the record cannot be generated.' // @translate
                 ));
                 $this->logger->warn(
@@ -210,7 +226,7 @@ class GenerateViaOpenAi extends AbstractPlugin
 
         if (!count($urls)) {
             if ($isMedia) {
-                $this->messenger->addWarning(new PsrMessage(
+                $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                     'The resource is not a file, not an image or the original file is missing, so the record cannot be generated.' // @translate
                 ));
                 $this->logger->warn(
@@ -218,7 +234,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                     ['media_id' => $resource->id()]
                 );
             } else {
-                $this->messenger->addWarning(new PsrMessage(
+                $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                     'The item has no files, or no image or no original file, so the record cannot be generated.' // @translate
                 ));
                 $this->logger->warn(
@@ -247,7 +263,7 @@ class GenerateViaOpenAi extends AbstractPlugin
             if ($responseFormat) {
                 $promptSystem .= "\n" . json_encode($responseFormat, 448);
             } else {
-                $this->messenger->addWarning(new PsrMessage(
+                $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                     'The format has no properties. In that case, the list of properties should be defined manually in the prompt.' // @translate
                 ));
                 $this->logger->warn(
@@ -343,7 +359,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 $response = $client->chat()->create($args);
             }
         } catch (\Exception $e) {
-            $this->messenger->addError(new PsrMessage(
+            $this->skipMessenger || $this->messenger->addError(new PsrMessage(
                 'An exception occurred: {msg}', // @translate
                 ['msg' => $e->getMessage()]
             ));
@@ -392,7 +408,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         try {
             $generatedResource = $this->api->create('generated_resources', $data)->getContent();
         } catch (\Exception $e) {
-            $this->messenger->addError(new PsrMessage(
+            $this->skipMessenger || $this->messenger->addError(new PsrMessage(
                 'An exception occurred when creating resource: {msg}', // @translate
                 ['msg' => $e->getMessage()]
             ));
@@ -426,7 +442,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         $missingTemplate = function (string $placeholder): null {
-            $this->messenger->addWarning(new PsrMessage(
+            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                 'The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
                 ['placeholder' => $placeholder]
             ));
@@ -542,7 +558,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         if (!$template || $templateGeneratable === 'none') {
-            $this->messenger->addWarning(new PsrMessage(
+            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                 'The process requires a resource with a template with generatable properties.' // @translate
             ));
             $this->logger->warn(
@@ -613,7 +629,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         if (!$template || $templateGeneratable === 'none') {
-            $this->messenger->addWarning(new PsrMessage(
+            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                 'The process requires a resource with a template with generatable properties.' // @translate
             ));
             $this->logger->warn(
