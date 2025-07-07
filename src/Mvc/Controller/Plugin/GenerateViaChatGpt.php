@@ -3,14 +3,14 @@
 namespace Generate\Mvc\Controller\Plugin;
 
 use Common\Stdlib\EasyMeta;
+use Generate\Entity\GeneratedResource;
 use Laminas\I18n\Translator\TranslatorInterface;
 use Laminas\Log\LoggerInterface;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Manager as ApiManager;
 use Omeka\Settings\Settings;
-use Generate\Entity\GeneratedResource;
 
-class GenerateViaChatgpt extends AbstractPlugin
+class GenerateViaChatGpt extends AbstractPlugin
 {
     /**
      * @var \Omeka\Api\Manager
@@ -73,17 +73,18 @@ class GenerateViaChatgpt extends AbstractPlugin
         $options += [
             'prompt' => '',
         ];
-        $this->logger->err('ChatGPT api key is undefined.'); // @translate
 
         if (empty($options['prompt'])) {
             $prompt = trim((string) $this->settings->get('generate_chatgpt_prompt'));
             if (!$prompt) {
                 $configModule = include dirname(__DIR__, 4) . '/config/module.config.php';
                 $prompt = $configModule['generate']['settings']['generate_chatgpt_prompt'];
-                $this->logger->err('ChatGPT api key is undefined.'); // @translate
+                $this->logger->err('Prompt is not defined.'); // @translate
                 return null;
             }
         }
+
+
 
         return null;
     }

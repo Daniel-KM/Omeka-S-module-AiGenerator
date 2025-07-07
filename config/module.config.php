@@ -53,7 +53,7 @@ return [
             'generativeData' => Mvc\Controller\Plugin\GenerativeData::class,
         ],
         'factories' => [
-            'generateViaChatgpt' => Service\ControllerPlugin\GenerateViaChatgptFactory::class,
+            'generateViaChatGpt' => Service\ControllerPlugin\GenerateViaChatGptFactory::class,
         ],
     ],
     'navigation' => [

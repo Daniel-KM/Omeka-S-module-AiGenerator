@@ -10,6 +10,7 @@ use Common\Stdlib\PsrMessage;
 use Common\TraitModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Module\AbstractModule;
@@ -31,6 +32,11 @@ class Module extends AbstractModule
         'AdvancedResourceTemplate',
     ];
 
+    public function init(ModuleManager $moduleManager): void
+    {
+        require_once __DIR__ . '/vendor/autoload.php';
+    }
+
     protected function preInstall(): void
     {
         $services = $this->getServiceLocator();
@@ -49,6 +55,14 @@ class Module extends AbstractModule
             $message = new \Omeka\Stdlib\Message(
                 $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
                 'Advanced Resource Template', '3.4.43'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        }
+
+        if (PHP_VERSION_ID < 80200) {
+            $message = new \Common\Stdlib\PsrMessage(
+                $translate('This module require php version {version} or above.'), // @translate
+                ['version' => '8.2']
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
@@ -202,7 +216,7 @@ class Module extends AbstractModule
             // \Annotate\Api\Adapter\AnnotationAdapter::class => \Annotate\Controller\Admin\AnnotationController::class,
         ];
         foreach ($adaptersAndControllers as $adapter => $controller) {
-            // Store status.
+            // Create metadata via llm.
             $sharedEventManager->attach(
                 $adapter,
                 'api.create.pre',
@@ -325,8 +339,8 @@ class Module extends AbstractModule
         unset($resourceData['generate_metadata'], $resourceData['generate_chatgpt_prompt']);
 
         $plugins = $services->get('ControllerPluginManager');
-        $generateViaChatgpt = $plugins->get('generateViaChatgpt');
-        $generateViaChatgpt($resourceData, [
+        $generateViaChatGpt = $plugins->get('generateViaChatGpt');
+        $generateViaChatGpt($resourceData, [
             'prompt' => $prompt,
         ]);
     }
