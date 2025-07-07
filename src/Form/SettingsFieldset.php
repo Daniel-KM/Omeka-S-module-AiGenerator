@@ -116,7 +116,7 @@ class SettingsFieldset extends Fieldset
                 'options' => [
                     'element_group' => 'generate',
                     'label' => 'Prompt to set context of a session for resource analysis', // @translate
-                    'info' => 'Write the prompt in the language the record should be.', // @translate
+                    'info' => 'Write the prompt in the language the record should be. Keep the prompt short to take care of credits.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'generate_prompt_system',
@@ -129,6 +129,7 @@ class SettingsFieldset extends Fieldset
                 'options' => [
                     'element_group' => 'generate',
                     'label' => 'Prompt to generate resource metadata', // @translate
+                    'info' => 'May be empty when the prompt is complete.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'generate_prompt_user',

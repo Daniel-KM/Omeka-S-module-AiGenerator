@@ -155,14 +155,18 @@ return [
             'generate_model' => 'gpt-4.1-nano',
             'generate_max_tokens' => 300,
             'generate_derivative' => 'medium',
+            // Keep the prompt short, else it may cost more tokens than image analysis.
             'generate_prompt_system' => <<<'TXT'
-                You are a system to analyze images. The images are stored in a database and your analyse is used to search and find these images.
-                Therefore, describe the main content of the image which might be relevant for indexing operations.
-                Output the response as a structured json. Each property key may be an empty value, a single value, or an array of values. Return only the requested properties. When a value is unknown, skip it.
+                You are an image analysis system. Describe main content of image for indexing and search purposes.
+                TXT, // @translate
+                /* Example of technical request when a structured output cannot be used.
+                Output the response as a structured json. Each property may be empty, single, or multiple. Return only requested properties. Skip unknown value.
                 Example:
                 {properties_sample_json}
-                TXT, // @translate
-            'generate_prompt_user' => 'Analyze the image then generate metadata as json', // @translate
+                */
+            // This prompt may be useless with chat structure, since the urls
+            // are added automatically and the system context is enough.
+            'generate_prompt_user' => 'Analyze image', // @translate
             'generate_item_sets_auto' => [],
             'generate_hide_flag_review' => false,
         ],

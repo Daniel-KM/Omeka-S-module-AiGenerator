@@ -102,10 +102,13 @@ class GenerateViaOpenAi extends AbstractPlugin
      * - model (string): the model to use.
      * - max_tokens (int): the max tokens to use for a request (0 for no limit).
      * - derivative (string): the derivative image type or original to process.
-     * - prompt_system (string|false): specific prompt for the system (session).
-     *   The configured prompt in settings is used by default, unless false is
-     *   passed.
-     * - prompt_user (string): specific prompt.
+     * - prompt_system (string|false): specific prompt for the system, that
+     *   defines the context of the session.
+     * - prompt_user (string): specific prompt. May be a simple word when the
+     *   context is enough.
+     * - process (string): "json" (default) or "text". "json" always outputs
+     *   valid json, but it is twice the price of a simple textual prompt
+     *   requesting json, but this one may be invalid.
      */
     public function __invoke(ItemRepresentation|MediaRepresentation $resource, array $options = []): ?GeneratedResourceRepresentation
     {
@@ -123,6 +126,9 @@ class GenerateViaOpenAi extends AbstractPlugin
 
         $models = $this->settings->get('generate_models') ?: [];
         if (!$models) {
+            $this->messenger->addWarning(new PsrMessage(
+                'The list of models is empty.' // @translate
+            ));
             $this->logger->warn(
                 '[Generate] The list of models is empty.' // @translate
             );
@@ -133,6 +139,10 @@ class GenerateViaOpenAi extends AbstractPlugin
             ? trim((string) $this->settings->get('generate_model'))
             : trim((string) $options['model']);
         if (!isset($models[$model])) {
+            $this->messenger->addWarning(new PsrMessage(
+                'The model "{model}" is not in the list of allowed models.', // @translate
+                ['model' => $model]
+            ));
             $this->logger->warn(
                 '[Generate] The model "{model}" is not in the list of allowed models.', // @translate
                 ['model' => $model]
@@ -164,6 +174,8 @@ class GenerateViaOpenAi extends AbstractPlugin
             $this->logger->warn('[Generate] Prompt is not defined.'); // @translate
             return null;
         }
+
+        $useProcess = ($options['process'] ?? null) === 'text' ? 'text' : 'json';
 
         $isMedia = false;
         if ($resource instanceof ItemRepresentation) {
@@ -217,9 +229,34 @@ class GenerateViaOpenAi extends AbstractPlugin
             return null;
         }
 
-        $messages = [];
+        // "completions" is deprecated as main endpoint and the sub-endpoint
+        // "chat/completions" does not seem to be supported, so use chat by
+        // default, for textual data or json.
 
         $promptSystem = $this->preparePrompt($resource, $options['prompt_system'], $urls);
+        $promptUser = $this->preparePrompt($resource, $options['prompt_user'], $urls);
+
+        $messages = [];
+
+        // For completions, the response format is appended to prompt.
+        // So it is useless to append it to prompt or use a placeholder.
+        // It is simpler than a
+        if ($useProcess === 'text') {
+            // Use response format for one-shot process with completions.
+            $responseFormat = $this->prepareResponseFormat($resource);
+            if ($responseFormat) {
+                $promptSystem .= "\n" . json_encode($responseFormat, 448);
+            } else {
+                $this->messenger->addWarning(new PsrMessage(
+                    'The format has no properties. In that case, the list of properties should be defined manually in the prompt.' // @translate
+                ));
+                $this->logger->warn(
+                    '[Generate] Error for resource #{resource_id}: the format has no properties. In that case, the list of properties should be defined manually in the prompt.', // @translate
+                    ['resource_id' => $resource->id()]
+                );
+            }
+        }
+
         if ($promptSystem) {
             $messages[] = [
                 'role' => 'system',
@@ -232,7 +269,6 @@ class GenerateViaOpenAi extends AbstractPlugin
             'content' => [],
         ];
 
-        $promptUser = $this->preparePrompt($resource, $options['prompt_user'], $urls);
         if ($promptUser) {
             $messageUser['content'][] = [
                 'type' => 'text',
@@ -251,16 +287,61 @@ class GenerateViaOpenAi extends AbstractPlugin
 
         $messages[] = $messageUser;
 
+        if ($useProcess === 'text') {
+            // Use response format and completions.
+            // Completions does not allow message, so add urls.
+            $promptSystem = "\n"
+                . 'Urls of images to analyse are:'
+                . "\n"
+                . implode(",\n", $urls);
+            $args = [
+                'model' => $model,
+                'prompt' => $promptSystem,
+                'max_tokens' => $maxTokens,
+                // Deterministic.
+                'temperature' => 0,
+                'top_p' => 1,
+                'frequency_penalty' => 0,
+                'presence_penalty' => 0,
+                'stop' => null,
+                // 'response_format' => 'json',
+            ];
+        } else {
+            // Use tools and chat for complex workflow with dialog
+            // "functions" is deprecated, it is now sub-part of tools.
+            $tools = $this->prepareTools($resource);
+            if (!$tools || empty($tools[0]['function']['parameters']['properties'])) {
+                $this->logger->err(
+                    'The structure defined from the template is empty or incorrect.' // @translate
+                );
+                $this->logger->err(
+                    '[Generate] Error for resource #{resource_id}: the structure defined from the template is empty or incorrect.', // @translate
+                    ['resource_id' => $resource->id()]
+                );
+                return null;
+            }
+            $args = [
+                'model' => $model,
+                'messages' => $messages,
+                'tools' => $tools,
+                'max_tokens' => $maxTokens,
+            ];
+        }
+
         // Send the request to OpenAI.
+
+        /** @var \OpenAI\Client $client */
         $client = OpenAI::client($this->apiKey, $this->organization, $this->project);
 
         try {
             /** @var \OpenAI\Responses\Chat\CreateResponse $response */
-            $response = $client->chat()->create([
-                'model' => $model,
-                'messages' => $messages,
-                'max_tokens' => $maxTokens,
-            ]);
+            if ($useProcess === 'text') {
+                // "completions" is deprecated and work only with some models.
+                // Anyway, the command can be similar than json.
+                $response = $client->completions()->create($args);
+            } else {
+                $response = $client->chat()->create($args);
+            }
         } catch (\Exception $e) {
             $this->messenger->addError(new PsrMessage(
                 'An exception occurred: {msg}', // @translate
@@ -268,18 +349,34 @@ class GenerateViaOpenAi extends AbstractPlugin
             ));
             $this->logger->err(
                 '[Generate] Exception for resource #{resource_id}: {msg}', // @translate
-                ['msg' => $e->getMessage()]
+                ['resource_id' => $resource->id(), 'msg' => $e->getMessage()]
             );
             return null;
         }
 
-        /** @var \OpenAI\Responses\Chat\CreateResponseChoice $choice */
-        $choice = $response->choices[0];
-        $content = $choice->message->content;
-
         // Fill the generated resource.
         $resourceTemplate = $resource->resourceTemplate();
-        $proposal = $this->fillProposal($content, $resourceTemplate);
+
+        /** @var \OpenAI\Responses\Chat\CreateResponseChoice $choice */
+        $choice = $response->choices[0];
+
+        if ($useProcess === 'text') {
+            $content = $choice->message->content;
+            $proposal = $this->fillProposal($content, $resourceTemplate);
+        } else {
+            /** @var OpenAI\Responses\Chat\CreateResponseToolCall $toolCall */
+            // There may be multiple tool call, generally 2.
+            // The good one is the second tool call. The first tool call is a
+            // pre-call to calibrate the model json. It may be skipped for next
+            // resources.
+            // So use the last call, that is the good one.
+            $toolCall = $choice->message->toolCalls;
+            $toolCall = $toolCall[array_key_last($toolCall)];
+            $content = $toolCall->function->toArray();
+            $content = $content['arguments'] ?? [];
+            $content = empty($content) ? [] : json_decode($content, true);
+            $proposal = $this->fillProposal($content, $resourceTemplate);
+        }
 
         // Validate the generated resource.
         /** @see \Contribute\Controller\Site\ContributionController::submitAction() */
@@ -301,7 +398,7 @@ class GenerateViaOpenAi extends AbstractPlugin
             ));
             $this->logger->err(
                 '[Generate] Exception when creating generated resource for resource #{resource_id}: {msg}', // @translate
-                ['msg' => $e->getMessage()]
+                ['resource_id' => $resource->id(), 'msg' => $e->getMessage()]
             );
             return null;
         }
@@ -309,6 +406,11 @@ class GenerateViaOpenAi extends AbstractPlugin
         return $generatedResource;
     }
 
+    /**
+     * Prepare a prompt with placeholders.
+     *
+     * The name placeholders are are experimental.
+     */
     protected function preparePrompt(ItemRepresentation|MediaRepresentation $resource, ?string $prompt, array $urls): ?string
     {
         $replace = [];
@@ -325,24 +427,35 @@ class GenerateViaOpenAi extends AbstractPlugin
 
         $missingTemplate = function (string $placeholder): null {
             $this->messenger->addWarning(new PsrMessage(
-                'The prompt contains the placeholder "{placeholder}", but there is no template to replace it.', // @translate
+                'The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
                 ['placeholder' => $placeholder]
             ));
             $this->logger->warn(
-                '[Generate] The prompt contains the placeholder "{placeholder}", but there is no template to replace it.', // @translate
+                '[Generate] The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
                 ['placeholder' => $placeholder]
             );
             return null;
         };
 
-        /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
+        /** @see GenerativeData() */
+        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
         $template = $resource->resourceTemplate();
+        if ($template) {
+            $templateGeneratable = $template->dataValue('generatable');
+            $templateGeneratable = in_array($templateGeneratable, ['specific', 'none'])
+                ? $templateGeneratable
+                : 'all';
+        } else {
+            $templateGeneratable = 'none';
+        }
 
         if (str_contains($prompt, '{properties}')) {
-            if ($template) {
+            if ($template && $templateGeneratable !== 'none') {
                 $list = [];
                 foreach ($template->resourceTemplateProperties() as $rtp) {
-                    $list[] = $rtp->property()->term();
+                    if ($templateGeneratable || $rtp->dataValue('generatable')) {
+                        $list[] = $rtp->property()->term();
+                    }
                 }
                 $replace['{properties}'] = implode(', ', $list);
             } else {
@@ -352,11 +465,13 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         if (str_contains($prompt, '{properties_names}')) {
-            if ($template) {
+            if ($template && $templateGeneratable !== 'none') {
                 $list = [];
                 foreach ($template->resourceTemplateProperties() as $rtp) {
-                    $property = $rtp->property();
-                    $list[] = $property->vocabulary()->label() . ' : ' . $property->label();
+                    if ($templateGeneratable || $rtp->dataValue('generatable')) {
+                        $property = $rtp->property();
+                        $list[] = $property->vocabulary()->label() . ' : ' . $property->label();
+                    }
                 }
                 $replace['{properties_names}'] = implode(', ', $list);
             } else {
@@ -366,13 +481,15 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         if (str_contains($prompt, '{properties_sample}')) {
-            if ($template) {
+            if ($template && $templateGeneratable !== 'none') {
                 $list = [];
                 foreach ($template->resourceTemplateProperties() as $rtp) {
-                    $property = $rtp->property();
-                    $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+                    if ($templateGeneratable || $rtp->dataValue('generatable')) {
+                        $property = $rtp->property();
+                        $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+                    }
                 }
-                $replace['{properties_sample}'] =  json_encode($list, 320);
+                $replace['{properties_sample}'] =  json_encode($list, 448);
             } else {
                 $missingTemplate('{properties_sample}');
                 $replace['{properties_sample}'] = '';
@@ -380,14 +497,16 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         if (str_contains($prompt, '{properties_sample_json}')) {
-            if ($template) {
+            if ($template && $templateGeneratable !== 'none') {
                 $list = [];
                 foreach ($template->resourceTemplateProperties() as $rtp) {
-                    $property = $rtp->property();
-                    $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+                    if ($templateGeneratable || $rtp->dataValue('generatable')) {
+                        $property = $rtp->property();
+                        $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+                    }
                 }
                 $replace['{properties_sample_json}'] = '```json' . "\n"
-                    . json_encode($list, 320)
+                    . json_encode($list, 448)
                     . '```';
             } else {
                 $missingTemplate('{properties_sample_json}');
@@ -400,13 +519,150 @@ class GenerateViaOpenAi extends AbstractPlugin
             : $prompt;
     }
 
-    protected function fillProposal(array|string $content, ?ResourceTemplateRepresentation $resourceTemplate): array
+    /**
+     * Specify the format for the response.
+     *
+     * The precise omeka json-ld format can be created, but it is useless here,
+     * because the aim is to do a proposition with human validation, not direct
+     * creation of items via api.
+     * Else, such a format can be used:
+     * "dcterms:creator": [{"type": "literal", "property_id": "auto", "@value": "John Doe"}],
+     */
+    protected function prepareTools(ItemRepresentation|MediaRepresentation $resource): ?array
     {
+        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
+        $template = $resource->resourceTemplate();
+        if ($template) {
+            $templateGeneratable = $template->dataValue('generatable');
+            $templateGeneratable = in_array($templateGeneratable, ['specific', 'none'])
+                ? $templateGeneratable
+                : 'all';
+        } else {
+            $templateGeneratable = 'none';
+        }
+
+        if (!$template || $templateGeneratable === 'none') {
+            $this->messenger->addWarning(new PsrMessage(
+                'The process requires a resource with a template with generatable properties.' // @translate
+            ));
+            $this->logger->warn(
+                '[Generate] For resource #{resource_id}, the process requires a resource with a template with generatable properties.', // @translate
+                ['resource_id' => $resource->id()]
+            );
+            return null;
+        }
+
+        /** @see https://packagist.org/packages/openai-php/client */
+
+        $tool = [
+            'type' => 'function',
+            'function' => [
+                'name' => 'proposed_record',
+                'description' => 'Get specific metadata from an image.', // @translate
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [],
+                    'required' => [],
+                ],
+            ],
+        ];
+
+        foreach ($template->resourceTemplateProperties() as $rtp) {
+            if ($templateGeneratable || $rtp->dataValue('generatable')) {
+                $property = $rtp->property();
+                $term = $property->term();
+                $tool['function']['parameters']['properties'][$term] = [
+                    'type' => 'string',
+                    'description' => sprintf('Example %s', $property->label()), // @translate
+                    // TODO For custom vocabs, the values may be predefined with "enum".
+                    // TODO Use the data type for numeric and dates.
+                ];
+                /* // TODO Manage property "required": it requires a specific options in generatable.
+                if ($rtp->isRequired()) {
+                    $function['parameters']['required'][] = $term;
+                }
+                */
+            }
+        }
+
+        return [$tool];
+    }
+
+    /**
+     * Specify the format for the response.
+     *
+     * The precise omeka json-ld format can be created, but it is useless here,
+     * because the aim is to do a proposition with human validation, not direct
+     * creation of items via api.
+     * Else, such a format can be used:
+     * "dcterms:creator": [{"type": "literal", "property_id": "auto", "@value": "John Doe"}],
+     *
+     * @experimental
+     */
+    protected function prepareResponseFormat(ItemRepresentation|MediaRepresentation $resource): ?array
+    {
+        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
+        $template = $resource->resourceTemplate();
+        if ($template) {
+            $templateGeneratable = $template->dataValue('generatable');
+            $templateGeneratable = in_array($templateGeneratable, ['specific', 'none'])
+                ? $templateGeneratable
+                : 'all';
+        } else {
+            $templateGeneratable = 'none';
+        }
+
+        if (!$template || $templateGeneratable === 'none') {
+            $this->messenger->addWarning(new PsrMessage(
+                'The process requires a resource with a template with generatable properties.' // @translate
+            ));
+            $this->logger->warn(
+                '[Generate] For resource #{resource_id}, the process requires a resource with a template with generatable properties.', // @translate
+                ['resource_id' => $resource->id()]
+            );
+            return null;
+        }
+
+        // This is the format proposed by openai.
+        $structure = [
+            'status' => 'success',
+            'resource' => $resource->getControllerName(),
+            'id' => null,
+            'data' => [],
+            'errors' => [],
+        ];
+
+        $list = [];
+        foreach ($template->resourceTemplateProperties() as $rtp) {
+            if ($templateGeneratable || $rtp->dataValue('generatable')) {
+                $property = $rtp->property();
+                $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+            }
+        }
+        $structure['data'] = $list;
+
+        return $structure;
+    }
+
+    protected function fillProposal(array|string|null $content, ?ResourceTemplateRepresentation $resourceTemplate): array
+    {
+        if (in_array($content, [null, '', []], true)) {
+            return [];
+        }
+
         $proposal = [
             'template' =>  $resourceTemplate ? $resourceTemplate->id() : null,
         ];
 
         // Some models don't support structured output, so manage all cases.
+
+        // Check if the content is json encoded.
+        if (!is_array($content)) {
+            $metadata = @json_decode($content, true);
+            if (is_array($metadata)) {
+                $content = $metadata;
+            }
+        }
 
         if (!is_array($content)) {
             // Use the default format, that is wrapped with markdown ```json```.
@@ -435,7 +691,10 @@ class GenerateViaOpenAi extends AbstractPlugin
             }
         }
 
-        foreach ($content as $key => $value) {
+        // Take care of various json output formats.
+        $metadata = $content['data'] ?? $content['arguments'] ?? $content;
+
+        foreach ($metadata as $key => $value) {
             // Manage multiple values for the same property, if supported.
             if (!is_array($value)) {
                 $value = [$value];
