@@ -1,0 +1,58 @@
+<?php declare(strict_types=1);
+
+namespace Generate\Form;
+
+use Laminas\Form\Element;
+use Laminas\Form\Fieldset;
+
+class BatchEditFieldset extends Fieldset
+{
+    public function init(): void
+    {
+        $this
+            ->setName('generate')
+            ->setOptions([
+                'element_group' => 'generate',
+                'label' => 'Generate metadata', // @translate
+            ])
+            ->setAttributes([
+                'id' => 'generate',
+                'class' => 'field-container',
+                // This attribute is required to make "batch edit all" working.
+                'data-collection-action' => 'replace',
+            ])
+
+            ->add([
+                'name' => 'generate_metadata',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Generate metadata', // @translate
+                    'info' => 'It is recommended to process this task in background.', // @translate
+                    'use_hidden_element' => false,
+                ],
+                'attributes' => [
+                    'id' => 'generate-metadata',
+                    // This attribute is required to make "batch edit all" working.
+                    'data-collection-action' => 'replace',
+                ],
+            ])
+            ->add([
+                'type' => Element\Textarea::class,
+                'name' => 'generate_chatgpt_prompt',
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Prompt', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate-prompt',
+                    'rows' => 10,
+                    // Enabled via js when checkbox is on.
+                    'disabled' => 'disabled',
+                    // This attribute is required to make "batch edit all" working.
+                    'data-collection-action' => 'replace',
+                ],
+            ])
+        ;
+    }
+}

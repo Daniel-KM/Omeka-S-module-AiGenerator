@@ -245,10 +245,11 @@ class GenerateViaChatGpt extends AbstractPlugin
         return $generatedResource;
     }
 
-    protected function preparePrompt(ItemRepresentation|MediaRepresentation $resource, string $prompt, array $urls): ?string
+    protected function preparePrompt(ItemRepresentation|MediaRepresentation $resource, ?string $prompt, array $urls): ?string
     {
         $replace = [];
 
+        $prompt = (string) $prompt;
         if (!str_contains($prompt, '{url}') && !str_contains($prompt, '{urls}')) {
             $prompt .= "\n{urls}";
         }

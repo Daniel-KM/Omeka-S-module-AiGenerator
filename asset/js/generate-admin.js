@@ -102,14 +102,18 @@
             }
         };
 
-        // Manage resource form check box to generate resource metadata.
-        $('.resource-form').on('change', 'input[type=checkbox]#generate-metadata', function(e) {
-            if ($('.resource-form input[type=checkbox]#generate-metadata').prop("checked")) {
-                $('.resource-form textarea#generate-prompt').prop('disabled', false).closest('.field').show();
+        // Manage check box to generate resource metadata in any form.
+        const handleChangeGenerateMetadata = function() {
+            const input = $('.resource-form, #batch-edit-item, batch-edit-tmedia').find('input[type=checkbox]#generate-metadata');
+            if (input.prop("checked")) {
+                $('textarea#generate-prompt').prop('disabled', false).closest('.field').show();
             } else {
-                $('.resource-form textarea#generate-prompt').prop('disabled', true).closest('.field').hide();
+                $('textarea#generate-prompt').prop('disabled', true).closest('.field').hide();
             }
-        });
+        };
+
+        $('.resource-form, #batch-edit-item, batch-edit-tmedia').on('change', 'input[type=checkbox]#generate-metadata', handleChangeGenerateMetadata);
+        handleChangeGenerateMetadata();
 
         // Mark a generated resource reviewed/unreviewed.
         $('#content').on('click', '.generated-resource a.status-toggle', function(e) {
