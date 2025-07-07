@@ -136,7 +136,9 @@ return [
     ],
     'generate' => [
         'config' => [
-            'generate_api_key_openai' => '',
+            'generate_openai_api_key' => '',
+            'generate_openai_organization' => '',
+            'generate_openai_project' => '',
         ],
         'settings' => [
             'generate_roles' => [],

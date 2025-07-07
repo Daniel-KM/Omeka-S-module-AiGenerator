@@ -21,7 +21,9 @@ class GenerateViaOpenAiFactory implements FactoryInterface
             $plugins->get('messenger'),
             $settings,
             $services->get('MvcTranslator'),
-            $settings->get('generate_api_key_openai')
+            $settings->get('generate_openai_api_key'),
+            $settings->get('generate_openai_organization'),
+            $settings->get('generate_openai_project')
         );
     }
 }

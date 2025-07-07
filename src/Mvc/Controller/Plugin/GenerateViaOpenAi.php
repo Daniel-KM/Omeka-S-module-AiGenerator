@@ -58,6 +58,16 @@ class GenerateViaOpenAi extends AbstractPlugin
      */
     protected $apiKey;
 
+    /**
+     * @var string|null
+     */
+    protected $organization;
+
+    /**
+     * @var string|null
+     */
+    protected $project;
+
     public function __construct(
         ApiManager $api,
         AuthenticationServiceInterface $authentication,
@@ -66,7 +76,9 @@ class GenerateViaOpenAi extends AbstractPlugin
         Messenger $messenger,
         Settings $settings,
         TranslatorInterface $translator,
-        string $apiKey
+        string $apiKey,
+        ?string $organization,
+        ?string $project
     ) {
         $this->api = $api;
         $this->authentication = $authentication;
@@ -76,6 +88,8 @@ class GenerateViaOpenAi extends AbstractPlugin
         $this->settings = $settings;
         $this->translator = $translator;
         $this->apiKey = $apiKey;
+        $this->organization = $organization;
+        $this->project = $project;
     }
 
     /**
@@ -207,7 +221,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         $messages[] = $messageUser;
 
         // Send the request to OpenAI.
-        $client = OpenAI::client($this->apiKey);
+        $client = OpenAI::client($this->apiKey, $this->organization, $this->project);
 
         try {
             /** @var \OpenAI\Responses\Chat\CreateResponse $response */
