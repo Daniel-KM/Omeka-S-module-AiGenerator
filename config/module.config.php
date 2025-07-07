@@ -155,9 +155,9 @@ return [
                 // Require rights, so more purchases on OpenAI.
                 'gpt-4.5-preview' => 'GPT 4.5 preview ($225 / 1M tokens)',
             ],
-            'aigenerator_model' => 'gpt-4.1-nano',
-            'aigenerator_max_tokens' => 1000,
-            'aigenerator_derivative' => 'medium',
+            'aigenerator_model' => 'gpt-4.1',
+            'aigenerator_max_tokens' => 10000,
+            'aigenerator_derivative' => 'large',
             // Keep the prompt short, else it may cost more tokens than image analysis.
             'aigenerator_prompt_system' => <<<'TXT'
                 You are an image analysis system. Describe main content of image for indexing and search purposes.
