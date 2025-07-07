@@ -23,6 +23,62 @@ use OpenAI;
 class GenerateViaOpenAi extends AbstractPlugin
 {
     /**
+     * The type of models is slightly mysterious. Furthermore, it can change at
+     * any time, so it is recommended to append the date of the model.
+     * Furthermore, some models does not support sending image separately.
+     * Furthermore, some options are strange.
+     *
+     * @todo Clarify api use.
+     *
+     * @var array
+     */
+    protected $dataModels = [
+        'gpt-4.1-nano' => [
+            'messages' => true,
+            'output' => 'tools',
+            'separate_urls' => true,
+            'stop' => "\n\n\n",
+        ],
+        'gpt-4.1-mini' => [
+            'messages' => true,
+            'output' => 'tools',
+            'separate_urls' => true,
+            'stop' => "\n\n\n",
+        ],
+        'gpt-4.1' => [
+            'messages' => true,
+            'output' => 'text',
+            'separate_urls' => true,
+            'stop' => "\n\n\n",
+        ],
+        'gpt-4o-mini' => [
+            'messages' => true,
+            'output' => 'tools',
+            'separate_urls' => true,
+            'stop' => "\n\n\n",
+        ],
+        'gpt-4o' => [
+            'messages' => true,
+            'output' => 'text',
+            'separate_urls' => true,
+            'stop' => "\n\n\n",
+        ],
+        // TODO How to support images with gpt-3.5?
+        'gpt-3.5-turbo' => [
+            'messages' => true,
+            'output' => 'text',
+            'separate_urls' => false,
+            'stop' => null,
+        ],
+        'gpt-4.5-preview' => [
+            'messages' => true,
+            'output' => 'tools',
+            'separate_urls' => true,
+            'stop' => "\n\n\n",
+        ],
+    ];
+
+    /**
      * @var \Omeka\Permissions\Acl
      */
     protected $acl;
@@ -135,7 +191,7 @@ class GenerateViaOpenAi extends AbstractPlugin
      *   of the session. Empty string is allowed. Null means default prompt.
      * - prompt_user (string): specific prompt. May be a simple word when the
      *   context is enough. Empty string is allowed. Null means default prompt.
-     * - process (string): "json" (default) or "text". "json" always outputs
+     * - process (string): "tools" (default) or "text". "tools" always outputs
      *   valid json, but it is twice the price of a simple textual prompt
      *   requesting json, but this one may be invalid.
      * - validate (bool): validate response automatically if user has rights.
@@ -210,8 +266,6 @@ class GenerateViaOpenAi extends AbstractPlugin
             return null;
         }
 
-        $useProcess = ($options['process'] ?? null) === 'text' ? 'text' : 'json';
-
         $validate = !empty($options['validate']);
 
         $isMedia = false;
@@ -266,82 +320,85 @@ class GenerateViaOpenAi extends AbstractPlugin
             return null;
         }
 
+        // The request and the response varies according to the model.
+
+        // TODO Simplify: if text, append json and urls to the prompt; else create the tools.
+
         // "completions" is deprecated as main endpoint and the sub-endpoint
         // "chat/completions" does not seem to be supported, so use chat by
         // default, for textual data or json.
+
+        $useProcess = isset($options['process'])
+            ? (($options['process'] ?? null) === 'text' ? 'text' : 'tools')
+            : ($this->dataModels[$model]['output'] ?? 'tools');
+
+        // For completions, the response format is appended to prompt.
+        // A text is output too to force json output.
+        // So it is useless to append it to prompt or use a placeholder.
+        // It is simpler than a
+        if ($useProcess === 'text') {
+            // Use response format for one-shot process with completions.
+            [$promptSystem, $promptUser] = $this->completePrompts($promptSystem, $promptUser, $model, $resource, $urls);
+        }
 
         $promptSystem = $this->preparePrompt($resource, $promptSystem, $urls);
         $promptUser = $this->preparePrompt($resource, $promptUser, $urls);
 
         $messages = [];
+        if ($this->dataModels[$model]['messages'] ?? false) {
+            if ($promptSystem) {
+                $messages[] = [
+                    'role' => 'system',
+                    'content' => $promptSystem,
+                ];
+            }
 
-        // For completions, the response format is appended to prompt.
-        // So it is useless to append it to prompt or use a placeholder.
-        // It is simpler than a
-        if ($useProcess === 'text') {
-            // Use response format for one-shot process with completions.
-            $responseFormat = $this->prepareResponseFormat($resource);
-            if ($responseFormat) {
-                $promptSystem .= "\n" . json_encode($responseFormat, 448);
-            } else {
-                $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
-                    'The format has no properties. In that case, the list of properties should be defined manually in the prompt.' // @translate
-                ));
-                $this->logger->warn(
-                    '[AiGenerator] Error for resource #{resource_id}: the format has no properties. In that case, the list of properties should be defined manually in the prompt.', // @translate
-                    ['resource_id' => $resource->id()]
-                );
+            if ($promptUser) {
+                $messageUser = [
+                    'role' => 'user',
+                    'content' => [],
+                ];
+                $messageUser['content'][] = [
+                    'type' => 'text',
+                    'text' => $promptUser,
+                ];
+            }
+
+            if (!empty($this->dataModels[$model]['separate_urls'])) {
+                $messageUser ??= [
+                    'role' => 'user',
+                    'content' => [],
+                ];
+                foreach ($urls as $url) {
+                    $messageUser['content'][] = [
+                        'type' => 'image_url',
+                        'image_url' => [
+                            'url' => $url,
+                        ],
+                    ];
+                }
+            }
+
+            if ($messageUser) {
+                $messages[] = $messageUser;
             }
         }
 
-        if ($promptSystem) {
-            $messages[] = [
-                'role' => 'system',
-                'content' => $promptSystem,
-            ];
-        }
-
-        $messageUser = [
-            'role' => 'user',
-            'content' => [],
-        ];
-
-        if ($promptUser) {
-            $messageUser['content'][] = [
-                'type' => 'text',
-                'text' => $promptUser,
-            ];
-        }
-
-        foreach ($urls as $url) {
-            $messageUser['content'][] = [
-                'type' => 'image_url',
-                'image_url' => [
-                    'url' => $url,
-                ],
-            ];
-        }
-
-        $messages[] = $messageUser;
-
         if ($useProcess === 'text') {
             // Use response format and completions.
-            // Completions does not allow message, so add urls.
-            $promptSystem = "\n"
-                . 'Urls of images to analyse are:'
-                . "\n"
-                . implode(",\n", $urls);
+            // Return deterministic metadata.
             $args = [
                 'model' => $model,
-                'prompt' => $promptSystem,
+                'messages' => $messages,
                 'max_tokens' => $maxTokens,
-                // Deterministic.
                 'temperature' => 0,
                 'top_p' => 1,
                 'frequency_penalty' => 0,
                 'presence_penalty' => 0,
-                'stop' => null,
+                'stop' => $this->dataModels[$model]['stop'] ?? null,
                 // 'response_format' => 'json',
+                // Sometime needed.
+                // 'prompt' => $promptSystem ?: $promptUser,
             ];
         } else {
             // Use tools and chat for complex workflow with dialog
@@ -362,6 +419,11 @@ class GenerateViaOpenAi extends AbstractPlugin
                 'messages' => $messages,
                 'tools' => $tools,
                 'max_tokens' => $maxTokens,
+                'temperature' => 0,
+                'top_p' => 1,
+                'frequency_penalty' => 0,
+                'presence_penalty' => 0,
+                'stop' => $this->dataModels[$model]['stop'] ?? null,
             ];
         }
 
@@ -375,7 +437,8 @@ class GenerateViaOpenAi extends AbstractPlugin
             if ($useProcess === 'text') {
                 // "completions" is deprecated and work only with some models.
                 // Anyway, the command can be similar than json.
-                $response = $client->completions()->create($args);
+                // $response = $client->completions()->create($args);
+                $response = $client->chat()->create($args);
             } else {
                 $response = $client->chat()->create($args);
             }
@@ -399,7 +462,6 @@ class GenerateViaOpenAi extends AbstractPlugin
 
         if ($useProcess === 'text') {
             $content = $choice->message->content;
-            $proposal = $this->fillProposal($content, $resourceTemplate);
         } else {
             /** @var OpenAI\Responses\Chat\CreateResponseToolCall $toolCall */
             // There may be multiple tool call, generally 2.
@@ -408,12 +470,16 @@ class GenerateViaOpenAi extends AbstractPlugin
             // resources.
             // So use the last call, that is the good one.
             $toolCall = $choice->message->toolCalls;
-            $toolCall = $toolCall[array_key_last($toolCall)];
-            $content = $toolCall->function->toArray();
-            $content = $content['arguments'] ?? [];
-            $content = empty($content) ? [] : json_decode($content, true);
-            $proposal = $this->fillProposal($content, $resourceTemplate);
+            if ($toolCall) {
+                $toolCall = $toolCall[array_key_last($toolCall)];
+                $content = $toolCall->function->toArray();
+                $content = $content['arguments'] ?? [];
+                $content = empty($content) ? [] : json_decode($content, true);
+            } else {
+                $content = $choice->message->content;
+            }
         }
+        $proposal = $this->fillProposal($content, $resourceTemplate);
 
         // Validate the generated resource.
         /** @see \Contribute\Controller\Site\ContributionController::submitAction() */
@@ -466,9 +532,82 @@ class GenerateViaOpenAi extends AbstractPlugin
     }
 
     /**
+     * Specify the format for the response.
+     *
+     * The precise omeka json-ld format can be created, but it is useless here,
+     * because the aim is to do a proposition with human validation, not direct
+     * creation of items via api.
+     * Else, such a format can be used:
+     * "dcterms:creator": [{"type": "literal", "property_id": "auto", "@value": "John Doe"}],
+     *
+     * @experimental
+     */
+    protected function completePrompts(
+        ?string $promptSystem,
+        ?string $promptUser,
+        string $model,
+        ItemRepresentation|MediaRepresentation $resource,
+        array $urls,
+    ): array {
+        $use = null;
+        if (empty($promptSystem) && empty($promptUser)) {
+            $use = 'system';
+            $prompt = $promptSystem;
+        } elseif (empty($promptSystem)) {
+            $use = 'user';
+            $prompt = $promptUser;
+        } elseif (empty($promptUser)) {
+            $use = 'system';
+            $prompt = $promptSystem;
+        } else {
+            $use = 'system';
+            $prompt = $promptSystem;
+        }
+
+        if (empty($this->dataModels[$model]['separate_urls'])
+            && !str_contains($promptSystem, '{url}')
+            && !str_contains($promptUser, '{url}')
+            && !str_contains($promptSystem, '{urls}')
+            && !str_contains($promptUser, '{urls}')
+        ) {
+            // Completions does not allow message, so add urls.
+            $prompt .= "\n"
+                . $this->translator->translate('Urls of images to analyze are:') // @translate
+                . "\n"
+                . implode(",\n", $urls);
+        }
+
+        if (!str_contains($promptSystem, 'json') && !str_contains($promptUser, 'json')) {
+            $prompt .= "\n"
+                . $this->translator->translate(
+                    'Output the response as JSON object. Each property may be single or multiple. Return only requested properties. Skip empty values.' // @translate
+                );
+        }
+
+        $regex = [
+            '{properties}',
+            '{properties_name}',
+            '{properties_sample}',
+            '{properties_sample_json}',
+        ];
+        $regex = '~' . implode('|', array_map(fn ($v) => preg_quote($v, '~'), $regex)) . '~';
+        if (!preg_match($regex, $promptSystem) && !preg_match($regex, $promptUser)) {
+            // Completions does not allow message, so add urls.
+            $prompt .= "\n"
+                . $this->translator->translate('Example:') // @translate
+                . "\n"
+                . '{properties_sample}';
+        }
+
+        return $use === 'user'
+            ? [$promptSystem, $prompt]
+            : [$prompt, $promptUser];
+    }
+
+    /**
      * Prepare a prompt with placeholders.
      *
-     * The name placeholders are are experimental.
+     * The name placeholders are experimental.
      */
     protected function preparePrompt(ItemRepresentation|MediaRepresentation $resource, ?string $prompt, array $urls): ?string
     {
@@ -529,7 +668,11 @@ class GenerateViaOpenAi extends AbstractPlugin
                 foreach ($template->resourceTemplateProperties() as $rtp) {
                     if ($templateGeneratable || $rtp->dataValue('generatable')) {
                         $property = $rtp->property();
-                        $list[] = $property->vocabulary()->label() . ' : ' . $property->label();
+                        $list[] = sprintf(
+                            '%1$s: %2$s',
+                            $this->translator->translate($property->vocabulary()->label()),
+                            $this->translator->translate($property->label())
+                        );
                     }
                 }
                 $replace['{properties_names}'] = implode(', ', $list);
@@ -545,7 +688,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 foreach ($template->resourceTemplateProperties() as $rtp) {
                     if ($templateGeneratable || $rtp->dataValue('generatable')) {
                         $property = $rtp->property();
-                        $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+                        $list[$property->term()] = $this->translator->translate($property->label());
                     }
                 }
                 $replace['{properties_sample}'] =  json_encode($list, 448);
@@ -561,7 +704,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 foreach ($template->resourceTemplateProperties() as $rtp) {
                     if ($templateGeneratable || $rtp->dataValue('generatable')) {
                         $property = $rtp->property();
-                        $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+                        $list[$property->term()] = $this->translator->translate($property->label());
                     }
                 }
                 $replace['{properties_sample_json}'] = '```json' . "\n"
@@ -617,7 +760,7 @@ class GenerateViaOpenAi extends AbstractPlugin
             'type' => 'function',
             'function' => [
                 'name' => 'proposed_record',
-                'description' => 'Get specific metadata from an image.', // @translate
+                'description' => $this->translator->translate('Get specific metadata from an image.'), // @translate
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [],
@@ -632,7 +775,11 @@ class GenerateViaOpenAi extends AbstractPlugin
                 $term = $property->term();
                 $tool['function']['parameters']['properties'][$term] = [
                     'type' => 'string',
-                    'description' => sprintf('%1$s: %2$s', $property->label(), $property->comment()),
+                    'description' => sprintf(
+                        '%1$s: %2$s',
+                        $this->translator->translate($property->label()),
+                        $this->translator->translate($property->comment())
+                    ),
                     // TODO For custom vocabs, the values may be predefined with "enum".
                     // TODO Use the data type for numeric and dates.
                 ];
@@ -645,62 +792,6 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         return [$tool];
-    }
-
-    /**
-     * Specify the format for the response.
-     *
-     * The precise omeka json-ld format can be created, but it is useless here,
-     * because the aim is to do a proposition with human validation, not direct
-     * creation of items via api.
-     * Else, such a format can be used:
-     * "dcterms:creator": [{"type": "literal", "property_id": "auto", "@value": "John Doe"}],
-     *
-     * @experimental
-     */
-    protected function prepareResponseFormat(ItemRepresentation|MediaRepresentation $resource): ?array
-    {
-        /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
-        $template = $resource->resourceTemplate();
-        if ($template) {
-            $templateGeneratable = $template->dataValue('generatable');
-            $templateGeneratable = in_array($templateGeneratable, ['specific', 'none'])
-                ? $templateGeneratable
-                : 'all';
-        } else {
-            $templateGeneratable = 'none';
-        }
-
-        if (!$template || $templateGeneratable === 'none') {
-            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
-                'The process requires a resource with a template with generatable properties.' // @translate
-            ));
-            $this->logger->warn(
-                '[AiGenerator] For resource #{resource_id}, the process requires a resource with a template with generatable properties.', // @translate
-                ['resource_id' => $resource->id()]
-            );
-            return null;
-        }
-
-        // This is the format proposed by openai.
-        $structure = [
-            'status' => 'success',
-            'resource' => $resource->getControllerName(),
-            'id' => null,
-            'data' => [],
-            'errors' => [],
-        ];
-
-        $list = [];
-        foreach ($template->resourceTemplateProperties() as $rtp) {
-            if ($templateGeneratable || $rtp->dataValue('generatable')) {
-                $property = $rtp->property();
-                $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
-            }
-        }
-        $structure['data'] = $list;
-
-        return $structure;
     }
 
     protected function fillProposal(array|string|null $content, ?ResourceTemplateRepresentation $resourceTemplate): array

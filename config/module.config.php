@@ -148,22 +148,25 @@ return [
                 'gpt-4.1-nano' => 'GPT 4.1 nano ($0.50 / 1M tokens)',
                 'gpt-4.1-mini' => 'GPT 4.1 mini ($2 / 1M tokens)',
                 'gpt-4.1' => 'GPT 4.1 ($10 / 1M tokens)',
-                'gpt-4o-mini' => 'GPT 4o mini ($0.75 / 1M tokens)',
+                'gpt-4o-mini' => 'GPT 4o mini ($0.75 / 1M tokens, tokens x 10)',
                 'gpt-4o' => 'GPT 4o ($12.5 / 1M tokens)',
-                'gpt-3.5-turbo' => 'GPT 3.5 turbo ($2 / 1M tokens)',
+                // TODO How to support images with gpt-3.5?
+                // 'gpt-3.5-turbo' => 'GPT 3.5 turbo ($2 / 1M tokens, tokens x 10)',
+                // Require rights, so more purchases on OpenAI.
                 'gpt-4.5-preview' => 'GPT 4.5 preview ($225 / 1M tokens)',
             ],
             'aigenerator_model' => 'gpt-4.1-nano',
-            'aigenerator_max_tokens' => 300,
+            'aigenerator_max_tokens' => 1000,
             'aigenerator_derivative' => 'medium',
             // Keep the prompt short, else it may cost more tokens than image analysis.
             'aigenerator_prompt_system' => <<<'TXT'
                 You are an image analysis system. Describe main content of image for indexing and search purposes.
                 TXT, // @translate
-                /* Example of technical request when a structured output cannot be used.
-                Output the response as a structured json. Each property may be empty, single, or multiple. Return only requested properties. Skip unknown value.
-                Example:
-                {properties_sample_json}
+                // Example of technical request when a structured output cannot be used.
+                // It is automatically appended when needed when the model does
+                // not support output json with tools.
+                /*
+                'Output the response as JSON object. Each property may be single or multiple. Return only requested properties. Skip empty values.
                 */
             // This prompt may be useless with chat structure, since the urls
             // are added automatically and the system context is enough.
