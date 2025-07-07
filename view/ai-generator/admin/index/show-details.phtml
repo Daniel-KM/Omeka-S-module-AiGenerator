@@ -7,6 +7,7 @@
  */
 
 $plugins = $this->getHelperPluginManager();
+$i18n = $plugins->get('i18n');
 $setting = $plugins->get('setting');
 $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
@@ -40,6 +41,16 @@ $translate = $plugins->get('translate');
             <div class="reviewed"><?= $escape($resource->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></div>
         </div>
         <?php endif; ?>
+    </div>
+    <div class="meta-group ai-record">
+        <h4><?= $escape($translate('Response')) ?></h4>
+        <ul class="value">
+            <li><?= $escape(sprintf($translate('Model: %s'), $resource->model())) ?></li>
+            <li><?= $escape(sprintf($translate('Tokens input: %s'), $resource->tokensInput())) ?></li>
+            <li><?= $escape(sprintf($translate('Tokens output: %s'), $resource->tokensOutput())) ?></li>
+            <li><?= $escape(sprintf($translate('Date: %s'), $i18n->dateFormat($resource->created(), 'long', 'medium'))) ?></li>
+            <li><?= $escape(sprintf($translate('Response id: %s'), $resource->responseId())) ?></li>
+        </ul>
     </div>
     <div class="meta-group ai-record">
         <h4><?= $escape($translate('Proposal')) ?></h4>

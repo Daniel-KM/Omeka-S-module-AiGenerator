@@ -13,6 +13,7 @@
     #ai-records .actions {
         float: right;
     }
+    .ai-record-info span,
     .actions span,
     .actions span::before {
         width: 24px;
@@ -27,6 +28,12 @@
     .actions span {
         opacity: 0.5;
     }
+    .ai-record-info span {
+        cursor: pointer;
+        opacity: 0.5;
+    }
+    .ai-record-info span:focus,
+    .ai-record-info span:hover,
     .actions span:focus,
     .actions span:hover {
         opacity: 1;
@@ -290,6 +297,15 @@
     }
     .ai-records.browse .sidebar .meta-group.ai-record .ai-record {
         padding-left: 12px;
+    }
+
+    /** Dialog. */
+
+    #content dialog.popup-dialog {
+        margin: auto;
+    }
+    dialog .dialog-header-close-button {
+        float: right;
     }
 }
 

@@ -102,6 +102,20 @@
             }
         };
 
+        // Manage info.
+        $('.ai-record-info').on('click', function() {
+            const json = $(this).data('info');
+            let msg = '';
+            msg = `AI record id: ${json['o:id']}
+                  model: ${json['o:model']}
+                  tokens input: ${json['o:tokens_input']}
+                  tokens output: ${json['o:tokens_output']}
+                  date: ${json['o:created']['@value']}
+                  response id: ${json['o:response_id']}
+            `;
+            dialogMessage(msg, true);
+        });
+
         // Manage check box to generate resource metadata in any form.
         const generateFieldset = $('#ai-record-form, .resource-form, #batch-edit-item, #batch-edit-media');
         const handleChangeGenerateMetadata = function() {

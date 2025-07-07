@@ -117,7 +117,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\AiGenerator\Api\Adapter\AiReco
                 $ownerText = $translate('[no owner]');
             }
             ?>
-            <tr class="ai-record" data-ai-record-id="<?= $aiRecord->id() ?>">
+            <tr id="ai-record-<?= $aiRecord->id() ?>" class="ai-record" data-ai-record-id="<?= $aiRecord->id() ?>">
                 <td>
                     <?php if (false && $aiRecord->userIsAllowed('update') || $aiRecord->userIsAllowed('delete')): ?>
                     <input type="checkbox" name="resource_ids[]" value="<?= $aiRecord->id() ?>" aria-label="<?= $translate('Select ai record') ?>">

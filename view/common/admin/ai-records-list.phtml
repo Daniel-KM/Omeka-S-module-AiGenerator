@@ -7,6 +7,7 @@
 
 $plugins = $this->getHelperPluginManager();
 $api = $plugins->get('api');
+$i18n = $plugins->get('i18n');
 $setting = $plugins->get('setting');
 $escape = $plugins->get('escapeHtml');
 $assetUrl = $plugins->get('assetUrl');
@@ -55,19 +56,23 @@ $labelInfo = $setting('property_label_information');
     unset($proposal['template'], $proposal['media']);
 
     $isValidable = $aiRecord->isValidable();
+
+    $info = $aiRecord->jsonSerialize();
+    unset($info['o:resource']);
+    unset($info['o:owner']);
+    unset($info['o:reviewed']);
+    unset($info['o:proposal']);
+    unset($info['o:modified']);
     ?>
-<div class="ai-record" data-id="<?= $aiRecord->id() ?>" data-linked-id="<?= $aiRecord->resource()?->id() ?>">
+<div id="ai-record-<?= $aiRecord->id() ?>" class="ai-record" data-id="<?= $aiRecord->id() ?>" data-linked-id="<?= $aiRecord->resource()?->id() ?>">
 <table class="tablesaw<?= $batchEditRight ? ' batch-edit' : '' ?>" data-tablesaw-mode="stack" data-id="<?= $aiRecord->id() ?>">
     <thead>
         <tr>
             <th>
                 <?= $translate('AI record') ?>
-                <?php /*
-                <span class="ai-record-id">#<?= $aiRecord->id() ?></span>
-                */ ?>
-
+                <span class="ai-record-info" data-info="<?= $escapeAttr(json_encode($info, 320)) ?>" title="<?= $txt = $escapeAttr($translate('More info about ai record')) ?>" aria-label=" title="<?= $txt ?>"><span class="o-icon- fas fa-info-circle"></span></span>
                 <span class="ai-record-id"><?= sprintf($translate('(#%s)'), $aiRecord->id()) ?></span>
-                <span class="ai-record-date"><?= $this->i18n()->dateFormat($aiRecord->created(), 'medium', 'medium') ?></span>
+                <span class="ai-record-date"><?= $i18n->dateFormat($aiRecord->created(), 'long', 'medium') ?></span>
 
                 <?php /* Unlike Contribution, there is no possible modification of an ai record for now. ?>
                 <?php // TODO Don't check "modified" when the modification is just a change of the flag. ?>
