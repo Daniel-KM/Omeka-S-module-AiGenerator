@@ -15,11 +15,18 @@ use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Mvc\Status;
+use Omeka\Permissions\Acl;
 use Omeka\Settings\Settings;
+use Omeka\Stdlib\ErrorStore;
 use OpenAI;
 
 class GenerateViaOpenAi extends AbstractPlugin
 {
+    /**
+     * @var \Omeka\Permissions\Acl
+     */
+    protected $acl;
+
     /**
      * @var \Omeka\Api\Manager
      */
@@ -61,6 +68,11 @@ class GenerateViaOpenAi extends AbstractPlugin
     protected $translator;
 
     /**
+     * @var \Generate\Mvc\Controller\Plugin\ValidateRecordOrCreateOrUpdate
+     */
+    protected $validateRecordOrCreateOrUpdate;
+
+    /**
      * @var string
      */
     protected $apiKey;
@@ -81,6 +93,7 @@ class GenerateViaOpenAi extends AbstractPlugin
     protected $skipMessenger = false;
 
     public function __construct(
+        Acl $acl,
         ApiManager $api,
         AuthenticationServiceInterface $authentication,
         EasyMeta $easyMeta,
@@ -89,10 +102,12 @@ class GenerateViaOpenAi extends AbstractPlugin
         Settings $settings,
         Status $status,
         TranslatorInterface $translator,
+        ValidateRecordOrCreateOrUpdate $validateRecordOrCreateOrUpdate,
         string $apiKey,
         ?string $organization,
         ?string $project
     ) {
+        $this->acl = $acl;
         $this->api = $api;
         $this->authentication = $authentication;
         $this->easyMeta = $easyMeta;
@@ -101,6 +116,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         $this->settings = $settings;
         $this->status = $status;
         $this->translator = $translator;
+        $this->validateRecordOrCreateOrUpdate = $validateRecordOrCreateOrUpdate;
         $this->apiKey = $apiKey;
         $this->organization = $organization;
         $this->project = $project;
@@ -122,6 +138,7 @@ class GenerateViaOpenAi extends AbstractPlugin
      * - process (string): "json" (default) or "text". "json" always outputs
      *   valid json, but it is twice the price of a simple textual prompt
      *   requesting json, but this one may be invalid.
+     * - validate (bool): validate response automatically if user has rights.
      */
     public function __invoke(ItemRepresentation|MediaRepresentation $resource, array $options = []): ?GeneratedResourceRepresentation
     {
@@ -192,6 +209,8 @@ class GenerateViaOpenAi extends AbstractPlugin
         }
 
         $useProcess = ($options['process'] ?? null) === 'text' ? 'text' : 'json';
+
+        $validate = !empty($options['validate']);
 
         $isMedia = false;
         if ($resource instanceof ItemRepresentation) {
@@ -421,6 +440,24 @@ class GenerateViaOpenAi extends AbstractPlugin
                 ['resource_id' => $resource->id(), 'msg' => $e->getMessage()]
             );
             return null;
+        }
+
+        if ($validate
+            && $this->acl->userIsAllowed(\Generate\Entity\GeneratedResource::class, 'update')
+        ) {
+            $resourceData = $generatedResource->proposalToResourceData();
+            if ($resourceData) {
+                $errorStore = new ErrorStore();
+                $this->validateRecordOrCreateOrUpdate->__invoke($generatedResource, $resourceData, $errorStore, true, false, !$this->skipMessenger);
+            } else {
+                $this->skipMessenger || $this->messenger->addError(new PsrMessage(
+                    'Generated resource not valid.' // @translate
+                ));
+                $this->logger->err(
+                    '[Generate] Generated resource #{generated_resource_id}: not valid.', // @translate
+                    ['generated_resource_id' => $generatedResource->id()]
+                );
+            }
         }
 
         return $generatedResource;

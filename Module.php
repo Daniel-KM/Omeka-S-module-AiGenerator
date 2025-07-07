@@ -391,6 +391,7 @@ class Module extends AbstractModule
 
         $data['generate'] = [
             'generate_metadata' => true,
+            'generate_validate' => !empty($post['generate']['generate_validate']),
             'generate_model' => $post['generate']['generate_model'] ?? null,
             'generate_max_tokens' => $post['generate']['generate_max_tokens'] ?? null,
             'generate_derivative' => $post['generate']['generate_derivative'] ?? null,
@@ -404,6 +405,7 @@ class Module extends AbstractModule
             [
                 'json' => [
                     'model' => $data['generate']['generate_model'],
+                    'validate' => !empty($post['generate']['generate_validate']),
                     'max_tokens' => $data['generate']['generate_max_tokens'],
                     'derivative' => $data['generate']['generate_derivative'],
                     'prompt_system' => $data['generate']['generate_prompt_system'],
@@ -442,9 +444,10 @@ class Module extends AbstractModule
 
         $request = $event->getParam('request');
         $resourceData = $request->getContent();
-        if (empty($resourceData['generate_metadata'])
-            && empty($resourceData['generate']['generate_metadata'])
-        ) {
+
+        $generate = $resourceData['generate'] ?? $resourceData;
+
+        if (empty($generate['generate_metadata'])) {
             $settings = $services->get('Omeka\Settings');
             $itemSetsAuto = $settings->get('generate_item_sets_auto');
             if (!$itemSetsAuto) {
@@ -471,18 +474,17 @@ class Module extends AbstractModule
         $plugins = $services->get('ControllerPluginManager');
         $generateViaOpenAi = $plugins->get('generateViaOpenAi');
 
-        // Check for specific prompts.
-        $promptSystem = $resourceData['generate_prompt_system']
-            ?? ['generate']['generate_prompt_system']
-            ?? null;
-        $promptUser = $resourceData['generate_prompt_user']
-            ?? ['generate']['generate_prompt_user']
-            ?? null;
+        // Prepare options.
+        $args = [
+            'model' => $generate['generate_model'] ?? null,
+            'validate' => !empty($generate['generate_validate']),
+            'max_tokens' => $generate['generate_max_tokens'] ?? null,
+            'derivative' => $generate['generate_derivative'] ?? null,
+            'prompt_system' => $generate['generate_prompt_system'] ?? null,
+            'prompt_user' => $generate['generate_prompt_user'] ?? null,
+        ];
 
-        $generateViaOpenAi($representation, [
-            'prompt_system' => $promptSystem,
-            'prompt_user' => $promptUser,
-        ]);
+        $generateViaOpenAi($representation, $args);
     }
 
     /**
@@ -579,6 +581,7 @@ class Module extends AbstractModule
     protected function checkAndPrepareGenerateFieldset(): ?Fieldset
     {
         /**
+         * @var \Omeka\Permissions\Acl $acl
          * @var \Omeka\Api\Request $request
          * @var \Omeka\Settings\Settings $settings
          * @var \Laminas\View\Renderer\PhpRenderer $view
@@ -596,6 +599,10 @@ class Module extends AbstractModule
             return null;
         }
 
+        $acl = $services->get('Omeka\Acl');
+
+        $canValidate = $acl->userIsAllowed(\Generate\Entity\GeneratedResource::class, 'update');
+
         $thumbnailManager = $services->get('Omeka\File\ThumbnailManager');
         $derivatives = $thumbnailManager->getTypes();
         $derivatives = ['original' => 'Original']
@@ -607,6 +614,7 @@ class Module extends AbstractModule
 
         $apiKey = $settings->get('generate_api_key_openai');
 
+        $validate = (bool) $settings->get('generate_validate');
         $models = $settings->get('generate_models')
             ?: $this->getModuleConfig('settings')['generate_models'];
         $model = trim((string) $settings->get('generate_model'))
@@ -648,6 +656,14 @@ class Module extends AbstractModule
         $fieldset
             ->get('generate_prompt_user')
             ->setValue($promptUser);
+
+        if ($canValidate) {
+            $fieldset
+                ->get('generate_validate')
+                ->setValue((int) $validate);
+        } else {
+            $fieldset->remove('generate_validate');
+        }
 
         return $fieldset;
     }

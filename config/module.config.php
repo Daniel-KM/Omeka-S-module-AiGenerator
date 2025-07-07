@@ -143,6 +143,7 @@ return [
         ],
         'settings' => [
             'generate_roles' => [],
+            'generate_validate' => false,
             'generate_models' => [
                 'gpt-4.1-nano' => 'GPT 4.1 nano ($0.50 / 1M tokens)',
                 'gpt-4.1-mini' => 'GPT 4.1 mini ($2 / 1M tokens)',

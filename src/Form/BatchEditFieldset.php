@@ -39,6 +39,23 @@ class BatchEditFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'generate_validate',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Validate proposition and fill resource', // @translate
+                    'use_hidden_element' => false,
+                ],
+                'attributes' => [
+                    'id' => 'generate-validate',
+                    'class' => 'generate-settings',
+                    // Enabled via js when checkbox is on.
+                    'disabled' => 'disabled',
+                    // This attribute is required to make "batch edit all" working.
+                    'data-collection-action' => 'replace',
+                ],
+            ])
+            ->add([
                 'name' => 'generate_model',
                 'type' => CommonElement\OptionalSelect::class,
                 'options' => [

@@ -125,16 +125,14 @@ class IndexController extends AbstractActionController
          * @see \Generate\Mvc\Controller\Plugin\GenerateViaOpenAi $generateViaOpenAi
          */
 
-        // No check for prompt: this is simple text.
         // FIXME The form on resource/show sends a get instead of a post (js).
         $post = $this->params()->fromPost()
             ?: $this->params()->fromQuery();
 
-        if (isset($post['generate'])) {
-            $post = $post['generate'];
-        }
+        // TODO Check input with form validation.
+        $generate = $post['generate'] ?? $post;
 
-        $resourceId = (int) ($post['resource_id'] ?? 0);
+        $resourceId = (int) ($generate['resource_id'] ?? 0);
         if (!$resourceId) {
             $this->messenger()->addError(new PsrMessage(
                 'The resource id should be defined to generate a record.' // @translate
@@ -161,14 +159,16 @@ class IndexController extends AbstractActionController
             return $this->redirect()->toRoute('admin/generated-resource', ['action' => 'browse'], true);
         }
 
-        // Check for specific prompts.
-        $promptSystem = $post['generate_prompt_system'] ?? null;
-        $promptUser = $post['generate_prompt_user'] ?? null;
+        $args = [
+            'model' => $generate['generate_model'] ?? null,
+            'validate' => !empty($generate['generate_validate']),
+            'max_tokens' => $generate['generate_max_tokens'] ?? null,
+            'derivative' => $generate['generate_derivative'] ?? null,
+            'prompt_system' => $generate['generate_prompt_system'] ?? null,
+            'prompt_user' => $generate['generate_prompt_user'] ?? null,
+        ];
 
-        $generatedResource = $this->generateViaOpenAi($resource, [
-            'prompt_system' => $promptSystem,
-            'prompt_user' => $promptUser,
-        ]);
+        $generatedResource = $this->generateViaOpenAi($resource, $args);
 
         if ($generatedResource) {
             $this->messenger()->addSuccess(new PsrMessage(

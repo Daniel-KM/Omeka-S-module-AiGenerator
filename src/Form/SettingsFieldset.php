@@ -42,6 +42,18 @@ class SettingsFieldset extends Fieldset
             ])
 
             ->add([
+                'type' => Element\Checkbox::class,
+                'name' => 'generate_validate',
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Validate by default if user has rights', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate_validate',
+                ],
+            ])
+
+            ->add([
                 'type' => OmekaElement\ArrayTextarea::class,
                 'name' => 'generate_models',
                 'options' => [

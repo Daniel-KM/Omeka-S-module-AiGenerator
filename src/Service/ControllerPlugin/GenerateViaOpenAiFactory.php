@@ -14,6 +14,7 @@ class GenerateViaOpenAiFactory implements FactoryInterface
         $settings = $services->get('Omeka\Settings');
 
         return new GenerateViaOpenAi(
+            $services->get('Omeka\Acl'),
             $services->get('Omeka\ApiManager'),
             $services->get('Omeka\AuthenticationService'),
             $services->get('Common\EasyMeta'),
@@ -22,6 +23,7 @@ class GenerateViaOpenAiFactory implements FactoryInterface
             $settings,
             $services->get('Omeka\Status'),
             $services->get('MvcTranslator'),
+            $plugins->get('validateRecordOrCreateOrUpdate'),
             $settings->get('generate_openai_api_key'),
             $settings->get('generate_openai_organization'),
             $settings->get('generate_openai_project')
