@@ -2,12 +2,13 @@
 
 namespace Generate\Controller\Admin;
 
+use Common\Mvc\Controller\Plugin\JSend;
 use Common\Stdlib\PsrMessage;
 use Doctrine\ORM\EntityManager;
 use Generate\Api\Representation\GeneratedResourceRepresentation;
 use Generate\Form\QuickSearchForm;
+use Laminas\Http\Response as HttpResponse;
 use Laminas\Mvc\Controller\AbstractActionController;
-use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Form\ConfirmForm;
@@ -225,31 +226,39 @@ class IndexController extends AbstractActionController
     public function toggleStatusAction()
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            return $this->jsonErrorNotFound();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Method not allowed.' // @translate
+            ), HttpResponse::STATUS_CODE_405);
         }
 
         $id = $this->params('id');
+
         /** @var \Generate\Api\Representation\GeneratedResourceRepresentation $generatedResource */
-        $generatedResource = $this->api()->read('generated_resources', $id)->getContent();
+        try {
+            $generatedResource = $this->api()->read('generated_resources', $id)->getContent();
+        } catch (\Exception $e) {
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Resource not found.' // @translate
+            ), HttpResponse::STATUS_CODE_404);
+        }
 
         // Only a resource already added can have a status reviewed.
         $resource = $generatedResource ? $generatedResource->resource() : null;
         if (!$resource) {
-            return new JsonModel([
-                'status' => 'success',
+            return $this->jSend(JSend::SUCCESS, [
                 // Status is updated, so inverted.
-                'data' => [
-                    'generated_resource' => [
-                        'status' => 'unreviewed',
-                        'statusLabel' => $this->translate('Unreviewed'), // @translate
-                    ],
+                'generated_resource' => [
+                    'status' => 'unreviewed',
+                    'statusLabel' => $this->translate('Unreviewed'), // @translate
                 ],
             ]);
         }
 
         // Only people who can edit the resource can update the status.
         if ($resource && !$resource->userIsAllowed('update')) {
-            return $this->jsonErrorUnauthorized();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Unauthorized access.' // @translate
+            ), HttpResponse::STATUS_CODE_401);
         }
 
         $isReviewed = $generatedResource->isReviewed();
@@ -259,17 +268,16 @@ class IndexController extends AbstractActionController
         $response = $this->api()
             ->update('generated_resources', $id, $data, [], ['isPartial' => true]);
         if (!$response) {
-            return $this->jsonErrorUpdate();
+            return $this->jSend(JSend::ERROR, null, $this->translate(
+                'An internal error occurred.' // @translate
+            ));
         }
 
-        return new JsonModel([
-            'status' => 'success',
+        return $this->jSend(JSend::SUCCESS, [
             // Status is updated, so inverted.
-            'data' => [
-                'generated_resource' => [
-                    'status' => $isReviewed ? 'unreviewed' : 'reviewed',
-                    'statusLabel' => $isReviewed ? $this->translate('Unreviewed') : $this->translate('Reviewed'), // @translate
-                ],
+            'generated_resource' => [
+                'status' => $isReviewed ? 'unreviewed' : 'reviewed',
+                'statusLabel' => $isReviewed ? $this->translate('Unreviewed') : $this->translate('Reviewed'), // @translate
             ],
         ]);
     }
@@ -277,66 +285,86 @@ class IndexController extends AbstractActionController
     public function createResourceAction()
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            return $this->jsonErrorNotFound();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Method not allowed.' // @translate
+            ), HttpResponse::STATUS_CODE_405);
         }
 
         $id = $this->params('id');
 
         /** @var \Generate\Api\Representation\GeneratedResourceRepresentation $generatedResource */
-        $generatedResource = $this->api()->read('generated_resources', $id)->getContent();
+        try {
+            $generatedResource = $this->api()->read('generated_resources', $id)->getContent();
+        } catch (\Exception $e) {
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Resource not found.' // @translate
+            ), HttpResponse::STATUS_CODE_404);
+        }
 
         // If there is a resource, it can't be created.
+        // This is always the case with Generate, unlike Contribution.
         $generatedResourceResource = $generatedResource->resource();
         if ($generatedResourceResource) {
-            return $this->jsonErrorUpdate();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Resource not found.' // @translate
+            ), HttpResponse::STATUS_CODE_404);
         }
 
         // Only people who can create resource can validate.
         $acl = $generatedResource->getServiceLocator()->get('Omeka\Acl');
         if (!$acl->userIsAllowed(\Omeka\Api\Adapter\ItemAdapter::class, 'create')) {
-            return $this->jsonErrorUnauthorized();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Unauthorized access.' // @translate
+            ), HttpResponse::STATUS_CODE_401);
         }
 
         $resourceData = $generatedResource->proposalToResourceData();
         if (!$resourceData) {
-            return $this->jsonErrorUpdate(new PsrMessage(
-                $this->translate('Generated resource is not valid: check template.') // @translate
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Generated resource is not valid: check template.' // @translate
             ));
         }
 
         // Validate and create the resource.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false);
+        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false, false, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
-            return $this->jsonErrorUpdate(new PsrMessage(
+            return $this->jSend(JSend::FAIL, $errorStore->getErrors() ?: null, $this->translate(
                 'Generated resource cannot be created: some values are not valid.' // @translate
-            ), $errorStore);
+            ));
         }
         if (!$resource) {
-            return $this->jsonErrorUpdate();
+            return $this->jSend(JSend::ERROR, null, $this->translate(
+                'An internal error occurred.' // @translate
+            ));
         }
 
-        return new JsonModel([
-            'status' => 'success',
-            'data' => [
-                'generated_resource' => $generatedResource,
-                'is_new' => true,
-                'url' => $resource->adminUrl(),
-            ],
+        return $this->jSend(JSend::SUCCESS, [
+            'generated_resource' => $generatedResource,
+            'is_new' => true,
+            'url' => $resource->adminUrl(),
         ]);
     }
 
     public function validateAction()
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            return $this->jsonErrorNotFound();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Method not allowed.' // @translate
+            ), HttpResponse::STATUS_CODE_405);
         }
 
         $id = $this->params('id');
 
         /** @var \Generate\Api\Representation\GeneratedResourceRepresentation $generatedResource */
-        $generatedResource = $this->api()->read('generated_resources', $id)->getContent();
+        try {
+            $generatedResource = $this->api()->read('generated_resources', $id)->getContent();
+        } catch (\Exception $e) {
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Resource not found.' // @translate
+            ), HttpResponse::STATUS_CODE_404);
+        }
 
         // If there is no resource, create it as a whole.
         $generatedResourceResource = $generatedResource->resource();
@@ -345,104 +373,120 @@ class IndexController extends AbstractActionController
         if (($generatedResourceResource && !$generatedResourceResource->userIsAllowed('update'))
             || (!$generatedResourceResource && !$generatedResource->getServiceLocator()->get('Omeka\Acl')->userIsAllowed('Omeka\Api\Adapter\ItemAdapter', 'create'))
         ) {
-            return $this->jsonErrorUnauthorized();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Unauthorized access.' // @translate
+            ), HttpResponse::STATUS_CODE_401);
         }
 
         $resourceData = $generatedResource->proposalToResourceData();
         if (!$resourceData) {
-            return $this->jsonErrorUpdate(new PsrMessage(
+            return $this->jSend(JSend::FAIL, null, $this->translate(
                 'Generated resource is not valid.' // @translate
             ));
         }
 
         // Validate and update the resource.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false);
+        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false, false, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
-            return $this->jsonErrorUpdate(new PsrMessage(
+            // Keep similar messages different to simplify debug.
+            return $this->jSend(JSend::FAIL, $errorStore->getErrors() ?: null, $this->translate(
                 'Generated resource is not valid: check its values.' // @translate
-            ), $errorStore);
+            ));
         }
         if (!$resource) {
-            return $this->jsonErrorUpdate();
+            return $this->jSend(JSend::ERROR, null, $this->translate(
+                'An internal error occurred.' // @translate
+            ));
         }
 
-        return new JsonModel([
-            'status' => 'success',
+        return $this->jSend(JSend::SUCCESS, [
             // Status is updated, so inverted.
-            'data' => [
-                'generated_resource' => [
-                    'status' => 'validated',
-                    'statusLabel' => $this->translate('Validated'), // @translate
-                    'reviewed' => [
-                        'status' => 'reviewed',
-                        'statusLabel' => $this->translate('Reviewed'), // @translate
-                    ],
+            'generated_resource' => [
+                'status' => 'validated',
+                'statusLabel' => $this->translate('Validated'), // @translate
+                'reviewed' => [
+                    'status' => 'reviewed',
+                    'statusLabel' => $this->translate('Reviewed'), // @translate
                 ],
-                'is_new' => true,
-                'url' => $resource->adminUrl(),
             ],
+            // All generated resources are patches, since the resource exists..
+            'is_new' => false,
+            'url' => $resource->adminUrl(),
         ]);
     }
 
     public function validateValueAction()
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            return $this->jsonErrorNotFound();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Method not allowed.' // @translate
+            ), HttpResponse::STATUS_CODE_405);
         }
 
         $id = $this->params('id');
 
         /** @var \Generate\Api\Representation\GeneratedResourceRepresentation $generatedResource */
-        $generatedResource = $this->api()->read('generated_resources', $id)->getContent();
+        try {
+            $generatedResource = $this->api()->read('generated_resources', $id)->getContent();
+        } catch (\Exception $e) {
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Resource not found.' // @translate
+            ), HttpResponse::STATUS_CODE_404);
+        }
 
         // A resource is required to update it.
         $generatedResourceResource = $generatedResource->resource();
         if (!$generatedResourceResource) {
-            return $this->jsonErrorUpdate();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Resource not found.' // @translate
+            ), HttpResponse::STATUS_CODE_404);
         }
 
         // Only people who can edit the resource can validate.
         if (!$generatedResourceResource->userIsAllowed('update')) {
-            return $this->jsonErrorUnauthorized();
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Unauthorized access.' // @translate
+            ), HttpResponse::STATUS_CODE_401);
         }
 
         $term = $this->params()->fromQuery('term');
         $key = $this->params()->fromQuery('key');
         if (!$term || !is_numeric($key)) {
-            return $this->returnError('Missing term or key.'); // @translate
+            return $this->jSend(JSend::FAIL, null, $this->translate(
+                'Missing term or key.' // @translate
+            ));
         }
 
         $key = (int) $key;
 
         $resourceData = $generatedResource->proposalToResourceData($term, $key);
         if (!$resourceData) {
-            return $this->jsonErrorUpdate(new PsrMessage(
+            return $this->jSend(JSend::FAIL, null, $this->translate(
                 'Generated resource is not valid.' // @translate
             ));
         }
 
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, true);
+        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, true, false, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
-            return $this->jsonErrorUpdate(new PsrMessage(
+            return $this->jSend(JSend::FAIL, $errorStore->getErrors() ?: null, $this->translate(
                 'Generated resource is not valid: check values.' // @translate
-            ), $errorStore);
+            ));
         }
         if (!$resource) {
-            return $this->jsonErrorUpdate();
+            return $this->jSend(JSend::ERROR, null, $this->translate(
+                'An internal error occurred.' // @translate
+            ));
         }
 
-        return new JsonModel([
-            'status' => 'success',
+        return $this->jSend(JSend::SUCCESS, [
             // Status is updated, so inverted.
-            'data' => [
-                'generated_resource' => [
-                    'status' => 'validated-value',
-                    'statusLabel' => $this->translate('Validated value'), // @translate
-                ],
+            'generated_resource' => [
+                'status' => 'validated-value',
+                'statusLabel' => $this->translate('Validated value'), // @translate
             ],
         ]);
     }
@@ -628,34 +672,5 @@ class IndexController extends AbstractActionController
             ->update('generated_resources', $generatedResource->id(), $data, [], ['isPartial' => true]);
 
         return $generatedResourceResource;
-    }
-
-    protected function jsonErrorUnauthorized($message = null, $errors = null): JsonModel
-    {
-        return $this->returnError($message ?? $this->translate('Unauthorized access.'), 'error', $errors); // @translate
-    }
-
-    protected function jsonErrorNotFound($message = null, $errors = null): JsonModel
-    {
-        return $this->returnError($message && $this->translate('Resource not found.'), 'error', $errors); // @translate
-    }
-
-    protected function jsonErrorUpdate($message = null, $errors = null): JsonModel
-    {
-        return $this->returnError($message ?? $this->translate('An internal error occurred.'), 'error', $errors); // @translate
-    }
-
-    protected function returnError($message, string $statusCode = 'error', $errors = null): JsonModel
-    {
-        $result = [
-            'status' => $statusCode,
-            'message' => is_object($message) ? $message->setTranslator($this->translator()) : $message,
-        ];
-        if (is_array($errors) && count($errors)) {
-            $result['data'] = $errors;
-        } elseif (is_object($errors) && $errors instanceof ErrorStore && $errors->hasErrors()) {
-            $result['data'] = $errors->getErrors();
-        }
-        return new JsonModel($result);
     }
 }
