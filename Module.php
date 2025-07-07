@@ -143,21 +143,11 @@ class Module extends AbstractModule
                     'search',
                     'browse',
                     'show',
+                    'show-details',
                     'add',
-                    'edit',
                     'delete',
                     'delete-confirm',
                     'submit',
-                ]
-            );
-            $acl->allow(
-                $authors,
-                [
-                    'Generate\Controller\Admin\Index',
-                ],
-                [
-                    'batch-edit',
-                    'batch-delete',
                 ]
             )
             ->allow(
@@ -166,10 +156,10 @@ class Module extends AbstractModule
                     \Generate\Api\Adapter\GeneratedResourceAdapter::class,
                 ],
                 [
+                    'read',
+                    'search',
                     'create',
-                    'update',
                     'delete',
-                    'batch_update',
                     'batch_delete',
                 ]
             )
@@ -180,6 +170,8 @@ class Module extends AbstractModule
                 ],
                 [
                     'create',
+                    'read',
+                    'delete',
                 ]
             )
             ->allow(
@@ -190,7 +182,6 @@ class Module extends AbstractModule
                     \Generate\Entity\GeneratedResource::class,
                 ],
                 [
-                    'update',
                     'delete',
                 ],
                 new OwnsEntityAssertion()
@@ -200,9 +191,50 @@ class Module extends AbstractModule
             ->allow(
                 $validators,
                 [
+                    'Generate\Controller\Admin\Index',
+                ],
+                [
+                    'index',
+                    'search',
+                    'browse',
+                    'show',
+                    'show-details',
+                    'add',
+                    'edit',
+                    'delete',
+                    'delete-confirm',
+                    'toggle-status',
+                    'create-resource',
+                    'validate',
+                    'validate-value',
+                    'batch-edit',
+                    'batch-delete',
+                    'batch-process',
+                    'batch-process-all',
+                ]
+            )
+            ->allow(
+                $validators,
+                [
+                    \Generate\Api\Adapter\GeneratedResourceAdapter::class,
+                ],
+                [
+                    'read',
+                    'search',
+                    'create',
+                    'delete',
+                    'batch_update',
+                    'batch_delete',
+                ]
+            )
+            ->allow(
+                $validators,
+                [
                     \Generate\Entity\GeneratedResource::class,
                 ],
                 [
+                    'create',
+                    'read',
                     'update',
                     'delete',
                 ]
