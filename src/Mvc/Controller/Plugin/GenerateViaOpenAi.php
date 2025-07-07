@@ -98,6 +98,7 @@ class GenerateViaOpenAi extends AbstractPlugin
      * @see https://packagist.org/packages/chatgptcom/chatgpt-php
      *
      * @var array $options
+     * - model (string): the model to use.
      * - prompt_system (string|false): specific prompt for the system (session).
      *   The configured prompt in settings is used by default, unless false is
      *   passed.
@@ -115,6 +116,24 @@ class GenerateViaOpenAi extends AbstractPlugin
         if (!$this->apiKey) {
             $this->logger->err('OpenAI api key is undefined.'); // @translate
             return null;
+        }
+
+        $models = $this->settings->get('generate_models') ?: [];
+        if (!$models) {
+            $this->logger->warn(
+                '[Generate] The list of models is empty.' // @translate
+            );
+            return null;
+        }
+
+        $model = empty($options['model'])
+            ? trim((string) $this->settings->get('generate_model'))
+            : trim((string) $options['model']);
+        if (!isset($models[$model])) {
+            $this->logger->warn(
+                '[Generate] The model "{model}" is not in the list of allowed models.', // @translate
+                ['model' => $model]
+            );
         }
 
         // The prompt for session or for user may be skipped, not the two.
@@ -226,7 +245,7 @@ class GenerateViaOpenAi extends AbstractPlugin
         try {
             /** @var \OpenAI\Responses\Chat\CreateResponse $response */
             $response = $client->chat()->create([
-                'model' => 'gpt-4.1-mini',
+                'model' => $model,
                 'messages' => $messages,
                 'max_tokens' => 300,
             ]);

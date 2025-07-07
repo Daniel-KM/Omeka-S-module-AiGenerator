@@ -357,6 +357,7 @@ class Module extends AbstractModule
 
         $data['generate'] = [
             'generate_metadata' => true,
+            'generate_model' => $post['generate']['generate_model'] ?? null,
             'generate_prompt_system' => $post['generate']['generate_prompt_system'] ?? null,
             'generate_prompt_user' => $post['generate']['generate_prompt_user'] ?? null,
         ];
@@ -366,6 +367,7 @@ class Module extends AbstractModule
             "Generated metadata with options:\n{json}", // @translate
             [
                 'json' => [
+                    'model' => $data['generate']['generate_model'],
                     'prompt_system' => $data['generate']['generate_prompt_system'],
                     'prompt_user' => $data['generate']['generate_prompt_user'],
                 ],
@@ -502,6 +504,10 @@ class Module extends AbstractModule
 
         $apiKey = $settings->get('generate_api_key_openai');
 
+        $models = $settings->get('generate_models')
+            ?: $this->getModuleConfig('settings')['generate_models'];
+        $model = trim((string) $settings->get('generate_model'))
+            ?: $this->getModuleConfig('settings')['generate_model'];
         $promptSystem = trim((string) $settings->get('generate_prompt_system'))
             ?: $this->getModuleConfig('settings')['generate_prompt_system'];
         $promptUser = trim((string) $settings->get('generate_prompt_user'))
@@ -522,6 +528,19 @@ class Module extends AbstractModule
                 'id' => 'generate-metadata',
                 'value' => 0,
                 'disabled' => empty($apiKey) ? 'disabled' : false,
+            ]);
+
+        $elementModel = new \Common\Form\Element\OptionalSelect('generate_model');
+        $elementModel
+            ->setLabel('Model') // @translate
+            ->setValueOptions($models)
+            ->setValue($model)
+            ->setAttributes([
+                'id' => 'generate-model',
+                'value' => $model,
+                'class' => 'generate-settings',
+                // Enabled via js when checkbox is on.
+                'disabled' => 'disabled',
             ]);
 
         $elementPromptSystem = new \Laminas\Form\Element\Textarea('generate_prompt_system');
@@ -578,9 +597,12 @@ class Module extends AbstractModule
 
         $apiKey = $settings->get('generate_api_key_openai');
 
+        $models = $settings->get('generate_models')
+            ?: $this->getModuleConfig('settings')['generate_models'];
+        $model = trim((string) $settings->get('generate_model'))
+            ?: $this->getModuleConfig('settings')['generate_model'];
         $promptSystem = trim((string) $settings->get('generate_prompt_system'))
             ?: $this->getModuleConfig('settings')['generate_prompt_system'];
-
         $promptUser = trim((string) $settings->get('generate_prompt_user'))
             ?: $this->getModuleConfig('settings')['generate_prompt_user'];
 
@@ -600,6 +622,10 @@ class Module extends AbstractModule
                     : 'Generate metadata' // @translate
             )
             ->setAttribute('disabled', empty($apiKey) ? 'disabled' : false);
+        $fieldset
+            ->get('generate_model')
+            ->setValueOptions($models)
+            ->setValue($model);
         $fieldset
             ->get('generate_prompt_system')
             ->setValue($promptSystem);

@@ -142,6 +142,16 @@ return [
         ],
         'settings' => [
             'generate_roles' => [],
+            'generate_models' => [
+                'gpt-4.1-nano' => 'GPT 4.1 nano ($0.50 / 1M tokens)',
+                'gpt-4.1-mini' => 'GPT 4.1 mini ($2 / 1M tokens)',
+                'gpt-4.1' => 'GPT 4.1 ($10 / 1M tokens)',
+                'gpt-4o-mini' => 'GPT 4o mini ($0.75 / 1M tokens)',
+                'gpt-4o' => 'GPT 4o ($12.5 / 1M tokens)',
+                'gpt-3.5-turbo' => 'GPT 3.5 turbo ($2 / 1M tokens)',
+                'gpt-4.5-preview' => 'GPT 4.5 preview ($225 / 1M tokens)',
+            ],
+            'generate_model' => 'gpt-4.1-nano',
             'generate_prompt_system' => <<<'TXT'
                 You are a system to analyze images. The images are stored in a database and your analyse is used to search and find these images.
                 Therefore, describe the main content of the image which might be relevant for search/find operations.

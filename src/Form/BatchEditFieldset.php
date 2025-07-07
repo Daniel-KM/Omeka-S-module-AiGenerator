@@ -2,6 +2,7 @@
 
 namespace Generate\Form;
 
+use Common\Form\Element as CommonElement;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 
@@ -33,6 +34,22 @@ class BatchEditFieldset extends Fieldset
                 ],
                 'attributes' => [
                     'id' => 'generate-metadata',
+                    // This attribute is required to make "batch edit all" working.
+                    'data-collection-action' => 'replace',
+                ],
+            ])
+            ->add([
+                'name' => 'generate_model',
+                'type' => CommonElement\OptionalSelect::class,
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Model', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate-model',
+                    'class' => 'generate-settings',
+                    // Enabled via js when checkbox is on.
+                    'disabled' => 'disabled',
                     // This attribute is required to make "batch edit all" working.
                     'data-collection-action' => 'replace',
                 ],
