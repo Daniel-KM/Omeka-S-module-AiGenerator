@@ -454,7 +454,7 @@ class Module extends AbstractModule
 
         $view = $event->getTarget();
         echo $view->formRow($elementGenerate);
-        echo str_replace('<div class="field"', '<div class="field" style="display: none;"', $view->formRow($elementPrompt));
+        echo strtr($view->formRow($elementPrompt), ['<div class="field"' => '<div class="field" style="display: none;"']);
     }
 
     /**

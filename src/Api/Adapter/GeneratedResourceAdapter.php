@@ -192,7 +192,7 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
         if (isset($query['fulltext_search']) && $query['fulltext_search'] !== '') {
             $qb->andWhere($expr->like(
                 'omeka_root.proposal',
-                $this->createNamedParameter($qb, '%' . str_replace(['%', '_', '\\'], ['\%', '\_', '\\\\'], $query['fulltext_search']) . '%')
+                $this->createNamedParameter($qb, '%' . strtr($query['fulltext_search'], ['%' => '\%', '_' => '\_', '\\' => '\\\\']) . '%')
             ));
         }
     }
