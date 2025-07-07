@@ -1,12 +1,10 @@
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-#
 # Daniel Berthereau <Daniel.github@Berthereau.net>, 2020.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-06 00:00+0000\n"
+"POT-Creation-Date: 2025-07-07 00:00+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
@@ -17,1539 +15,834 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: Module.php:49
+#: data/scripts/upgrade.php:39 Module.php:51 Module.php:59
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr "Le module %1$s doit être mis à niveau à la version %2$s ou supérieure."
 
-#: Module.php:463 Module.php:612
-#: view/contribute/admin/contribution/browse.phtml:48
-#: view/guest/site/guest/contribution-browse.phtml:41
-msgid "Contributions"
-msgstr "Contributions"
+#: Module.php:67
+msgid "This module require php version {version} or above."
+msgstr "Ce module requiert php en version {version} ou supérieure."
 
-#: Module.php:510
-msgid "Create contribution token"
-msgstr "Créer un jeton pour la contribution"
+#: Module.php:759 view/ai-generator/admin/index/browse.phtml:52
+msgid "AI records"
+msgstr "Notices IA"
 
-#: Module.php:514 view/common/contribution-link.phtml:20
-msgid "Contribute"
-msgstr "Contribuer"
+#: src/Controller/Admin/IndexController.php:405
+#: src/Controller/Admin/IndexController.php:464
+#: src/Controller/Admin/IndexController.php:529
+#: src/Controller/Admin/IndexController.php:603
+msgid "Method not allowed."
+msgstr "Méthode non autorisée."
 
-#: Module.php:515
-msgid "Please input optional email…"
-msgstr "Ajouter un email si besoin…"
-
-#: Module.php:516
-msgid "Create token"
-msgstr "Créer un jeton"
-
-#: src/Controller/Admin/ContributionController.php:452
-#: src/Controller/Admin/ContributionController.php:479
-msgid "Unreviewed"
-msgstr "Non relu"
-
-#: src/Controller/Admin/ContributionController.php:479
-#: src/Controller/Admin/ContributionController.php:649
-msgid "Reviewed"
-msgstr "Relu"
-
-#: src/Controller/Admin/ContributionController.php:521
-msgid "No token"
-msgstr "Pas de jeton"
-
-#: src/Controller/Admin/ContributionController.php:540
-msgid "Expired"
-msgstr "Expiré"
-
-#: src/Controller/Admin/ContributionController.php:572
-msgid "Contribution is not valid: check template."
-msgstr "La contribution est invalide : vérifier le modèle."
-
-#: src/Controller/Admin/ContributionController.php:646
-#: view/common/admin/contribute-list-part.phtml:132
-#: view/common/admin/contribute-list-part.phtml:187
-#: view/common/admin/contribute-list-part.phtml:235
-msgid "Validated"
-msgstr "Validé"
-
-#: src/Controller/Admin/ContributionController.php:713
-msgid "Validated value"
-msgstr "Valeur validée"
-
-#: src/Controller/ContributionTrait.php:201
-msgid "Unauthorized access."
-msgstr "Accès interdit."
-
-#: src/Controller/ContributionTrait.php:206
+#: src/Controller/Admin/IndexController.php:416
+#: src/Controller/Admin/IndexController.php:475
+#: src/Controller/Admin/IndexController.php:540
+#: src/Controller/Admin/IndexController.php:614
+#: src/Controller/Admin/IndexController.php:622
 msgid "Resource not found."
 msgstr "Ressource non trouvée."
 
-#: src/Controller/ContributionTrait.php:211
+#: src/Controller/Admin/IndexController.php:427
+#: src/Controller/Admin/IndexController.php:455
+#: view/common/admin/ai-records-list.phtml:112
+msgid "Unreviewed"
+msgstr "Non relu"
+
+#: src/Controller/Admin/IndexController.php:435
+#: src/Controller/Admin/IndexController.php:492
+#: src/Controller/Admin/IndexController.php:552
+#: src/Controller/Admin/IndexController.php:629
+msgid "Unauthorized access."
+msgstr "Accès interdit."
+
+#: src/Controller/Admin/IndexController.php:447
+#: src/Controller/Admin/IndexController.php:514
+#: src/Controller/Admin/IndexController.php:579
+#: src/Controller/Admin/IndexController.php:662
 msgid "An internal error occurred."
 msgstr "Une erreur interne s’est produite."
 
-#: src/Controller/Site/ContributionController.php:943
-msgid "prepare"
-msgstr "préparer"
+#: src/Controller/Admin/IndexController.php:455
+#: src/Controller/Admin/IndexController.php:590
+#: view/common/admin/ai-records-list.phtml:112
+msgid "Reviewed"
+msgstr "Relu"
 
-#: src/Controller/Site/ContributionController.php:944
-msgid "update"
-msgstr "mettre à jour"
+#: src/Controller/Admin/IndexController.php:484
+msgid "Resource already exists."
+msgstr "La ressource existe déjà."
 
-#: src/Controller/Site/ContributionController.php:945
-msgid "submit"
-msgstr "soumettre"
+#: src/Controller/Admin/IndexController.php:499
+msgid "AI record is not valid: check template."
+msgstr "La notice ia est incorrecte : vérifier le modèle."
 
-#: src/Controller/Site/ContributionController.php:954
-#, php-format
-msgid "[Omeka] Contribution %s"
-msgstr "[Omeka] Contribution %s"
+#: src/Controller/Admin/IndexController.php:509
+msgid "AI record cannot be created: some values are not valid."
+msgstr "La notice ia ne peut être créée : certaines valeurs sont incorrectes."
 
-#: src/Controller/Site/ContributionController.php:1030
-msgid "[Omeka] Contribution"
-msgstr "[Omeka] Contribution"
+#: src/Controller/Admin/IndexController.php:559
+#: src/Controller/Admin/IndexController.php:646
+msgid "AI record is not valid."
+msgstr "La notice ia n’est pas valable."
 
-#: src/Controller/Site/ContributionController.php:1074
-msgid "[Unknown resource]"
-msgstr "[Ressource inconnue]"
+#: src/Controller/Admin/IndexController.php:573
+msgid "AI record is not valid: check its values."
+msgstr "La notice ia est incorrecte : vérifier ses valeurs."
 
-#: src/Controller/Site/ContributionController.php:1084
-msgid "[Anonymous]"
-msgstr "[Anonyme]"
+#: src/Controller/Admin/IndexController.php:587
+#: view/common/admin/ai-records-list.phtml:223
+#: view/common/admin/ai-records-list.phtml:277
+#: view/common/admin/ai-records-list.phtml:324
+msgid "Validated"
+msgstr "Validé"
 
-#: src/Controller/Site/ContributionController.php:1550
-msgid "File successfuly uploaded."
-msgstr "Fichier téléversé avec succès."
+#: src/Controller/Admin/IndexController.php:637
+msgid "Missing term or key."
+msgstr "Terme ou clé manquante."
 
-#: src/Controller/Site/ContributionController.php:1551
-msgid "The total of file sizes exceeds the the server limit directive."
-msgstr "La taille des fichiers excède la valeur limite du serveur."
+#: src/Controller/Admin/IndexController.php:657
+msgid "AI record is not valid: check values."
+msgstr "La notice ia est incorrecte : vérifier les valeurs."
 
-#: src/Controller/Site/ContributionController.php:1552
-msgid "The file size exceeds the specified limit."
-msgstr "La taille du fichier excède la taille maximale."
+#: src/Controller/Admin/IndexController.php:670
+msgid "Validated value"
+msgstr "Valeur validée"
 
-#: src/Controller/Site/ContributionController.php:1553
-msgid "The file was only partially uploaded."
-msgstr "Le fichier a été partiellement chargé."
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:576
+msgid "Urls of images to analyze are:"
+msgstr "Urls des images à analyser :"
 
-#: src/Controller/Site/ContributionController.php:1554
-msgid "No file was uploaded."
-msgstr "Aucun fichier n’a été téléchargé."
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:584
+msgid ""
+"Output the response as JSON object. Each property may be single or multiple. "
+"Return only requested properties. Skip empty values."
+msgstr ""
+"Répondez avec un objet JSON. Chaque propriété peut être simple ou multiple. "
+"Indiquer uniquement les propriétés demandées. Ignorer les valeurs inconnues."
 
-#: src/Controller/Site/ContributionController.php:1555
-msgid "The temporary folder to store the file is missing."
-msgstr "Le dossier temporaire pour les fichiers est absent."
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:598
+msgid "Example:"
+msgstr "Exemple :"
 
-#: src/Controller/Site/ContributionController.php:1556
-msgid "Failed to write file to disk."
-msgstr "Impossible d’écrire le fichier sur le disque."
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:764
+msgid "Get specific metadata from an image."
+msgstr "Obtenir des métadonnées spécifiques d’une image."
 
-#: src/Controller/Site/ContributionController.php:1557
-msgid "A PHP extension stopped the file upload."
-msgstr "Une extension php a arrêté le téléchargement du fichier."
-
-#: src/Media/Ingester/Contribution.php:81
-msgid "Used only for internal contribution process."
-msgstr "Utilisé seulement pour le process interne des contributions."
-
-#: src/View/Helper/ContributionSearchFilters.php:68
-msgid "Type of contribution"
-msgstr "Type de contribution"
-
-#: src/View/Helper/ContributionSearchFilters.php:70
-msgid "Correction"
-msgstr "Correction"
-
-#: src/View/Helper/ContributionSearchFilters.php:71
-msgid "Full contribution"
-msgstr "Contribution complète"
-
-#: src/View/Helper/ContributionSearchFilters.php:76
-#: view/contribute/admin/contribution/browse.phtml:118
-#: view/contribute/admin/contribution/browse.phtml:119
-#: view/contribute/admin/contribution/show-details.phtml:36
-#: view/contribute/site/contribution/show.phtml:41
-#: view/guest/site/guest/contribution-browse.phtml:54
-msgid "Is submitted"
-msgstr "Soumis"
-
-#: src/View/Helper/ContributionSearchFilters.php:84
-#: view/contribute/admin/contribution/show-details.phtml:37
-#: view/contribute/site/contribution/show.phtml:42
-#: view/guest/site/guest/contribution-browse.phtml:55
+#: src/View/Helper/AiRecordSearchFilters.php:68
+#: view/ai-generator/admin/index/show-details.phtml:41
 msgid "Is reviewed"
 msgstr "Relu"
 
-#: view/common/admin/contribute-list-part.phtml:33
-#, php-format
-msgid "Media %s"
-msgstr "Média %s"
+#: view/ai-generator/admin/index/browse.phtml:52
+msgid "AI Generator"
+msgstr "Générateur IA"
 
-#: view/common/admin/contribute-list-part.phtml:40
-#: view/contribute/admin/contribution/browse.phtml:113
-#: view/contribute/admin/contribution/show-details.phtml:47
+#: view/ai-generator/admin/index/browse.phtml:58
+msgid "Quick search / Filter"
+msgstr "Recherche rapide / filtre"
+
+#: view/ai-generator/admin/index/browse.phtml:73
+msgid "Set status checked"
+msgstr "Marquer vérifié"
+
+#: view/ai-generator/admin/index/browse.phtml:74
+msgid "Set status checked all"
+msgstr "Marquer vérifié pour tous"
+
+#: view/ai-generator/admin/index/browse.phtml:75
+msgid "Set status unchecked"
+msgstr "Marquer non vérifié"
+
+#: view/ai-generator/admin/index/browse.phtml:76
+msgid "Set status unchecked all"
+msgstr "Marquer non vérifié pour tous"
+
+#: view/ai-generator/admin/index/browse.phtml:78
+msgid "Validate selected"
+msgstr "Valider la sélection"
+
+#: view/ai-generator/admin/index/browse.phtml:79
+msgid "Validate all"
+msgstr "Tout valider"
+
+#: view/ai-generator/admin/index/browse.phtml:117
+#: view/ai-generator/admin/index/show-details.phtml:29
+msgid "[no owner]"
+msgstr "[Pas de propriétaire]"
+
+#: view/ai-generator/admin/index/browse.phtml:123
+msgid "Select ai record"
+msgstr "Choisir une notice ia"
+
+#: view/ai-generator/admin/index/browse.phtml:126
+#: view/ai-generator/admin/index/show-details.phtml:62
+#: view/common/admin/ai-records-list.phtml:128
 msgid "No resource template"
 msgstr "Pas de modèle de ressource"
 
-#: view/common/admin/contribute-list-part.phtml:134
-#: view/common/admin/contribute-list-part.phtml:189
-#: view/common/admin/contribute-list-part.phtml:237
+#: view/ai-generator/admin/index/browse.phtml:134
+#: view/ai-generator/admin/index/browse.phtml:135
+#: view/common/admin/ai-records-list.phtml:106
+msgid "Toggle status reviewed/unreviewed"
+msgstr "Inverser le statut relu/non-relu"
+
+#: view/ai-generator/admin/index/browse.phtml:144
+#: view/common/admin/ai-records-list.phtml:91
+msgid "Validate all values"
+msgstr "Valider toutes les valeurs"
+
+#: view/ai-generator/admin/index/browse.phtml:152
+#: view/common/admin/ai-records-list.phtml:97
+msgid "Not validable or already validated"
+msgstr "Non validable ou déjà validé"
+
+#: view/ai-generator/admin/index/browse.phtml:207
+#: view/ai-generator/admin/index/browse.phtml:225
+msgid "Delete ai records"
+msgstr "Supprimer les notices ia"
+
+#: view/ai-generator/admin/index/browse.phtml:208
+msgid "Are you sure you would like to delete the selected ai records?"
+msgstr ""
+"Êtes-vous certain de vouloir supprimer toutes les notices ia sélectionnées ?"
+
+#: view/ai-generator/admin/index/browse.phtml:210
+#: view/ai-generator/admin/index/browse.phtml:228
+#, php-format
+msgid ""
+"%1$s: this action will permanently delete %2$s ai records and cannot be "
+"undone."
+msgstr ""
+"%1$s : cette action supprimera %2$s notices ia de manière définitive et ne "
+"pourra pas être annulée.."
+
+#: view/ai-generator/admin/index/browse.phtml:226
+msgid ""
+"Are you sure you would like to delete all ai records on all pages of this "
+"result?"
+msgstr ""
+"Êtes-vous certain de vouloir supprimer toutes les notices ia de toutes les "
+"pages de ce résultat ?"
+
+#: view/ai-generator/admin/index/browse.phtml:268
+msgid "Omeka could not find any ai records."
+msgstr "Omeka ne trouve pas de notice ia."
+
+#: view/ai-generator/admin/index/browse.phtml:280
+msgid "Search ai records"
+msgstr "Rechercher des notices ia"
+
+#: view/ai-generator/admin/index/show-details.phtml:37
+msgid "No resource"
+msgstr "Pas de ressource"
+
+#: view/ai-generator/admin/index/show-details.phtml:41
+msgid "Is not reviewed"
+msgstr "Non relu"
+
+#: view/ai-generator/admin/index/show-details.phtml:46
+msgid "Response"
+msgstr "Réponse"
+
+#: view/ai-generator/admin/index/show-details.phtml:48
+#, php-format
+msgid "Model: %s"
+msgstr "Modèle : %s"
+
+#: view/ai-generator/admin/index/show-details.phtml:49
+#, php-format
+msgid "Tokens input: %s"
+msgstr "Jetons en entrée : %s"
+
+#: view/ai-generator/admin/index/show-details.phtml:50
+#, php-format
+msgid "Tokens output: %s"
+msgstr "Jetons en sortie : %s"
+
+#: view/ai-generator/admin/index/show-details.phtml:51
+#, php-format
+msgid "Date: %s"
+msgstr "Date : %s"
+
+#: view/ai-generator/admin/index/show-details.phtml:52
+#, php-format
+msgid "Response id: %s"
+msgstr "Réponse id : %s"
+
+#: view/ai-generator/admin/index/show-details.phtml:56
+msgid "Proposal"
+msgstr "Proposition"
+
+#: view/common/admin/ai-records-list.phtml:28
+msgid "There are no generated resources for this resource."
+msgstr "Il n’y a aucune notice ia pour cette ressource."
+
+#: view/common/admin/ai-records-list.phtml:72
+msgid "AI record"
+msgstr "Notice IA"
+
+#: view/common/admin/ai-records-list.phtml:73
+msgid "More info about ai record"
+msgstr "Plus d'info sur la notice ia"
+
+#: view/common/admin/ai-records-list.phtml:74
+#, php-format
+msgid "(#%s)"
+msgstr "(#%s)"
+
+#: view/common/admin/ai-records-list.phtml:225
+#: view/common/admin/ai-records-list.phtml:279
+#: view/common/admin/ai-records-list.phtml:326
 msgid "Not validable"
 msgstr "Ne peut être validé"
 
-#: view/common/admin/contribute-list-part.phtml:136
-#: view/common/admin/contribute-list-part.phtml:191
-#: view/common/admin/contribute-list-part.phtml:239
+#: view/common/admin/ai-records-list.phtml:227
+#: view/common/admin/ai-records-list.phtml:281
+#: view/common/admin/ai-records-list.phtml:328
 msgid "No right to write"
 msgstr "Pas de droit d’écriture"
 
-#: view/common/admin/contribute-list-part.phtml:142
-#: view/common/admin/contribute-list-part.phtml:197
-#: view/common/admin/contribute-list-part.phtml:245
+#: view/common/admin/ai-records-list.phtml:233
+#: view/common/admin/ai-records-list.phtml:287
+#: view/common/admin/ai-records-list.phtml:334
 #, php-format
 msgid "Validate this value (%s)"
 msgstr "Valider cette valeur (%s)"
 
-#: view/common/admin/contribute-list.phtml:25
-msgid ""
-"There are no tokens for this resource or contribution mode doesn’t use token."
-msgstr ""
-"Aucun jeton pour cette ressource ou le mode de contribution n’utilise pas de "
-"jeton."
-
-#: view/common/admin/contribute-list.phtml:36
-#, php-format
-msgid "There are %d tokens for this resource (%d expired)."
-msgstr "Il y a %d jetons pour cette ressource (%d expirés)."
-
-#: view/common/admin/contribute-list.phtml:38
-msgid "Expire all tokens"
-msgstr "Expirer tous les jetons"
-
-#: view/common/admin/contribute-list.phtml:45
-msgid "There are no contributions for this resource."
-msgstr "Aucune contribution pour cette ressource."
-
-#: view/common/admin/contribute-list.phtml:66
-#: view/contribute/site/contribution/show.phtml:37
-msgid "Contribution"
-msgstr "Contribution"
-
-#: view/common/admin/contribute-list.phtml:77
-msgid "(modified)"
-msgstr "(modifié)"
-
-#: view/common/admin/contribute-list.phtml:93
-#: view/common/admin/contribute-list.phtml:94
-msgid "Validate all values"
-msgstr "Valider toutes les valeurs"
-
-#: view/common/admin/contribute-list.phtml:99
-#: view/common/admin/contribute-list.phtml:100
-#: view/common/admin/contribute-list.phtml:119
-#: view/common/admin/contribute-list.phtml:120
-#: view/contribute/admin/contribution/browse.phtml:126
-#: view/contribute/admin/contribution/browse.phtml:127
-msgid "Toggle status reviewed/unreviewed"
-msgstr "Inverser le statut relu/non-relu"
-
-#: view/common/admin/contribute-list.phtml:104
-#: view/common/admin/contribute-token-list.phtml:54
-msgid "Expired token"
-msgstr "Jeton expiré"
-
-#: view/common/admin/contribute-list.phtml:109
-#: view/common/admin/contribute-list.phtml:110
-#: view/common/admin/contribute-token-list.phtml:60
-#: view/common/admin/contribute-token-list.phtml:61
-msgid "Expire token"
-msgstr "Expirer le jeton"
-
-#: view/common/admin/contribute-list.phtml:149
-#: view/common/contribution-values.phtml:54
-msgid "Medias"
-msgstr "Médias"
-
-#: view/common/admin/contribute-list.phtml:173
-msgid "Unused tokens"
-msgstr "Jetons non utilisés"
-
-#: view/common/admin/contribute-token-list.phtml:18
-msgid "There are no tokens for this resource."
-msgstr "Aucun jeton pour cette ressource."
-
-#: view/common/admin/contribute-token-list.phtml:39
-msgid "Token"
-msgstr "Jeton"
-
-#: view/common/admin/contribute-token-list.phtml:51
-msgid "[no email]"
-msgstr "[pas d’email]"
-
-#: view/common/admin/contribute-token-list.phtml:63
-msgid "Unused token"
-msgstr "Jeton inutilisé"
-
-#: view/common/contribution-link.phtml:25
-msgid "Edit this record"
-msgstr "Éditer cette notice"
-
-#: view/common/contribution-link.phtml:27
-msgid "Click your token link to edit this record."
-msgstr "Cliquez sur votre lien pour éditer cette notice."
-
-#: view/common/contribution-link.phtml:30
-#, php-format
-msgid "%1$sLogin%2$s or click your token link to edit this record."
-msgstr ""
-"%1$sConnectez-vous%2$s ou cliquez sur votre lien pour éditer cette notice."
-
-#: view/common/contribution-link.phtml:34
-#: view/guest/site/guest/widget/contribution.phtml:24
-msgid "Add a new record"
-msgstr "Ajouter une nouvelle notice"
-
-#: view/common/contribution-link.phtml:36
-msgid "Click your token link to add a new record."
-msgstr "Cliquez sur votre lien pour ajouter une nouvelle notice."
-
-#: view/common/contribution-link.phtml:39
-#, php-format
-msgid "%1$sLogin%2$s or click your token link to add a new record."
-msgstr ""
-"%1$sConnectez-vous%2$s ou cliquez sur votre lien pour ajouter une nouvelle "
-"notice."
-
-#: view/common/contribution-link.phtml:44
-msgid ""
-"A template with fields is required to edit this resource. Ask the "
-"administrator for more information."
-msgstr ""
-"Un modèle avec des champs est nécessaire pour éditer cette ressource. Merci "
-"de contacter l’administrateur pour plus d’information."
-
-#: view/common/contribution-values-part.phtml:27
-#, php-format
-msgid "File #%s"
-msgstr "Fichier #%s"
-
-#: view/common/contribution-values-part.phtml:27
-#, php-format
-msgid "Media #%s"
-msgstr "Média #%s"
-
-#: view/common/contribution-values-part.phtml:73
-#: view/common/contribution-values-part.phtml:93
-#: view/common/contribution-values-part.phtml:107
+#: view/common/resource-values-generated.phtml:65
+#: view/common/resource-values-generated.phtml:81
+#: view/common/resource-values-generated.phtml:95
 #, php-format
 msgid "%s [unavailable]"
 msgstr "%s [indisponible]"
 
-#: view/common/contribution-values.phtml:54
-#: view/contribute/site/contribution/form.phtml:223
-msgid "Files"
-msgstr "Fichiers"
-
-#: view/contribute/admin/contribution/browse.phtml:54
-msgid "Quick search / Filter"
-msgstr "Recherche rapide / filtre"
-
-#: view/contribute/admin/contribution/browse.phtml:68
-msgid "Set status checked"
-msgstr "Marquer le statut vérifié"
-
-#: view/contribute/admin/contribution/browse.phtml:69
-msgid "Set status checked all"
-msgstr "Marquer le statut vérifié pour tous"
-
-#: view/contribute/admin/contribution/browse.phtml:70
-msgid "Set status unchecked"
-msgstr "Marquer le statut non vérifié"
-
-#: view/contribute/admin/contribution/browse.phtml:71
-msgid "Set status unchecked all"
-msgstr "Marquer le statut non vérifié pour tous"
-
-#: view/contribute/admin/contribution/browse.phtml:72
-msgid "Validate selected"
-msgstr "Valider la sélection"
-
-#: view/contribute/admin/contribution/browse.phtml:73
-msgid "Validate all"
-msgstr "Tout valider"
-
-#: view/contribute/admin/contribution/browse.phtml:104
-#: view/contribute/admin/contribution/show-details.phtml:27
-msgid "[no owner]"
-msgstr "[Pas de propriétaire]"
-
-#: view/contribute/admin/contribution/browse.phtml:110
-msgid "Select contribution"
-msgstr "Choisir une contribution"
-
-#: view/contribute/admin/contribution/browse.phtml:118
-#: view/contribute/admin/contribution/browse.phtml:119
-#: view/contribute/admin/contribution/show-details.phtml:36
-#: view/contribute/site/contribution/show.phtml:41
-#: view/guest/site/guest/contribution-browse.phtml:54
-msgid "Is not submitted"
-msgstr "Non soumis"
-
-#: view/contribute/admin/contribution/browse.phtml:140
-msgid "Create resource to be validated"
-msgstr "Créer une ressource pour la valider"
-
-#: view/contribute/admin/contribution/browse.phtml:191
-#: view/contribute/admin/contribution/browse.phtml:209
-msgid "Delete contributions"
-msgstr "Supprimer les contributions"
-
-#: view/contribute/admin/contribution/browse.phtml:192
-msgid "Are you sure you would like to delete the selected contributions?"
+#: data/scripts/upgrade.php:46
+msgid "The module {module} should be upgraded to version {version} or later."
 msgstr ""
-"Êtes-vous certain de vouloir supprimer toutes les contributions "
-"sélectionnées ?"
+"Le module {module} doit être mis à niveau à la version {version} ou "
+"supérieure."
 
-#: view/contribute/admin/contribution/browse.phtml:194
-#: view/contribute/admin/contribution/browse.phtml:212
-#, php-format
+#: Module.php:389
 msgid ""
-"%1$s: this action will permanently delete %2$s contributions and cannot be "
-"undone."
+"Generate ai records with options:\n"
+"{json}"
 msgstr ""
-"%1$s : cette action supprimera %2$s contributions de manière définitive et "
-"ne pourra pas être annulée.."
+"Générer des notices ia avec des options :\n"
+"{json}"
 
-#: view/contribute/admin/contribution/browse.phtml:210
+#: Module.php:557 src/Form/SettingsFieldset.php:12
+#: src/Form/SettingsFieldset.php:15 src/Form/BatchEditFieldset.php:17
+msgid "AI Record Generator"
+msgstr "Générateur de notice IA"
+
+#: Module.php:593 src/Form/SettingsFieldset.php:113
+msgid "Midsized"
+msgstr "Moyen"
+
+#: Module.php:616
+msgid "Generate (api key undefined)"
+msgstr "Générer (clé d’api non définie)"
+
+#: Module.php:617 src/Form/BatchEditFieldset.php:31
+msgid "Generate"
+msgstr "Générer"
+
+#: Module.php:762
+msgid "{total} ai records ({count} not reviewed)"
+msgstr "{total} notices ia ({count} non relues)"
+
+#: Module.php:765
+msgid "No ai records"
+msgstr "Aucune notice ia"
+
+#: Module.php:788
+msgid "Make properties generatable via AI"
+msgstr "Rendre les propriétés générables via l’IA"
+
+#: Module.php:791
+msgid "All (default)"
+msgstr "Tous (par défaut)"
+
+#: Module.php:792
+msgid "Specific properties"
+msgstr "Propriétés spécifiques"
+
+#: Module.php:813
+msgid "Generatable via AI"
+msgstr "Générable par l’IA"
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:209
+msgid "OpenAI api key is undefined."
+msgstr "La clé de l’api OpenAI n’est pas définie."
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:219
+msgid "The list of models is empty."
+msgstr "La liste des modèles est vide."
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:222
+msgid "[AiGenerator] The list of models is empty."
+msgstr "[AiGenerator] La liste des modèles est vide."
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:232
+msgid "The model \"{model}\" is not in the list of allowed models."
+msgstr "Le modèle #{model} n’est pas dans la liste des modèles autorisés."
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:236
 msgid ""
-"Are you sure you would like to delete all contributions on all pages of this "
-"result?"
+"[AiGenerator] The model \"{model}\" is not in the list of allowed models."
 msgstr ""
-"Êtes-vous certain de vouloir supprimer toutes les contributions de toutes "
-"les pages de ce résultats ?"
+"[AiGenerator] Le modèle #{model} n’est pas dans la liste des modèles "
+"autorisés."
 
-#: view/contribute/admin/contribution/browse.phtml:252
-msgid "Omeka could not find any contributions."
-msgstr "Omeka ne trouve pas de contributions."
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:263
+msgid "No prompt is defined, so the record cannot be generated."
+msgstr ""
+"Aucune invite n’est définie, la notice ia ne peut donc pas être généré."
 
-#: view/contribute/admin/contribution/browse.phtml:264
-msgid "Search contribution"
-msgstr "Recherche une contribution"
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:265
+msgid "[AiGenerator] Prompts are not defined."
+msgstr "[AiGenerator] Les invites ne sont pas définies."
 
-#: view/contribute/admin/contribution/show-details.phtml:35
-#: view/contribute/site/contribution/show.phtml:40
-#: view/guest/site/guest/contribution-browse.phtml:53
-msgid "No resource"
-msgstr "Pas de ressource"
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:276
+msgid "The item has no file, so the record cannot be generated."
+msgstr ""
+"Le contenu n’a pas de fichier, la notice ia ne peut donc pas être générée."
 
-#: view/contribute/admin/contribution/show-details.phtml:37
-#: view/contribute/site/contribution/show.phtml:42
-#: view/guest/site/guest/contribution-browse.phtml:55
-msgid "Is not reviewed"
-msgstr "Non relu"
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:279
+msgid "[AiGenerator] The item #{item_id} has no file."
+msgstr "[AiGenerator] Le contenu #{item_id} n’a pas de fichier."
 
-#: view/contribute/admin/contribution/show-details.phtml:41
-msgid "Proposal"
-msgstr "Proposition"
-
-#: view/contribute/site/contribution/edit.phtml:39
-#, php-format
-msgid "Add %s"
-msgstr "Ajouter %s"
-
-#: view/contribute/site/contribution/edit.phtml:40
-#, php-format
-msgid "Edit %s"
-msgstr "Éditer le %s"
-
-#: view/contribute/site/contribution/edit.phtml:40
-#, php-format
-msgid "New %s"
-msgstr "Nouveau %s"
-
-#: view/contribute/site/contribution/edit.phtml:81
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:305
 msgid ""
-"A template with fields is required to submit a document. Ask the "
-"administrator for more information."
+"The resource is not a file, not an image or the original file is missing, so "
+"the record cannot be generated."
 msgstr ""
-"Un modèle avec des champs est nécessaire pour ajouter une ressource. Merci "
-"de contacter l’administrateur pour plus d’informations."
+"La ressource n’est pas un fichier, une image ou le fichier original manque. "
+"La notice ia ne peut pas être générée."
 
-#: view/contribute/site/contribution/form-input-custom-vocab.phtml:103
-#: view/contribute/site/contribution/form-value-more.phtml:122
-msgid "Select a value…"
-msgstr "Choisir une valeur…"
-
-#: view/contribute/site/contribution/form-input-numeric-timestamp.phtml:86
-msgid "Year"
-msgstr "Année"
-
-#: view/contribute/site/contribution/form-input-numeric-timestamp.phtml:92
-msgid "Month"
-msgstr "Mois"
-
-#: view/contribute/site/contribution/form-input-numeric-timestamp.phtml:98
-msgid "Day"
-msgstr "Jour"
-
-#: view/contribute/site/contribution/form-input-resource.phtml:73
-msgid "private"
-msgstr "privé"
-
-#: view/contribute/site/contribution/form-input-resource.phtml:103
-#: view/contribute/site/contribution/form-value-more.phtml:94
-msgid "Select a resource…"
-msgstr "Choisir une ressource…"
-
-#: view/contribute/site/contribution/form-value-more.phtml:66
-msgid "Add number"
-msgstr "Ajouter un nombre"
-
-#: view/contribute/site/contribution/form-value-more.phtml:72
-msgid "Add date"
-msgstr "Ajouter une date"
-
-#: view/contribute/site/contribution/form-value-more.phtml:94
-msgid "Add linked resource"
-msgstr "Ajouter des ressources liées"
-
-#: view/contribute/site/contribution/form-value-more.phtml:100
-msgid "Add URI"
-msgstr "Ajouter une URI"
-
-#: view/contribute/site/contribution/form-value-more.phtml:127
-msgid "Add linked data"
-msgstr "Ajouter des données liées"
-
-#: view/contribute/site/contribution/form.phtml:229
-#, php-format
-msgid "File %s"
-msgstr "Fichier %s"
-
-#: view/contribute/site/contribution/form.phtml:236
-#: view/contribute/site/contribution/form.phtml:303
-msgid "Remove file"
-msgstr "Supprimer le fichier"
-
-#: view/contribute/site/contribution/form.phtml:242
-msgid "Add file"
-msgstr "Ajouter un fichier"
-
-#: view/contribute/site/contribution/show.phtml:56
-#: view/guest/site/guest/contribution-browse.phtml:58
-msgid "Are you sure to remove this contribution?"
-msgstr "Êtes-vous certain de vouloir supprimer cette contribution ?"
-
-#: view/guest/site/guest/contribution-browse.phtml:44
-#, php-format
-msgid "%d contributions"
-msgstr "%d contributions"
-
-#: view/guest/site/guest/contribution-browse.phtml:74
-msgid "There are no contributions."
-msgstr "Il n’y a pas de contribution."
-
-#: view/guest/site/guest/widget/contribution.phtml:17
-msgid "See contributions"
-msgstr "Voir les contributions"
-
-#: data/scripts/upgrade.php:72
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:308
 msgid ""
-"This module requires the module \"{module}\", version {version} or above."
+"[AiGenerator] The media #{media_id} is not a file, not an image or the "
+"original file is missing."
 msgstr ""
-"Ce module requiert le module « {module} », version {version} ou supérieure."
+"[AiGenerator] Le média #{media_id} n’est pas un fichier, une image ou n’a "
+"pas de fichier original."
 
-#: data/scripts/upgrade.php:166
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:313
 msgid ""
-"At least one configured template is required to contribute. Default options "
-"were removed. Edit the resource template directly."
+"The item has no files, or no image or no original file, so the record cannot "
+"be generated."
 msgstr ""
-"Au moins un modèle doit être configuré pour contribuer. Les options par "
-"défaut ont été supprimées. Modifier le modèle directement."
+"Le contenu n’a pas de fichier, ou pas d’image ou pas de fichier original. La "
+"notice ia ne peut pas être générée."
 
-#: data/scripts/upgrade.php:170
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:316
 msgid ""
-"For information, the removed options to reuse in a template, eventually with "
-"module Advanced Resource Template, are: {json}."
+"[AiGenerator] The item #{item_id} has no files, or no image or no original "
+"file."
 msgstr ""
-"Pour information, les options supprimées à réutiliser dans le modèle, "
-"éventuellement avec le module Advanced Resource Template, sont : {json}"
+"[AiGenerator] Le contenu #{item_id} n’a pas de fichier, d’image ou de "
+"fichier original."
 
-#: data/scripts/upgrade.php:196 Module.php:60 Module.php:754
-msgid "The directory \"{directory}\" is not writeable."
-msgstr "Le répertoire « {directory} » n’est pas accessible en écriture."
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:408
+msgid "The structure defined from the template is empty or incorrect."
+msgstr "La structure définie à partir du modèle est vide ou incorrecte."
 
-#: data/scripts/upgrade.php:234
-msgid "It’s now possible for the user to select a resource template."
-msgstr ""
-"Il est désormais possible pour l’ utilisateur de choisir un modèle de "
-"ressource."
-
-#: data/scripts/upgrade.php:238
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:411
 msgid ""
-"It’s now possible to create a template with a sub-template for one or more "
-"media."
+"[AiGenerator] Error for resource #{resource_id}: the structure defined from "
+"the template is empty or incorrect."
 msgstr ""
-"Il est désormais possible de créer un modèle avec un sous-modèle pour un ou "
-"plusieurs média."
+"[AiGenerator] Erreur pour la ressource #{resource_id} : la structure définie "
+"à partir du modèle est vide ou incorrecte."
 
-#: data/scripts/upgrade.php:242
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:447
+msgid "An exception occurred: {msg}"
+msgstr "Une exception s’est produite : {msg}"
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:451
+msgid "[AiGenerator] Exception for resource #{resource_id}: {msg}"
+msgstr "[AiGenerator] Exception pour la ressource #{resource_id} : {msg}"
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:504
+msgid "An exception occurred when creating ai record: {msg}"
+msgstr "Une exception s’est produite lors de la création d’une notice : {msg}"
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:508
 msgid ""
-"It’s now possible to create a template with file, custom vocab, value "
-"suggest or numeric fields."
+"[AiGenerator] Exception when creating ai record for resource #{resource_id}: "
+"{msg}"
 msgstr ""
-"Il est désormais possible de créer un modèle avec un fichier, un vocabulaire "
-"personnalisé, des valeurs suggérées ou des champs numériques."
+"[AiGenerator] Exception lors de la création de la notice ia pour la "
+"ressource #{resource_id} : {msg}"
 
-#: data/scripts/upgrade.php:246
-msgid "It’s now possible to edit a contribution until it is submitted."
-msgstr ""
-"Il est désormais possible d’éditer une contribution tant qu’elle n’a pas été "
-"soumise."
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:523
+msgid "AI record not valid."
+msgstr "La notice ia n’est pas valide."
 
-#: data/scripts/upgrade.php:250
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:526
+msgid "[AiGenerator] AI record #{ai_record_id}: not valid."
+msgstr "[AiGenerator] Notice IA #{ai_record_id} : non valide."
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:629
 msgid ""
-"This version does not allow to correct resources. The feature will be "
-"reincluded in version 3.3.0.18."
+"The prompt contains the placeholder \"{placeholder}\", but there is no "
+"template to replace it or it is marked non-generatable."
 msgstr ""
-"Cette version ne permet pas de corriger les ressources. Cette fonctionnalité "
-"sera réintroduite dans la version 3.3.0.18."
+"L’invite contient le joker \"{placeholder}\", mais il n’y a pas de modèle "
+"pour le remplacer ou il est marqué comme non générable."
 
-#: data/scripts/upgrade.php:257
-msgid "It’s now possible for admin to search contributions."
-msgstr "Il est désormais possible de rechercher des contributions en admin."
-
-#: data/scripts/upgrade.php:266
-msgid "It’s now possible to correct and fill existing resources."
-msgstr ""
-"Il est désormais possible de corriger et de remplir des ressources "
-"existantes."
-
-#: data/scripts/upgrade.php:270
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:633
 msgid ""
-"A new option was added to allow to update a contribution until validation."
+"[AiGenerator] The prompt contains the placeholder \"{placeholder}\", but "
+"there is no template to replace it or it is marked non-generatable."
 msgstr ""
-"Une nouvelle option a été ajoutée pour autoriser à modifier une contribution "
-"jusqu’à la validation."
+"[AiGenerator] L’invite contient le caractère générique \"{placeholder}\", "
+"mais il n’y a pas de modèle pour le remplacer ou il est marqué comme non "
+"générable."
 
-#: data/scripts/upgrade.php:274
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:749
 msgid ""
-"The events \"view.add.before/after\" are used in place of \"view.edit.before/"
-"after\" in template contribution/add."
+"The process requires a resource with a template with generatable properties."
 msgstr ""
-"Les événements \"view.add.before/after\" sont utilisés à la place de \"view."
-"edit.before/after\" dans le gabarit contribution/add."
+"Le traitement nécessite une ressource avec un modèle dont les propriétés "
+"peuvent être générées."
 
-#: data/scripts/upgrade.php:278
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:752
 msgid ""
-"Warning: the variable \"$resource\" is now the edited resource in the theme "
-"and no more the contribution. Check your theme if you edited templates, "
-"mainly \"show\" and \"edit\"."
+"[AiGenerator] For resource #{resource_id}, the process requires a resource "
+"with a template with generatable properties."
 msgstr ""
-"Attention : la variable « $resource » correspond désormais la ressource "
-"éditée dans le thème et non plus à la contribution. Vérifiez le thème si "
-"vous avez modifier les gabarits, principalement « show » et « edit »."
+"[AiGenerator] Pour la ressource #{resource_id}, le traitement requiert une "
+"ressource avec un modèle ayant des propriétés générables."
 
-#: data/scripts/upgrade.php:285
-msgid "It’s now possible to submit a contribution in one step."
-msgstr ""
-"Il est désormais possible de soumettre une contribution en une seule étape."
+#: src/Mvc/Controller/Plugin/GenerativeData.php:83
+msgid "A resource template must be set to allow to generate metadata."
+msgstr "Un modèle de ressource doit être défini afin de générer des notices."
 
-#: data/scripts/upgrade.php:292
-msgid ""
-"It’s now possible to allow contribution only for selected authenticated "
-"users or via a regex on email."
-msgstr ""
-"Il est désormais possible d’autoriser les contributions seulement pour "
-"certains utilisateurs ou via une regex sur leur mail."
-
-#: Module.php:615
-msgid "{total} contributions ({count} not reviewed)"
-msgstr "{total} contributions ({count} non relues)"
-
-#: Module.php:618
-msgid "No contribution"
-msgstr "Pas de contribution"
-
-#: Module.php:643
-msgid "Media template for contribution"
-msgstr "Modèle de média pour la contribution"
-
-#: Module.php:644
-msgid ""
-"If any, the template should be in the list of allowed templates for "
-"contribution of a media"
-msgstr ""
-"Si disponible, le modèle doit être dans la liste des modèles autorisés pour "
-"la contribution d’un média"
-
-#: Module.php:652
-msgid "Select resource template for media…"
-msgstr "Choisir un modèle de ressource pour les médias…"
-
-#: Module.php:660
-msgid "Specific confirmation subject to the contributor"
-msgstr "Sujet spécifique pour la confirmation au contributeur"
-
-#: Module.php:671
-msgid "Specific confirmation message to the contributor"
-msgstr "Message spécifique pour la confirmation au contributeur"
-
-#: Module.php:672 Module.php:697 src/Form/SettingsFieldset.php:245
-#: src/Form/SettingsFieldset.php:271
-msgid ""
-"Placeholders: wrap properties with \"{}\", for example \"{dcterms:title}\"."
-msgstr ""
-"Jokers : entourer les propriétés avec des « {} », par exemple « {dcterms:"
-"title} »."
-
-#: Module.php:685
-msgid "Specific confirmation subject to the reviewer"
-msgstr "Sujet spécifique pour la confirmation au relecteur"
-
-#: Module.php:696
-msgid "Specific confirmation message to the reviewer"
-msgstr "Message spécifique pour la confirmation au relecteur"
-
-#: Module.php:716
-msgid "Contribute: Editable by contributor"
-msgstr "Contribute : Éditable par un contributeur"
-
-#: Module.php:728
-msgid "Contribute: Fillable by contributor"
-msgstr "Contribute : Remplissable par un contributeur"
-
-#: src/Mvc/Controller/Plugin/ContributiveData.php:78
-#: src/Mvc/Controller/Plugin/ContributiveData.php:133
-msgid ""
-"The resource template #{template_id} is not in the list of allowed "
-"contribution templates for media."
-msgstr ""
-"Le modèle de ressource #{template_id} n’est pas dans la liste des modèles de "
-"contribution autorisés pour les médias."
-
-#: src/Mvc/Controller/Plugin/ContributiveData.php:79
-msgid ""
-"The resource template #{template_id} is not in the list of allowed "
-"contribution templates."
-msgstr ""
-"Le modèle de ressource #{template_id} n’est pas dans la liste des modèles de "
-"contribution autorisés."
-
-#: src/Mvc/Controller/Plugin/ContributiveData.php:90
-msgid "A resource template must be set to allow to contribute"
-msgstr "Un modèle de ressource doit être défini pour contribuer"
-
-#: src/Mvc/Controller/Plugin/ContributiveData.php:98
+#: src/Mvc/Controller/Plugin/GenerativeData.php:90
 msgid "The module Advanced Resource Template is not available."
-msgstr "Le module Advanced Resource Template n’est pas disponible."
+msgstr "Le module Modèle de ressource avancé n’est pas disponible."
 
-#: src/Mvc/Controller/Plugin/ContributiveData.php:326
+#: src/Mvc/Controller/Plugin/GenerativeData.php:132
 msgid ""
-"The template #{template_id} does not exist and cannot be used for "
-"contribution."
+"The resource template #{template_id} used for media in template {template} "
+"is not available."
 msgstr ""
-"Le modèle « {template_id} » n’existe pas et ne peut pas être utilisé pour "
-"une contribution."
+"Le modèle de ressource #{template_id} utilisé pour les médias dans le modèle "
+"{template} n’est pas disponible."
 
-#: src/Mvc/Controller/Plugin/ContributiveData.php:331
+#: src/Mvc/Controller/Plugin/GenerativeData.php:332
 msgid ""
-"The template \"{template}\" does not exist and cannot be used for "
-"contribution."
+"The template #{template_id} does not exist and cannot be used for generation."
 msgstr ""
-"Le modèle « {template} » n’existe pas et ne peut pas être utilisé pour une "
-"contribution."
+"Le modèle #{template_id} n’existe pas et ne peut pas être utilisé pour la "
+"génération."
 
-#: src/Mvc/Controller/Plugin/SendContributionEmail.php:49
-msgid "Email not sent: the subject is missing."
-msgstr "Mail non envoyé : pas de sujet."
+#: src/Mvc/Controller/Plugin/GenerativeData.php:337
+msgid ""
+"The template \"{template}\" does not exist and cannot be used for generation."
+msgstr ""
+"Le modèle {template} n’existe pas et ne peut pas être utilisé pour la "
+"génération."
 
-#: src/Mvc/Controller/Plugin/SendContributionEmail.php:56
-msgid "Email not sent: content is missing (subject: {subject})."
-msgstr "Mail non envoyé : pas de contenu (sujet : {subject})."
+#: src/Mvc/Controller/Plugin/ValidateRecordOrCreateOrUpdate.php:223
+msgid "Unable to store the resource of the ai record: {message}"
+msgstr "Impossible d’enregistrer la ressource pour la notice ia : {message}"
 
-#: src/Mvc/Controller/Plugin/SendContributionEmail.php:64
-msgid "Email not sent: no recipient (subject: {subject})."
-msgstr "Mail non envoyé : pas de destinataire (sujet {subject})."
+#: src/Job/BatchValidate.php:56
+msgid ""
+"A query is required to batch validate ai records. It is not possible to "
+"validate all records together. Set a fake argument if needed."
+msgstr ""
+"Une requête est nécessaire pour valider les notices ia en lot. Il n’est pas "
+"possible de valider toutes les notices en même temps. Ajouter un faux "
+"argument si nécessaire."
 
-#: src/Mvc/Controller/Plugin/SendContributionEmail.php:122
-msgid "An email was sent to {emails} with subject: {subject}"
-msgstr "Un mail a été envoyé à {emails} avec le sujet : {subject}"
+#: src/Job/BatchValidate.php:64
+msgid ""
+"There is no ai record to validate or you do not have rights ro process them."
+msgstr ""
+"Il n’y a pas de notice ia à valider ou vous n’avez pas le droit de les "
+"traiter."
 
-#: src/Form/SettingsFieldset.php:28
-msgid "Contribution mode"
-msgstr "Mode de contribution"
+#: src/Job/BatchValidate.php:69
+msgid "Process started"
+msgstr "Démarrage du traitement"
 
-#: src/Form/SettingsFieldset.php:30
-msgid "Authenticated users with a token"
-msgstr "Utilisateurs authentifiés avec jeton"
+#: src/Job/BatchValidate.php:87
+msgid "{processed}/{total} resources processed."
+msgstr "{processed}/{total} ressources traitées."
 
-#: src/Form/SettingsFieldset.php:31
-msgid "Authenticated users from cas"
-msgstr "Utilisateurs authentifiés via le cas"
+#: src/Job/BatchValidate.php:93
+msgid ""
+"Process ended. {processed}/{total} ai records processed; {count} validated."
+msgstr ""
+"Le traitement est terminé. {processed}/{total} notices ia traitées ; {count} "
+"validées."
+
+#: src/Job/BatchValidate.php:108
+msgid "AI record #{ai_record_id}: user has no right to process."
+msgstr "Notice ia #{ai_record_id} : l’utilisateur n’a pas le droit de traiter."
+
+#: src/Job/BatchValidate.php:117
+msgid "AI record #{ai_record_id}: not valid."
+msgstr "Notice ia #{ai_record_id} : non valide."
+
+#: src/Job/BatchValidate.php:145
+msgid "The resource #{resource_id} is validated."
+msgstr "La ressource #{resource_id} est validée."
 
 #: src/Form/SettingsFieldset.php:32
-msgid "Authenticated users from ldap"
-msgstr "Utilisateurs authentifiés via le ldap"
+msgid "Roles allowed to generate via AI"
+msgstr "Rôles autorisés à générer via IA"
 
-#: src/Form/SettingsFieldset.php:33
-msgid "Authenticated users from sso"
-msgstr "Utilisateurs authentifiés via le sso"
-
-#: src/Form/SettingsFieldset.php:34
-msgid "Authenticated users with an email matching regex below"
-msgstr ""
-"Utilisateurs authentifiés avec un mail correspondant au modèle ci-dessous"
-
-#: src/Form/SettingsFieldset.php:35
-msgid "Authenticated users"
-msgstr "Utilisateurs authentifiés"
-
-#: src/Form/SettingsFieldset.php:36
-msgid "Roles"
-msgstr "Rôles"
-
-#: src/Form/SettingsFieldset.php:37
-msgid "With token"
-msgstr "Avec un jeton"
-
-#: src/Form/SettingsFieldset.php:38
-msgid "Open to any visitor"
-msgstr "Ouvert à tout visiteur"
-
-#: src/Form/SettingsFieldset.php:55
-msgid "Roles allowed to contribute (option \"Roles\" above)"
-msgstr "Rôles autorisés à contribuer (option « Rôles » ci-dessus)"
-
-#: src/Form/SettingsFieldset.php:63
+#: src/Form/SettingsFieldset.php:40
 msgid "Select roles…"
 msgstr "Choisir des rôles…"
 
-#: src/Form/SettingsFieldset.php:72
-msgid "Regex on email of users allowed to contribute (option above)"
+#: src/Form/SettingsFieldset.php:49
+msgid "Validate by default if user has rights"
+msgstr "Valider par défaut si l’utilisateur a les droits"
+
+#: src/Form/SettingsFieldset.php:61
+msgid "List of available models (as name = label)"
+msgstr "Liste des modèles disponibles (comme nom = étiquette)"
+
+#: src/Form/SettingsFieldset.php:62
+msgid ""
+"To analyze an image costs about 300 to 5000 tokens, according to the model, "
+"the image size, the length of the prompt and the length of the response. "
+"Warning: a multiplicator of 1.6 to 2.6 is used to analyze images."
 msgstr ""
-"Regex sur le mail des utilisateurs autorisés à contribuer (option ci-dessus)"
+"L’analyse d’une image coûte environ 300 à 5000 jetons, en fonction du "
+"modèle, de la taille de l’image, de la longueur de l’invite et de la "
+"longueur de la réponse. Attention : un multiplicateur de 1,6 à 2,6 est "
+"utilisé pour analyser les images."
 
 #: src/Form/SettingsFieldset.php:84
-msgid "Resource templates allowed for contribution"
-msgstr "Modèles autorisés pour les contributions"
+msgid "Default model name"
+msgstr "Modèle par défaut"
 
-#: src/Form/SettingsFieldset.php:92 src/Form/SettingsFieldset.php:109
-msgid "Select resources templates…"
-msgstr "Choisir un modèle de ressource…"
+#: src/Form/SettingsFieldset.php:85
+msgid "Use exact name from above field."
+msgstr "Utiliser le nom exact du champ ci-dessus."
 
-#: src/Form/SettingsFieldset.php:101
-msgid "Resource templates allowed for media (linked contribution)"
-msgstr "Modèles autorisés pour les médias (contribution liée)"
+#: src/Form/SettingsFieldset.php:97
+msgid "Default max tokens by request"
+msgstr "Nombre maximal de jetons par défaut selon la demande"
 
-#: src/Form/SettingsFieldset.php:118
-msgid "Days for token to expire"
-msgstr "Nombre de jours avant que le jeton n’expire"
+#: src/Form/SettingsFieldset.php:109
+msgid "Default derivative image"
+msgstr "Image dérivée par défaut"
 
-#: src/Form/SettingsFieldset.php:119
-msgid ""
-"Allow to set the default expiration date of a token. Let empty to remove "
-"expiration."
+#: src/Form/SettingsFieldset.php:112
+msgid "Large"
+msgstr "Large"
+
+#: src/Form/SettingsFieldset.php:114
+msgid "Square"
+msgstr "Carré"
+
+#: src/Form/SettingsFieldset.php:128
+msgid "Prompt to set context of a session for resource analysis"
 msgstr ""
-"Permet de définir une durée avant expiration automatique du jeton. Laisser "
-"vide pour supprimer l’expiration."
+"Invite pour définir le contexte de la session pour l’analyse des ressources"
 
-#: src/Form/SettingsFieldset.php:125
-msgid "90"
-msgstr "90"
+#: src/Form/SettingsFieldset.php:129
+msgid ""
+"Write the prompt in the language the record should be. Keep the prompt short "
+"to take care of credits."
+msgstr ""
+"Rédigez l’invite dans la langue de la notice. Soyez bref pour ne pas "
+"gaspiller les crédits."
 
-#: src/Form/SettingsFieldset.php:136
-msgid "No (directly submitted)"
-msgstr "Non (soumis directement)"
+#: src/Form/SettingsFieldset.php:140
+msgid "Prompt to generate ai record"
+msgstr "Invite pour générer une notice ia"
 
-#: src/Form/SettingsFieldset.php:137
-msgid "Until submission"
-msgstr "Jusqu’à la soumission"
-
-#: src/Form/SettingsFieldset.php:138
-msgid "Until validation"
-msgstr "Jusqu’à la validation"
-
-#: src/Form/SettingsFieldset.php:152
-msgid "Emails to notify contributions"
-msgstr "Adresses mails pour informer des contributions"
+#: src/Form/SettingsFieldset.php:141
+msgid "May be empty when the prompt for context is complete."
+msgstr "Peut être vide lorsque la demande de contexte est complète."
 
 #: src/Form/SettingsFieldset.php:153
+msgid "Item sets for automatic generation"
+msgstr "Collections pour la génération automatique"
+
+#: src/Form/SettingsFieldset.php:161
+msgid "Select item sets…"
+msgstr "Choisir des collections…"
+
+#: src/Form/SettingsFieldset.php:170
+msgid "HIde the flag review/unreviewed"
+msgstr "Cacher le drapeau relu/non-relu"
+
+#: src/Form/ConfigForm.php:17
+msgid "OpenAI api key"
+msgstr "Clé api OpenAI"
+
+#: src/Form/ConfigForm.php:18
 msgid ""
-"A query can be appended to limit notifications to specific contributions."
+"The api key can be created with an account on OpenAI developer platform."
 msgstr ""
-"Une requête peut être ajoutée pour limiter les notifications à des "
-"contributions spécifiques."
+"La clé api peut être créée avec un compte sur la plateforme de développement "
+"OpenAI."
 
-#: src/Form/SettingsFieldset.php:169
-msgid "Emails of the author"
-msgstr "Mails de l’auteur"
+#: src/Form/ConfigForm.php:30
+msgid "OpenAI organization id"
+msgstr "Identifiant de l’organisation OpenAI"
 
-#: src/Form/SettingsFieldset.php:181
-msgid "Select a property…"
-msgstr "Choisir une propriété…"
+#: src/Form/ConfigForm.php:31
+msgid ""
+"The optional organization id allows to follow members in the OpenAI "
+"dashboard."
+msgstr ""
+"L’identifiant facultatif de l’organisation permet de suivre les membres dans "
+"le tableau de bord OpenAI."
 
-#: src/Form/SettingsFieldset.php:190
-msgid "Confirmations to author"
-msgstr "Confirmations à l’auteur"
+#: src/Form/ConfigForm.php:42
+msgid "OpenAI project id"
+msgstr "Identifiant du projet OpenAI"
 
-#: src/Form/SettingsFieldset.php:191
-msgid "value_options"
-msgstr "value_options"
+#: src/Form/ConfigForm.php:43
+msgid ""
+"The optional project id allows to follow various projects in the OpenAI "
+"dashboard."
+msgstr ""
+"L’identifiant de projet facultatif permet de suivre différents projets dans "
+"le tableau de bord OpenAI."
 
-#: src/Form/SettingsFieldset.php:194
-msgid "On submit"
-msgstr "Lors de la soumission"
+#: src/Form/BatchEditFieldset.php:32
+msgid "It is recommended to process this task in background."
+msgstr "Il est recommandé d’exécuter cette tâche en arrière-plan."
 
-#: src/Form/SettingsFieldset.php:208
-msgid "Message displayed when a contribution is added"
-msgstr "Message affiché quand une contribution est ajoutée"
+#: src/Form/BatchEditFieldset.php:46
+msgid "Validate"
+msgstr "Valider"
 
-#: src/Form/SettingsFieldset.php:220
-msgid "Message displayed when a contribution is edited"
-msgstr "Message affiché quand une contribution est modifiée"
+#: src/Form/BatchEditFieldset.php:63
+msgid "Model"
+msgstr "Modèle"
 
-#: src/Form/SettingsFieldset.php:232
-msgid "Subject of the confirmation email to the author"
-msgstr "Sujet du mail de confirmation à l’auteur"
+#: src/Form/BatchEditFieldset.php:79
+msgid "Maximum tokens"
+msgstr "Jetons maximum"
 
-#: src/Form/SettingsFieldset.php:233 src/Form/SettingsFieldset.php:259
-msgid "May be overridden by a specific subject set in the resource template"
-msgstr "Peut être remplacé par un sujet spécifique défini dans le modèle"
+#: src/Form/BatchEditFieldset.php:96
+msgid "Derivative image"
+msgstr "Image dérivée"
 
-#: src/Form/SettingsFieldset.php:244
-msgid "Confirmation message to the author"
-msgstr "Message de confirmation à l’auteur"
+#: src/Form/BatchEditFieldset.php:112
+msgid "Prompt (session)"
+msgstr "Invite (session)"
 
-#: src/Form/SettingsFieldset.php:258
-msgid "Subject of the confirmation email to the reviewers"
-msgstr "Sujet du mail de confirmation aux relecteurs"
-
-#: src/Form/SettingsFieldset.php:270
-msgid "Confirmation message to the reviewers"
-msgstr "Message de confirmation aux relecteurs"
+#: src/Form/BatchEditFieldset.php:129
+msgid "Prompt (user)"
+msgstr "Invite (utilisateur)"
 
 #: src/Form/QuickSearchForm.php:42
 msgid "Select a template…"
 msgstr "Choisir un modèle…"
 
-#: src/Form/QuickSearchForm.php:50
-msgid "Texte"
-msgstr "Texte"
-
 #: src/Form/QuickSearchForm.php:65
 msgid "Set a date with optional comparator…"
 msgstr "Indiquer une date avec un signe éventuel de comparaison…"
 
-#: src/Form/QuickSearchForm.php:75 src/Form/QuickSearchForm.php:91
-#: src/Form/QuickSearchForm.php:107
+#: src/Form/QuickSearchForm.php:75
 msgid "Any"
 msgstr "Tous"
 
-#: src/Form/QuickSearchForm.php:89
-msgid "Submitted"
-msgstr "Soumis"
-
-#: src/Form/QuickSearchForm.php:146
+#: src/Form/QuickSearchForm.php:114
 msgid "User by id"
 msgstr "Utilisateur par id"
 
-#: src/Form/QuickSearchForm.php:156
-msgid "User by email"
-msgstr "Utilisateur par mail"
+#: src/Api/Adapter/AiRecordAdapter.php:254
+msgid "The proposal must be an array"
+msgstr "La proposition doit être une table"
 
-#: src/Form/ContributeForm.php:44
-msgid "Type of item"
-msgstr "Type de contenu"
+#: src/Controller/Admin/IndexController.php:91
+msgid "This ai record is a new resource or has no more resource."
+msgstr "Cette notice ia est une nouvelle ressource ou n’a plus de ressource."
 
-#: src/Api/Adapter/ContributionAdapter.php:328
-msgid "Invalid or empty file for key {key}."
-msgstr "Type de fichier incorrect ou vide pour l’index {key}."
-
-#: src/Api/Adapter/ContributionAdapter.php:340
-msgid "Invalid file type for key {key}."
-msgstr "Type de fichier incorrect pour l’index {key}."
-
-#: src/Api/Representation/TokenRepresentation.php:129
-#: src/Controller/Admin/ContributionController.php:284
-msgid "A site is required to create a public token."
-msgstr "Un site est nécessaire pour créer un jeton public."
-
-#: src/File/Contribution.php:67
-msgid "The filename set in store is empty."
-msgstr "Le fichier enregistré est vide."
-
-#: src/File/Contribution.php:117
-msgid "The filename is not a real path."
-msgstr "Le nom de fichier n’est pas un vrai chemin."
-
-#: src/File/Contribution.php:126
-msgid "The filename is not in the base directory."
-msgstr "Le fichier n’est pas dans le dossier de base."
-
-#: src/File/Contribution.php:135
-msgid "The file is not writeable."
-msgstr "Le fichier ne peut pas être écrit."
-
-#: src/File/Contribution.php:144
-msgid "The file is not a real file."
-msgstr "Le fichier n’est pas un vrai fichier."
-
-#: src/File/Contribution.php:153
-msgid "The file is not readable."
-msgstr "Le fichier n’est pas lisible."
-
-#: src/Media/Ingester/Contribution.php:43
-msgid "The store for file is not set."
-msgstr "L’emplacement de stockage du fichier n’est pas défini."
-
-#: src/Controller/Admin/ContributionController.php:120
-msgid "This contribution is a new resource or has no more resource."
+#: src/Controller/Admin/IndexController.php:138
+msgid "The resource id should be defined to generate a record."
 msgstr ""
-"Cette contribution est une nouvelle ressource ou n’a plus de ressource."
+"L’identifiant de la ressource doit être défini pour générer une notice."
 
-#: src/Controller/Admin/ContributionController.php:159
-msgid "contribution"
-msgstr "contribution"
+#: src/Controller/Admin/IndexController.php:147
+msgid "The resource to generate is not available."
+msgstr "La ressource à générer n’est pas disponible."
 
-#: src/Controller/Admin/ContributionController.php:177
-msgid "Contribution successfully deleted"
-msgstr "La contribution a été correctement supprimée"
+#: src/Controller/Admin/IndexController.php:157
+msgid "The user is not allowed to generate a record."
+msgstr "L’utilisateur n’est pas autorisé à générer une notice."
 
-#: src/Controller/Admin/ContributionController.php:198
-msgid "You must select at least one contribution to batch delete."
-msgstr "Vous devez choisir au moins une contribution pour supprimer en lot."
+#: src/Controller/Admin/IndexController.php:175
+msgid "The resource was generated successfully."
+msgstr "La ressource a été générée avec succès."
 
-#: src/Controller/Admin/ContributionController.php:207
-msgid "Contributions successfully deleted"
-msgstr "Les contributions ont été correctement supprimées"
+#: src/Controller/Admin/IndexController.php:213
+msgid "AI record successfully deleted"
+msgstr "La notice ia a été correctement supprimée"
 
-#: src/Controller/Admin/ContributionController.php:233
-msgid "Deleting contributions. This may take a while."
-msgstr "Suppression des contributions en cours. Cela peut prendre un moment."
+#: src/Controller/Admin/IndexController.php:230
+msgid "You must select at least one ai record to batch delete."
+msgstr "Vous devez choisir au moins une notice ia pour supprimer en lot."
 
-#: src/Controller/Admin/ContributionController.php:275
-msgid "You can create token only for items, media and item sets."
-msgstr ""
-"Vous pouvez créer un jeton seulement pour les contenus, les médias et les "
-"collections."
+#: src/Controller/Admin/IndexController.php:239
+msgid "AI records successfully deleted"
+msgstr "Les notices ia ont été correctement supprimée"
 
-#: src/Controller/Admin/ContributionController.php:310
-msgid "You must select at least one resource to create a token."
-msgstr "Vous devez choisir au moins une ressource pour créer un jeton."
+#: src/Controller/Admin/IndexController.php:265
+msgid "Deleting ai records. This may take a while."
+msgstr "Suppression des notices ia en cours. Cela peut prendre un moment."
 
-#: src/Controller/Admin/ContributionController.php:319
+#: src/Controller/Admin/IndexController.php:288
+#: src/Controller/Admin/IndexController.php:331
+msgid "You must select a valid action to batch process."
+msgstr "Vous devez choisir une action valide pour lancer un traitement en lot."
+
+#: src/Controller/Admin/IndexController.php:294
+msgid "You must select at least one ai record to batch process."
+msgstr "Vous devez choisir au moins une notice ia pour traiter en lot."
+
+#: src/Controller/Admin/IndexController.php:307
+msgid "AI records successfully updated"
+msgstr "Les notices ia ont été correctement mises à jour"
+
+#: src/Controller/Admin/IndexController.php:309
+msgid "An error occurred during update"
+msgstr "Une erreur interne s’est produite lors de la mise à jour"
+
+#: src/Controller/Admin/IndexController.php:353
 msgid ""
-"You set the optional email \"{email}\" to create a contribution token, but "
-"it is not well-formed."
+"Processing update of ai records in background (job {link_job}#{job_id}"
+"{link_end}, {link_log}logs{link_end})."
 msgstr ""
-"Vous avez saisi « {email} » comme mail optionnel pour le jeton de "
-"contribution, mais il n’est pas correctement écrit."
+"Traitement de la mise à jour des notices ia en arrière-plan (job {link_job}"
+"#{job_id}{link_end}, {link_log}logs{link_end})."
 
-#: src/Controller/Admin/ContributionController.php:361
+#: src/Controller/Admin/IndexController.php:380
 msgid ""
-"Created {total} contribution tokens (email: {email}, duration: {duration}): "
-"{urls}"
+"Processing validation of ai records in background (job {link_job}#{job_id}"
+"{link_end}, {link_log}logs{link_end})."
 msgstr ""
-"Création de {total} jetons de contribution (email : {email}, durée : "
-"{duration}) : {urls}"
+"Traitement de la validation des notices ia en arrière-plan (job {link_job}"
+"#{job_id}{link_end}, {link_log}logs{link_end})."
 
-#: src/Controller/Admin/ContributionController.php:364
-msgid "none"
-msgstr "aucun"
+#: config/module.config.php:64
+msgid "AI Records"
+msgstr "Notices IA"
 
-#: src/Controller/Admin/ContributionController.php:366
-msgid "{days} days"
-msgstr "{days} jours"
-
-#: src/Controller/Admin/ContributionController.php:367
-msgid "unlimited"
-msgstr "illimité"
-
-#: src/Controller/Admin/ContributionController.php:405
-msgid "Resource #{resource_id} has no tokens to expire."
-msgstr "La ressource #{resource_id} n’a pas de jeton à expirer."
-
-#: src/Controller/Admin/ContributionController.php:428
-msgid "All tokens of the resource were expired."
-msgstr "Tous les jetons de la ressource ont été expirés."
-
-#: src/Controller/Admin/ContributionController.php:582
-msgid "Contribution cannot be created: some values are not valid."
-msgstr "La contribution est incorrecte : certaines valeurs sont incorrectes."
-
-#: src/Controller/Admin/ContributionController.php:623
-#: src/Controller/Admin/ContributionController.php:691
-msgid "Contribution is not valid."
-msgstr "La contribution n’est pas valable."
-
-#: src/Controller/Admin/ContributionController.php:633
-msgid "Contribution is not valid: check its values."
-msgstr "La contribution est incorrecte : vérifier ses valeurs."
-
-#: src/Controller/Admin/ContributionController.php:683
-msgid "Missing term or key."
-msgstr "Terme ou clé manquante."
-
-#: src/Controller/Admin/ContributionController.php:700
-msgid "Contribution is not valid: check values."
-msgstr "La contribution est incorrecte : vérifier les valeurs."
-
-#: src/Controller/ContributionTrait.php:162
-msgid "Unable to store the resource of the contribution: {message}"
-msgstr "Impossible d’enregistrer la ressource pour la contribution : {message}"
-
-#: src/Controller/Site/ContributionController.php:210
+#: config/module.config.php:162
 msgid ""
-"A template is required to add a resource. Ask the administrator for more "
-"information."
+"You are an image analysis system. Describe main content of image for "
+"indexing and search purposes."
 msgstr ""
-"Un modèle est nécessaire pour ajouter une ressource. Merci de contacter "
-"l’administrateur pour plus d’information."
-
-#: src/Controller/Site/ContributionController.php:360
-msgid "Contribution successfully saved!"
-msgstr "La contribution a été correctement enregistrée !"
-
-#: src/Controller/Site/ContributionController.php:361
-msgid "Review it before its submission."
-msgstr "Vérifiez-la avant de la soumettre."
-
-#: src/Controller/Site/ContributionController.php:375
-#: src/Controller/Site/ContributionController.php:695
-msgid "An error occurred: check your input."
-msgstr "Une erreur interne s’est produite : merci de vérifier votre saisie."
-
-#: src/Controller/Site/ContributionController.php:535
-msgid ""
-"This resource cannot be edited: no resource template, no fields, or not "
-"allowed."
-msgstr ""
-"Cette ressource ne peut pas être modifiée. Merci de contacter "
-"l’administrateur pour plus d’information."
-
-#: src/Controller/Site/ContributionController.php:585
-msgid "This contribution has been submitted and cannot be edited."
-msgstr "Cette contribution a été soumise et ne peut pas être modifiée."
-
-#: src/Controller/Site/ContributionController.php:643
-#: src/Controller/Site/ContributionController.php:868
-msgid "Contribution successfully submitted!"
-msgstr "La contribution a été correctement envoyée !"
-
-#: src/Controller/Site/ContributionController.php:647
-msgid "This contribution is already submitted and cannot be updated."
-msgstr "Cette contribution est déjà soumise et ne peut pas être mise à jour."
-
-#: src/Controller/Site/ContributionController.php:650
-msgid "No change."
-msgstr "Pas de changement."
-
-#: src/Controller/Site/ContributionController.php:663
-msgid "Contribution successfully updated!"
-msgstr "La contribution a été correctement mise à jour !"
-
-#: src/Controller/Site/ContributionController.php:747
-msgid "The delete confirm action is currently unavailable"
-msgstr ""
-"L’action de confirmation de suppression n’est pas disponible actuellement"
-
-#: src/Controller/Site/ContributionController.php:756
-msgid "Deletion can be processed only with a post."
-msgstr "La suppression n’est possible que via un « post »."
-
-#: src/Controller/Site/ContributionController.php:762
-msgid "A contribution cannot be updated or deleted."
-msgstr "La contribution ne peut pas être mise à jour ou supprimée."
-
-#: src/Controller/Site/ContributionController.php:769
-msgid "This contribution has been submitted and cannot be deleted."
-msgstr "Cette contribution a été soumise et ne peut pas être supprimée."
-
-#: src/Controller/Site/ContributionController.php:773
-msgid "This contribution has been reviewed and cannot be deleted."
-msgstr "Cette contribution a été relue et ne peut pas être supprimée."
-
-#: src/Controller/Site/ContributionController.php:779
-msgid "Contribution successfully deleted."
-msgstr "La contribution a été correctement supprimée."
-
-#: src/Controller/Site/ContributionController.php:781
-msgid "An issue occurred and the contribution was not deleted."
-msgstr "Un problème est survenu et la contribution n’a pas été supprimée."
-
-#: src/Controller/Site/ContributionController.php:816
-msgid "Only a whole contribution can be submitted."
-msgstr "Seules les contributions complètes peuvent être soumises."
-
-#: src/Controller/Site/ContributionController.php:829
-msgid "Only the contributor can update a contribution."
-msgstr "Seul le contributeur peut mettre à jour une contribution."
-
-#: src/Controller/Site/ContributionController.php:834
-msgid "This contribution has already been submitted."
-msgstr "La contribution a déjà été soumise."
-
-#: src/Controller/Site/ContributionController.php:838
-msgid "This contribution has already been reviewed."
-msgstr "La contribution a déjà été relue."
-
-#: src/Controller/Site/ContributionController.php:864
-msgid "An error occurred: check your submission or ask an administrator."
-msgstr ""
-"Une erreur interne s’est produite : merci de vérifier votre saisie ou de "
-"contacter l’administrateur."
-
-#: src/Controller/Site/ContributionController.php:961
-msgid "contribute_reviewer_confirmation_body"
-msgstr "contribute_reviewer_confirmation_body"
-
-#: src/Controller/Site/ContributionController.php:974
-msgid ""
-"User {user} has made a contribution for resource #{resource} ({title}) "
-"(action: {action})."
-msgstr ""
-"L’utilisateur {user} a fait une contribution pour la ressource #{resource} "
-"({title}) (action : {action})."
-
-#: src/Controller/Site/ContributionController.php:985
-msgid ""
-"An anonymous user has made a contribution for resource {resource} ({title}) "
-"(action: {action})."
-msgstr ""
-"Un utilisateur anonyme a fait une contribution pour la ressource {resource} "
-"({title}) (action : {action})."
-
-#: src/Controller/Site/ContributionController.php:995
-msgid "User {user} has made a contribution (action: {action})."
-msgstr "L’utilisateur {user} a fait une contribution (action : {action})."
-
-#: src/Controller/Site/ContributionController.php:1004
-msgid "An anonymous user has made a contribution (action: {action})."
-msgstr "Un utilisateur anonyme a fait une contribution (action : {action})."
-
-#: src/Controller/Site/ContributionController.php:1006
-#: src/Controller/Site/ContributionController.php:1044
-msgid "</p>"
-msgstr "</p>"
-
-#: src/Controller/Site/ContributionController.php:1024
-msgid ""
-"The author of this contribution has no valid email. Check it or check the "
-"config."
-msgstr ""
-"L’auteur de la contribution n’a pas un mail correct. Vérifiez-le ou vérifier "
-"la configuration."
-
-#: src/Controller/Site/ContributionController.php:1032
-msgid ""
-"Hi,\n"
-"Thanks for your contribution.\n"
-"\n"
-"The administrators will validate it as soon as possible.\n"
-"\n"
-"Sincerely,"
-msgstr ""
-"Hi,\n"
-"Merci de votre contribution.\n"
-"\n"
-"Les administrateurs la valideront dès que possible.\n"
-"\n"
-"Cordialement,"
-
-#: src/Controller/Site/ContributionController.php:1575
-msgid "File {key}: {error}"
-msgstr "Fichier {key} : {error}"
-
-#: src/Controller/Site/ContributionController.php:1582
-msgid "Empty file for key {key}"
-msgstr "Fichier vide pour l’index {key}"
-
-#: src/Controller/Site/ContributionController.php:1595
-msgid "Invalid file type for key {key}"
-msgstr "Type de fichier incorrect pour l’index {key}"
-
-#: src/Controller/Site/ContributionController.php:1654
-msgid "Forbidden access."
-msgstr "Accès interdit."
-
-#: src/Service/Form/QuickSearchFormFactory.php:22
-msgid "Contribute templates"
-msgstr "Modèles pour contribuer"
-
-#: src/Service/Form/QuickSearchFormFactory.php:26
-msgid "Other templates"
-msgstr "Autres modèles"
-
-#: config/module.config.php:240
-msgid "Prepare tokens to edit selected"
-msgstr "Préparer les jetons de contribution pour la sélection"
-
-#: config/module.config.php:241
-msgid "Prepare tokens to edit all"
-msgstr "Préparer des jetons de contribution pour tous"
-
-#, php-format
-#~ msgid "This module requires the module \"%s\"."
-#~ msgstr "Ce module requiert le module « %s »."
-
-#, php-format
-#~ msgid "This module requires modules \"%s\"."
-#~ msgstr "Ce module requiert les modules \"%s\"."
-
-#~ msgid "This module has resources that cannot be installed."
-#~ msgstr "Ce module a des ressources qui ne peuvent pas être installées."
-
-#~ msgid ""
-#~ "This module cannot install its tables, because they exist already. Try to "
-#~ "remove them first."
-#~ msgstr ""
-#~ "Ce module ne peut pas installer ses tables car elles existent déjà. "
-#~ "Essayez de les supprimer manuellement."
-
-#, php-format
-#~ msgid "The module removed tables \"%s\" from a previous broken install."
-#~ msgstr ""
-#~ "Le module a supprimé les tables « %s » depuis une installation échouée."
-
-#, php-format
-#~ msgid ""
-#~ "The module \"%s\" was automatically deactivated because the dependencies "
-#~ "are unavailable."
-#~ msgstr ""
-#~ "Le module « %s » a été automatiquement désactivé car ses dépendances ne "
-#~ "sont plus disponibles."
-
-#~ msgid ""
-#~ "The module Correction was upgraded by module Contribute and uninstalled."
-#~ msgstr ""
-#~ "Le module Correction a été mis à jour par le module Contribuer et "
-#~ "désinstallé."
-
-#, php-format
-#~ msgid "The directory \"%s\" is not writeable: %s."
-#~ msgstr "Le dossier « %s » ne permet pas l’écriture : %s."
-
-#, php-format
-#~ msgid "File %s: %s"
-#~ msgstr "Fichier %s : %s"
-
-#, php-format
-#~ msgid ""
-#~ "An error occured when loading vocabulary \"%s\": file has no json content."
-#~ msgstr ""
-#~ "Une erreur est survenue en chargeant le vocabulaire « %s » : le fichier "
-#~ "n’a pas de contenu json."
-
-#, php-format
-#~ msgid ""
-#~ "An error occured when adding the prefix \"%s\": another vocabulary "
-#~ "exists. Resolve the conflict before installing this module."
-#~ msgstr ""
-#~ "Une erreur est survenue en ajoutant le préfixe « %s » : un autre "
-#~ "vocabulaire existe. Merci de résoudre le conflit avant d'installer ce "
-#~ "module."
-
-#, php-format
-#~ msgid ""
-#~ "A custom vocab exists for \"%s\". Remove it or rename it before "
-#~ "installing this module."
-#~ msgstr ""
-#~ "Un vocabulaire personnalisé existe pour « %s » : renommez-le ou supprimez-"
-#~ "le avant d’installer ce module."
-
-#, php-format
-#~ msgid ""
-#~ "A resource template exists for %s. Rename it or remove it before "
-#~ "installing this module."
-#~ msgstr ""
-#~ "Un modèle de ressource nommé « %s » existe : merci de le renommer ou de "
-#~ "le supprimer avant d'installer ce module."
-
-#, php-format
-#~ msgid "The vocabulary \"%s\" was already installed and was kept."
-#~ msgstr "Le vocabulaire « %s » a déjà été installé et a été conservé."
-
-#, php-format
-#~ msgid ""
-#~ "An error occured when adding the prefix \"%s\": another vocabulary exists "
-#~ "with the same prefix. Resolve the conflict before installing this module."
-#~ msgstr ""
-#~ "Une erreur est survenue lors de l'ajout du préfixe \"%s\" : un autre "
-#~ "vocabulaire existe avec le même préfixe. Merci de résoudre le conflit "
-#~ "avant d'installer ce module."
-
-#, php-format
-#~ msgid ""
-#~ "An error occured when adding the prefix \"%s\" and the associated "
-#~ "properties: %s"
-#~ msgstr ""
-#~ "Une erreur est survenue en ajoutant le préfixe \"%s\" et les propriétés "
-#~ "associées : %s"
-
-#, php-format
-#~ msgid ""
-#~ "An error occured when updating vocabulary \"%s\" and the associated "
-#~ "properties: %s"
-#~ msgstr ""
-#~ "Une erreur est survenue lors de la mise à jour du vocabulaire « %s » et "
-#~ "des propriétés associées : %s"
-
-#, php-format
-#~ msgid ""
-#~ "The following \"%1$s\" of the vocabulary \"%2$s\" were replaced: %3$s"
-#~ msgstr ""
-#~ "Les « %1$s » suivantes du vocabulaire « %2$s » ont été remplacées : %3$s"
-
-#~ msgid ""
-#~ "Resources, values and templates were updated, but you may check settings "
-#~ "where the old ones were used."
-#~ msgstr ""
-#~ "Les ressources, valeurs et modèles ont été mis à jour, mais vous pouvez "
-#~ "vérifier les paramètres où les anciennes valeurs étaient utilisées."
-
-#, php-format
-#~ msgid ""
-#~ "The resource template named \"%s\" is already available and is skipped."
-#~ msgstr ""
-#~ "Le modèle de ressource nommé « %s » est déjà disponible et a été conservé."
-
-#~ msgid "No file or url set for the vocabulary."
-#~ msgstr "Pas de fichier ou d’url pour le vocabulaire."
-
-#, php-format
-#~ msgid "The file \"%s\" cannot be read. Check the url."
-#~ msgstr "Le fichier « %s » ne peut pas être lu. Merci de vérifier l’url."
-
-#, php-format
-#~ msgid "The file \"%s\" cannot be read. Check the file."
-#~ msgstr ""
-#~ "Le fichier « %s » ne peut pas être lu. Merci de vérifier le fichier."
-
-#~ msgid "A vocabulary must have a namespace uri and a prefix."
-#~ msgstr ""
-#~ "Un vocabulaire doit avoir une uri pour l’espace de nom et un préfixe."
-
-#~ msgid "New resource"
-#~ msgstr "Nouvelle ressource"
-
-#~ msgid "New contribution"
-#~ msgstr "Nouvelle contribution"
-
-#~ msgid "Edit contribution"
-#~ msgstr "Modifier la contribution"
-
-#~ msgid "Go back to resource"
-#~ msgstr "Revenir au document"
-
-#~ msgid "New resource or no more resource."
-#~ msgstr "Nouvelle ressource ou plus de ressource."
-
-#~ msgid "Empty proposal."
-#~ msgstr "Proposition vide."
-
-#~ msgid ""
-#~ "The list of emails to notify when a user edits a resource, one by row."
-#~ msgstr ""
-#~ "La liste d’adresses mail à notifier quand un visiteur édite une "
-#~ "ressource, une par ligne."
-
-#~ msgid "Template to use for default edit form"
-#~ msgstr "Modèle à utiliser pour le formulaire d’édition par défaut"
-
-#~ msgid ""
-#~ "This template is used only when the current resource has no template or a "
-#~ "template without config. If not set, the properties below will be used."
-#~ msgstr ""
-#~ "Ce modèle est utilisé seulement quand la ressource en cours n’utilise pas "
-#~ "de modèle, ou que ce modèle n’est pas configuré. Si aucun modèle n’est "
-#~ "disponible, les propriétés ci-dessous seront utilisées."
-
-#~ msgid "Default contribute mode"
-#~ msgstr "Mode de contribution par défaut"
-
-#~ msgid "This option is used only when the template is not configured."
-#~ msgstr ""
-#~ "Cette option est utilisée seulement quand le modèle n’est pas configuré."
-
-#~ msgid "Allow to edit all values"
-#~ msgstr "Autoriser la contribution de toutes les valeurs"
-
-#~ msgid "Only specified properties (whitelist)"
-#~ msgstr "Seulement les propriétés indiquées (liste blanche)"
-
-#~ msgid "All values except properties (blacklist)"
-#~ msgstr "Toutes les valeurs sauf les propriétés indiquées (liste noire)"
-
-#~ msgid "Properties to edit or not when no template is available"
-#~ msgstr "Les propriétés à éditer ou non quand le modèle n’est pas disponible"
-
-#~ msgid ""
-#~ "Only the selected properties will be proposed for public contribute. This "
-#~ "list is used only when the resource template is not configured."
-#~ msgstr ""
-#~ "Seules les propriétés sélectionnées seront proposées au public pour la "
-#~ "contribution. Cette option est utilisée seulement quand le modèle n’est "
-#~ "pas configuré."
-
-#~ msgid "Default fillable mode"
-#~ msgstr "Mode d’ajout par défaut"
-
-#~ msgid "Allow to fill any value"
-#~ msgstr "Autoriser l’ajout de toutes les propriétés"
-
-#~ msgid "Any values except properties (blacklist)"
-#~ msgstr "Toutes les propriétés sauf celles indiquées (liste noire)"
-
-#~ msgid "Properties to fill or not when no template is available"
-#~ msgstr "Propriétés à ajouter ou non lorsque aucun modèle n’est disponible"
-
-#~ msgid ""
-#~ "Allow user to append new values for the selected properties. This list is "
-#~ "used only when the resource template is not configured."
-#~ msgstr ""
-#~ "Autoriser l’utilisateur à ajouter de nouvelles valeurs pour les "
-#~ "propriétés choisies. Cette option est utilisée seulement quand le modèle "
-#~ "n’est pas configuré."
-
-#~ msgid "Editable datatypes"
-#~ msgstr "Types de donnée modifiables"
-
-#~ msgid "Other datatypes are not editable."
-#~ msgstr "Les autres types de données ne sont pas éditables."
-
-#~ msgid "Literal"
-#~ msgstr "Textuel"
-
-#~ msgid "Uri"
-#~ msgstr "Uri"
-
-#~ msgid "Value suggest"
-#~ msgstr "Valeurs suggérées"
-
-#~ msgid "Queries for value resources"
-#~ msgstr "Requêtes pour les valeurs ressources"
-
-#~ msgid "Allows to limit options in a resource select."
-#~ msgstr "Permet de limiter les options dans un sélecteur."
-
-#, php-format
-#~ msgid "A user has edited resource #%1$d (%2$s)."
-#~ msgstr "Un utilisateur a édité la ressource #%1$d (%2$s)."
-
-#~ msgid "The current version of this module requires the module Custom Vocab."
-#~ msgstr "Cette version du module requiert le module Custom Vocab."
-
-#, php-format
-#~ msgid ""
-#~ "A custom vocab named \"%s\" exists and has not the needed language "
-#~ "(\"%s\"): check it or remove it before installing this module."
-#~ msgstr ""
-#~ "Un vocabulaire personnalisé nommé \"%s\" existe et n'utilise pas la même "
-#~ "langue (\"%s\") : merci de vérifier ou de le supprimer avant d'installer "
-#~ "ce module."
-
-#~ msgid "Allow contribute of resources without a token"
-#~ msgstr "Autoriser la contribution des ressources sans jeton"
+"Vous êtes un système d’analyse d’images. Décrivez le contenu principal de "
+"l’image à des fins d’indexation et de recherche."
+
+#: config/module.config.php:173
+msgid "Analyze image"
+msgstr "Analyser l’image"
