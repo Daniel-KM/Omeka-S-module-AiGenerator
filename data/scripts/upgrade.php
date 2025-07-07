@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate;
+namespace AiGenerator;
 
 use Common\Stdlib\PsrMessage;
 use Omeka\Module\Exception\ModuleCannotInstallException;

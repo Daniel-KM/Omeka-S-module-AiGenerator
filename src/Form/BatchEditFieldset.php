@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Form;
+namespace AiGenerator\Form;
 
 use Common\Form\Element as CommonElement;
 use Laminas\Form\Element;
@@ -11,44 +11,44 @@ class BatchEditFieldset extends Fieldset
     public function init(): void
     {
         $this
-            ->setName('generate')
+            ->setName('ai_generator')
             ->setOptions([
-                'element_group' => 'generate',
-                'label' => 'Generate metadata', // @translate
+                'element_group' => 'ai_generator',
+                'label' => 'AI Record Generator', // @translate
             ])
             ->setAttributes([
-                'id' => 'generate',
+                'id' => 'ai-generator',
                 'class' => 'field-container',
                 // This attribute is required to make "batch edit all" working.
                 'data-collection-action' => 'replace',
             ])
 
             ->add([
-                'name' => 'generate_metadata',
+                'name' => 'generate',
                 'type' => Element\Checkbox::class,
                 'options' => [
-                    'element_group' => 'generate',
-                    'label' => 'Generate metadata', // @translate
+                    'element_group' => 'ai_generator',
+                    'label' => 'Generate', // @translate
                     'info' => 'It is recommended to process this task in background.', // @translate
                     'use_hidden_element' => false,
                 ],
                 'attributes' => [
-                    'id' => 'generate-metadata',
+                    'id' => 'ai-generator-generate',
                     // This attribute is required to make "batch edit all" working.
                     'data-collection-action' => 'replace',
                 ],
             ])
             ->add([
-                'name' => 'generate_validate',
+                'name' => 'validate',
                 'type' => Element\Checkbox::class,
                 'options' => [
-                    'element_group' => 'generate',
-                    'label' => 'Validate proposition and fill resource', // @translate
+                    'element_group' => 'ai_generator',
+                    'label' => 'Validate', // @translate
                     'use_hidden_element' => false,
                 ],
                 'attributes' => [
-                    'id' => 'generate-validate',
-                    'class' => 'generate-settings',
+                    'id' => 'ai-generator-validate',
+                    'class' => 'ai-generator-settings',
                     // Enabled via js when checkbox is on.
                     'disabled' => 'disabled',
                     // This attribute is required to make "batch edit all" working.
@@ -56,15 +56,15 @@ class BatchEditFieldset extends Fieldset
                 ],
             ])
             ->add([
-                'name' => 'generate_model',
+                'name' => 'model',
                 'type' => CommonElement\OptionalSelect::class,
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Model', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate-model',
-                    'class' => 'generate-settings',
+                    'id' => 'ai-generator-model',
+                    'class' => 'ai-generator-settings',
                     // Enabled via js when checkbox is on.
                     'disabled' => 'disabled',
                     // This attribute is required to make "batch edit all" working.
@@ -72,16 +72,16 @@ class BatchEditFieldset extends Fieldset
                 ],
             ])
             ->add([
-                'name' => 'generate_max_tokens',
+                'name' => 'max_tokens',
                 'type' => CommonElement\OptionalNumber::class,
                 'options' => [
-                    'element_group' => 'generate',
-                    'label' => 'Max tokens', // @translate
+                    'element_group' => 'ai_generator',
+                    'label' => 'Maximum tokens', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate-max-tokens',
+                    'id' => 'ai-generator-max-tokens',
                     'min' => 0,
-                    'class' => 'generate-settings',
+                    'class' => 'ai-generator-settings',
                     // Enabled via js when checkbox is on.
                     'disabled' => 'disabled',
                     // This attribute is required to make "batch edit all" working.
@@ -89,15 +89,15 @@ class BatchEditFieldset extends Fieldset
                 ],
             ])
             ->add([
-                'name' => 'generate_derivative',
+                'name' => 'derivative',
                 'type' => CommonElement\OptionalRadio::class,
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Derivative image', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate-derivative',
-                    'class' => 'generate-settings',
+                    'id' => 'ai-generator-derivative',
+                    'class' => 'ai-generator-settings',
                     // Enabled via js when checkbox is on.
                     'disabled' => 'disabled',
                     // This attribute is required to make "batch edit all" working.
@@ -106,14 +106,14 @@ class BatchEditFieldset extends Fieldset
             ])
             ->add([
                 'type' => Element\Textarea::class,
-                'name' => 'generate_prompt_system',
+                'name' => 'prompt_system',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Prompt (session)', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate-prompt-system',
-                    'class' => 'generate-settings',
+                    'id' => 'ai-generator-prompt-system',
+                    'class' => 'ai-generator-settings',
                     'rows' => 5,
                     // Enabled via js when checkbox is on.
                     'disabled' => 'disabled',
@@ -123,14 +123,14 @@ class BatchEditFieldset extends Fieldset
             ])
             ->add([
                 'type' => Element\Textarea::class,
-                'name' => 'generate_prompt_user',
+                'name' => 'prompt_user',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Prompt (user)', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate-prompt-user',
-                    'class' => 'generate-settings',
+                    'id' => 'ai-generator-prompt-user',
+                    'class' => 'ai-generator-settings',
                     'rows' => 5,
                     // Enabled via js when checkbox is on.
                     'disabled' => 'disabled',

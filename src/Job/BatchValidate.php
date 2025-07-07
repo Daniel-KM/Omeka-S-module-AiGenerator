@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Job;
+namespace AiGenerator\Job;
 
-use Generate\Api\Representation\GeneratedResourceRepresentation;
+use AiGenerator\Api\Representation\AiRecordRepresentation;
 use Omeka\Job\AbstractJob;
 use Omeka\Stdlib\ErrorStore;
 
@@ -27,14 +27,14 @@ class BatchValidate extends AbstractJob
     protected $logger;
 
     /**
-     * @var \Generate\Mvc\Controller\Plugin\ValidateRecordOrCreateOrUpdate
+     * @var \AiGenerator\Mvc\Controller\Plugin\ValidateRecordOrCreateOrUpdate
      */
     protected $validateRecordOrCreateOrUpdate;
 
     /**
      * @var array
      */
-    protected $generatedResourceIds;
+    protected $aiRecordIds;
 
     public function perform()
     {
@@ -42,7 +42,7 @@ class BatchValidate extends AbstractJob
 
         // The reference id is the job id for now.
         $referenceIdProcessor = new \Laminas\Log\Processor\ReferenceId();
-        $referenceIdProcessor->setReferenceId('generate/validate/job_' . $this->job->getId());
+        $referenceIdProcessor->setReferenceId('ai-generator/validate/job_' . $this->job->getId());
 
         $this->acl = $services->get('Omeka\Acl');
         $this->api = $services->get('Omeka\ApiManager');
@@ -53,15 +53,15 @@ class BatchValidate extends AbstractJob
         if (!$query) {
             $this->job->setStatus(\Omeka\Entity\Job::STATUS_ERROR);
             $this->logger->err(
-                'A query is required to batch validate generations. It is not possible to validate all generations together. Set a fake argument if needed.', // @translate
+                'A query is required to batch validate ai records. It is not possible to validate all records together. Set a fake argument if needed.', // @translate
             );
             return;
         }
 
-        $this->generatedResourceIds = $this->api->search('generated_resources', $query, ['returnScalar' => 'id'])->getContent();
-        if (!count($this->generatedResourceIds)) {
+        $this->aiRecordIds = $this->api->search('ai_records', $query, ['returnScalar' => 'id'])->getContent();
+        if (!count($this->aiRecordIds)) {
             $this->logger->warn(
-                'There is no generated resource to validate or you do not have rights ro process them.' // @translate
+                'There is no ai record to validate or you do not have rights ro process them.' // @translate
             );
             return;
         }
@@ -70,14 +70,14 @@ class BatchValidate extends AbstractJob
 
         $index = 0;
         $validated = 0;
-        foreach (array_chunk($this->generatedResourceIds, 100) as $ids) {
+        foreach (array_chunk($this->aiRecordIds, 100) as $ids) {
             if ($this->shouldStop()) {
                 break;
             }
             foreach ($ids as $id) {
                 ++$index;
-                $generatedResource = $this->api->read('generated_resources', $id)->getContent();
-                $result = (bool) $this->validate($generatedResource);
+                $aiRecord = $this->api->read('ai_records', $id)->getContent();
+                $result = (bool) $this->validate($aiRecord);
                 // Keep list of ids unvalidated?
                 if ($result) {
                     ++$validated;
@@ -85,37 +85,37 @@ class BatchValidate extends AbstractJob
             }
             $this->logger->info(
                 '{processed}/{total} resources processed.', // @translate
-                ['processed' => $index, 'total' => count($this->generatedResourceIds)]
+                ['processed' => $index, 'total' => count($this->aiRecordIds)]
             );
         }
 
         $this->logger->notice(
-            'Process ended. {processed}/{total} resources processed; {count} validated.', // @translate
-            ['processed' => $index, 'total' => count($this->generatedResourceIds), 'count' => $validated]
+            'Process ended. {processed}/{total} ai records processed; {count} validated.', // @translate
+            ['processed' => $index, 'total' => count($this->aiRecordIds), 'count' => $validated]
         );
     }
 
-    protected function validate(GeneratedResourceRepresentation $generatedResource)
+    protected function validate(AiRecordRepresentation $aiRecord)
     {
         // If there is no resource, create it as a whole.
-        $generatedResourceResource = $generatedResource->resource();
+        $relatedResource = $aiRecord->resource();
 
         // Only people who can edit the resource can validate.
-        if (($generatedResourceResource && !$generatedResourceResource->userIsAllowed('update'))
-            || (!$generatedResourceResource && !$this->acl->userIsAllowed('Omeka\Api\Adapter\ItemAdapter', 'create'))
+        if (($relatedResource && !$relatedResource->userIsAllowed('update'))
+            || (!$relatedResource && !$this->acl->userIsAllowed('Omeka\Api\Adapter\ItemAdapter', 'create'))
         ) {
             $this->logger->err(
-                'Generated resource #{generated_resource_id}: user has no right to process.', // @translate
-                ['generated_resource_id' => $generatedResource->id()]
+                'AI record #{ai_record_id}: user has no right to process.', // @translate
+                ['ai_record_id' => $aiRecord->id()]
             );
             return false;
         }
 
-        $resourceData = $generatedResource->proposalToResourceData();
+        $resourceData = $aiRecord->proposalToResourceData();
         if (!$resourceData) {
             $this->logger->err(
-                'Generated resource #{generated_resource_id}: not valid.', // @translate
-                ['generated_resource_id' => $generatedResource->id()]
+                'AI record #{ai_record_id}: not valid.', // @translate
+                ['ai_record_id' => $aiRecord->id()]
             );
             return false;
         }
@@ -125,7 +125,7 @@ class BatchValidate extends AbstractJob
         // a review.
 
         $errorStore = new ErrorStore();
-        $resource = $this->validateRecordOrCreateOrUpdate->__invoke($generatedResource, $resourceData, $errorStore, true, false, false);
+        $resource = $this->validateRecordOrCreateOrUpdate->__invoke($aiRecord, $resourceData, $errorStore, true, false, false);
 
         if ($errorStore->hasErrors()) {
             foreach ($errorStore->getErrors() as $error) {

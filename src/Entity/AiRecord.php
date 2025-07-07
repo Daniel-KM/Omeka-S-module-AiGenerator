@@ -27,7 +27,7 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace Generate\Entity;
+namespace AiGenerator\Entity;
 
 use DateTime;
 use Omeka\Entity\AbstractEntity;
@@ -37,7 +37,7 @@ use Omeka\Entity\User;
 /**
  * @Entity
  */
-class GeneratedResource extends AbstractEntity
+class AiRecord extends AbstractEntity
 {
     /**
      * @var int

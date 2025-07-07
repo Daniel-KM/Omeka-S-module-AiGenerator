@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Mvc\Controller\Plugin;
+namespace AiGenerator\Mvc\Controller\Plugin;
 
 use Common\Stdlib\PsrMessage;
 use Doctrine\ORM\EntityManager;
-use Generate\Api\Representation\GeneratedResourceRepresentation;
+use AiGenerator\Api\Representation\AiRecordRepresentation;
 use Laminas\Authentication\AuthenticationServiceInterface;
 use Laminas\Log\LoggerInterface;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
@@ -82,18 +82,18 @@ class ValidateRecordOrCreateOrUpdate extends AbstractPlugin
      * - prompt_user (string): specific prompt.
      */
     public function __invoke(
-        GeneratedResourceRepresentation $generatedResource,
+        AiRecordRepresentation $aiRecord,
         array $resourceData,
         ErrorStore $errorStore,
         bool $reviewed = false,
         bool $validateOnly = false,
         bool $useMessenger = false
     ): ?AbstractResourceEntityRepresentation {
-        $generatedResourceResource = $generatedResource->resource();
+        $relatedResource = $aiRecord->resource();
 
         // Nothing to update or create.
         if (!$resourceData) {
-            return $generatedResourceResource;
+            return $relatedResource;
         }
 
         // Prepare the api to throw a validation exception with error store.
@@ -105,7 +105,7 @@ class ValidateRecordOrCreateOrUpdate extends AbstractPlugin
         unset($resourceData['file']);
 
         // TODO This is a new generation, so a new item for now.
-        $resourceName = $generatedResourceResource ? $generatedResourceResource->resourceName() : 'items';
+        $resourceName = $relatedResource ? $relatedResource->resourceName() : 'items';
 
         // Validate only: the simplest way is to skip flushing.
         // Nevertheless, a simple generator has no right to create a resource.
@@ -128,7 +128,7 @@ class ValidateRecordOrCreateOrUpdate extends AbstractPlugin
             ];
             $class = $classes[$resourceName] ?? 'Item';
             $entityClass = 'Omeka\Entity\\' . $class;
-            $action = $generatedResourceResource ? 'update' : 'create';
+            $action = $relatedResource ? 'update' : 'create';
             $isAllowed = $acl->userIsAllowed($entityClass, $action);
             if (!$isAllowed) {
                 $user = $this->authentication->getIdentity();
@@ -148,7 +148,7 @@ class ValidateRecordOrCreateOrUpdate extends AbstractPlugin
         }
 
         try {
-            if ($generatedResourceResource) {
+            if ($relatedResource) {
                 // During an update of items, keep existing media in any cases.
                 // TODO Move this check in proposalToResourceData(). Do it for item sets and sites too.
                 // @link https://gitlab.com/Daniel-KM/Omeka-S-module-Contribute/-/issues/3
@@ -162,11 +162,11 @@ class ValidateRecordOrCreateOrUpdate extends AbstractPlugin
                 }
                 $apiOptions['isPartial'] = true;
                 $response = $api
-                    ->update($resourceName, $generatedResourceResource->id(), $resourceData, [], $apiOptions);
+                    ->update($resourceName, $relatedResource->id(), $resourceData, [], $apiOptions);
             } else {
                 // The validator is not the generator.
                 // The validator will be added automatically for anonymous.
-                $owner = $generatedResource->owner() ?: null;
+                $owner = $aiRecord->owner() ?: null;
                 $resourceData['o:owner'] = $owner ? ['o:id' => $owner->id()] : null;
                 $resourceData['o:is_public'] = false;
                 $response = $api
@@ -220,7 +220,7 @@ class ValidateRecordOrCreateOrUpdate extends AbstractPlugin
         } catch (\Exception $e) {
             $this->entityManager->clear();
             $message = new PsrMessage(
-                'Unable to store the resource of the generated resource: {message}', // @translate
+                'Unable to store the resource of the ai record: {message}', // @translate
                 ['message' => $e->getMessage()]
             );
             $this->logger()->err($message);
@@ -246,14 +246,14 @@ class ValidateRecordOrCreateOrUpdate extends AbstractPlugin
         }
 
         // The exception is thrown in the api, there is always a response.
-        $generatedResourceResource = $response->getContent();
+        $relatedResource = $response->getContent();
 
         $data = [];
-        $data['o:resource'] = $validateOnly || !$generatedResourceResource ? null : ['o:id' => $generatedResourceResource->id()];
+        $data['o:resource'] = $validateOnly || !$relatedResource ? null : ['o:id' => $relatedResource->id()];
         $data['o:reviewed'] = $reviewed;
         $response = $this->api
-            ->update('generated_resources', $generatedResource->id(), $data, [], ['isPartial' => true]);
+            ->update('ai_records', $aiRecord->id(), $data, [], ['isPartial' => true]);
 
-        return $generatedResourceResource;
+        return $relatedResource;
     }
 }

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Form;
+namespace AiGenerator\Form;
 
 use Laminas\Form\Element;
 use Laminas\Form\Form;
@@ -11,7 +11,7 @@ class ConfigForm extends Form
     {
         $this
             ->add([
-                'name' => 'generate_openai_api_key',
+                'name' => 'aigenerator_openai_api_key',
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'OpenAI api key', // @translate
@@ -19,31 +19,31 @@ class ConfigForm extends Form
                     'documentation' => 'https://platform.openai.com',
                 ],
                 'attributes' => [
-                    'id' => 'generate_openai_api_key',
+                    'id' => 'aigenerator_openai_api_key',
                     'placeholder' => 'sk-proj-xxx',
                 ],
             ])
             ->add([
-                'name' => 'generate_openai_organization',
+                'name' => 'aigenerator_openai_organization',
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'OpenAI organization id', // @translate
                     'info' => 'The optional organization id allows to follow members in the OpenAI dashboard.', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_openai_organization',
+                    'id' => 'aigenerator_openai_organization',
                     'placeholder' => 'org-yyy',
                 ],
             ])
             ->add([
-                'name' => 'generate_openai_project',
+                'name' => 'aigenerator_openai_project',
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'OpenAI project id', // @translate
                     'info' => 'The optional project id allows to follow various projects in the OpenAI dashboard.', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_openai_project',
+                    'id' => 'aigenerator_openai_project',
                     'placeholder' => 'proj-zzz',
                 ],
             ])

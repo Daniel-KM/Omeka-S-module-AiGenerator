@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Service\ControllerPlugin;
+namespace AiGenerator\Service\ControllerPlugin;
 
-use Generate\Mvc\Controller\Plugin\GenerateViaOpenAi;
+use AiGenerator\Mvc\Controller\Plugin\GenerateViaOpenAi;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
@@ -24,9 +24,9 @@ class GenerateViaOpenAiFactory implements FactoryInterface
             $services->get('Omeka\Status'),
             $services->get('MvcTranslator'),
             $plugins->get('validateRecordOrCreateOrUpdate'),
-            $settings->get('generate_openai_api_key'),
-            $settings->get('generate_openai_organization'),
-            $settings->get('generate_openai_project')
+            $settings->get('aigenerator_openai_api_key'),
+            $settings->get('aigenerator_openai_organization'),
+            $settings->get('aigenerator_openai_project')
         );
     }
 }

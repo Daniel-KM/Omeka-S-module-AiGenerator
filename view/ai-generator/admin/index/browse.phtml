@@ -1,9 +1,9 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \Generate\Api\Representation\GeneratedResourceRepresentation[] $generatedResources
- * @var \Generate\Api\Representation\GeneratedResourceRepresentation[] $resources
- * @var \Generate\Form\QuickSearchForm $formSearch
+ * @var \AiGenerator\Api\Representation\AiRecordRepresentation[] $aiRecords
+ * @var \AiGenerator\Api\Representation\AiRecordRepresentation[] $resources
+ * @var \AiGenerator\Form\QuickSearchForm $formSearch
  * @var \Omeka\Form\ConfirmForm $formDeleteSelected
  * @var \Omeka\Form\ConfirmForm $formDeleteAll
  */
@@ -21,12 +21,12 @@ $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 
-$this->htmlElement('body')->appendAttribute('class', 'generated-resources browse');
+$this->htmlElement('body')->appendAttribute('class', 'ai-records browse');
 
 $this->headLink()
-    ->appendStylesheet($assetUrl('css/generate-admin.css', 'Generate'));
+    ->appendStylesheet($assetUrl('css/ai-generator-admin.css', 'AiGenerator'));
 $this->headScript()
-    ->appendFile($assetUrl('js/generate-admin.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
+    ->appendFile($assetUrl('js/ai-generator-admin.js', 'AiGenerator'), 'text/javascript', ['defer' => 'defer']);
 
 $sortHeadings = [
     [
@@ -43,15 +43,15 @@ $sortHeadings = [
     ],
 ];
 
-$displayFlagReview = !$setting('generate_hide_flag_review');
+$displayFlagReview = !$setting('aigenerator_hide_flag_review');
 
-$userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\GeneratedResourceAdapter::class, 'batch_delete');
+$userIsAllowedBatchDelete = $this->userIsAllowed(\AiGenerator\Api\Adapter\AiRecordAdapter::class, 'batch_delete');
 // $userIsAllowedToCreateResource = $this->userIsAllowed(\Omeka\Api\Adapter\ItemAdapter::class, 'create');
 ?>
 
-<?= $this->pageTitle($translate('Generated resource metadata')) ?>
+<?= $this->pageTitle($translate('AI records'), 1, $translate('AI Generator')) ?>
 
-<?= $this->generatedResourceSearchFilters() ?>
+<?= $this->aiRecordSearchFilters() ?>
 
 <div class="browse-controls">
     <?= $this->pagination() ?>
@@ -63,9 +63,9 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
 </div>
 
 <?php $this->trigger('view.browse.before'); ?>
-<?php if (count($generatedResources)): ?>
+<?php if (count($aiRecords)): ?>
 <form method="post" id="batch-form" class="disable-unsaved-warning">
-    <?php if ($this->userIsAllowed(\Generate\Api\Adapter\GeneratedResourceAdapter::class, 'batch_update')): ?>
+    <?php if ($this->userIsAllowed(\AiGenerator\Api\Adapter\AiRecordAdapter::class, 'batch_update')): ?>
     <div class="batch-inputs">
         <select class="batch-actions-select" aria-label="<?= $translate('Batch actions') ?>">
             <option value="default"><?= $translate('Batch actions') ?></option>
@@ -83,13 +83,13 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
         <div class="batch-actions">
             <button type="button" class="button default active" disabled="disabled"><?= $translate('Go') ?></button>
             <?php if ($displayFlagReview): ?>
-            <input type="submit" class="read-selected" name="read_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
-            <input type="submit" class="read-all" name="read_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
-            <input type="submit" class="unread-selected" name="read_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
-            <input type="submit" class="unread-all" name="read_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
+            <input type="submit" class="read-selected" name="read_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/ai-record/default', ['action' => 'batch-process'], true)) ?>">
+            <input type="submit" class="read-all" name="read_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/ai-record/default', ['action' => 'batch-process-all'], true)) ?>">
+            <input type="submit" class="unread-selected" name="read_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/ai-record/default', ['action' => 'batch-process'], true)) ?>">
+            <input type="submit" class="unread-all" name="read_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/ai-record/default', ['action' => 'batch-process-all'], true)) ?>">
             <?php endif; ?>
-            <input type="submit" class="validate-selected" name="validate_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
-            <input type="submit" class="validate-all" name="validate_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
+            <input type="submit" class="validate-selected" name="validate_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/ai-record/default', ['action' => 'batch-process'], true)) ?>">
+            <input type="submit" class="validate-all" name="validate_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/ai-record/default', ['action' => 'batch-process-all'], true)) ?>">
             <input type="hidden" name="query" class="batch-query" value="<?= $escapeAttr(json_encode($this->params()->fromQuery())) ?>">
             <a class="delete button sidebar-content delete-selected" data-sidebar-selector="#sidebar-delete-selected"><?= $translate('Go') ?></a>
             <a class="delete button sidebar-content delete-all" data-sidebar-selector="#sidebar-delete-all"><?= $translate('Go') ?></a>
@@ -106,31 +106,31 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($generatedResources as $generatedResource):
-            $generatedResourceResource = $generatedResource->resource();
-            $resourceTemplate = $generatedResource->resourceTemplate();
-            $isValidable = $generatedResource->isValidable();
-            $owner = $generatedResource->owner();
+            <?php foreach ($aiRecords as $aiRecord):
+            $relatedResource = $aiRecord->resource();
+            $resourceTemplate = $aiRecord->resourceTemplate();
+            $isValidable = $aiRecord->isValidable();
+            $owner = $aiRecord->owner();
             if ($owner) {
                 $ownerText = $hyperlink($owner->name(), $url('admin/id', ['controller' => 'user', 'action' => 'show', 'id' => $owner->id()]));
             } else {
                 $ownerText = $translate('[no owner]');
             }
             ?>
-            <tr class="generated-resource" data-generated-resource-id="<?= $generatedResource->id() ?>">
+            <tr class="ai-record" data-ai-record-id="<?= $aiRecord->id() ?>">
                 <td>
-                    <?php if (false && $generatedResource->userIsAllowed('update') || $generatedResource->userIsAllowed('delete')): ?>
-                    <input type="checkbox" name="resource_ids[]" value="<?= $generatedResource->id() ?>" aria-label="<?= $translate('Select generated resource') ?>">
+                    <?php if (false && $aiRecord->userIsAllowed('update') || $aiRecord->userIsAllowed('delete')): ?>
+                    <input type="checkbox" name="resource_ids[]" value="<?= $aiRecord->id() ?>" aria-label="<?= $translate('Select ai record') ?>">
                     <?php endif; ?>
-                    <span class="title"><?= $generatedResource->linkResource($generatedResource->displayTitle()) ?></span>
+                    <span class="title"><?= $aiRecord->linkResource($aiRecord->displayTitle()) ?></span>
                     <span class="template"><?= $escape($resourceTemplate ? $resourceTemplate->label() : $translate('No resource template')) ?></span>
                     <ul class="actions">
-                        <?php if ($displayFlagReview && $generatedResourceResource && $generatedResource->userIsAllowed('update')): ?>
+                        <?php if ($displayFlagReview && $relatedResource && $aiRecord->userIsAllowed('update')): ?>
                         <li>
                             <a href="#"
-                                class="status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                                data-status-toggle-url="<?= $escapeAttr($generatedResource->adminUrl('toggle-status')) ?>"
-                                data-status="<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                                class="status-toggle o-icon-<?= $aiRecord->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                                data-status-toggle-url="<?= $escapeAttr($aiRecord->adminUrl('toggle-status')) ?>"
+                                data-status="<?= $aiRecord->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
                                 aria-label="<?= $escapeAttr($translate('Toggle status reviewed/unreviewed')) ?>"
                                 title="<?= $escapeAttr($translate('Toggle status reviewed/unreviewed')) ?>"></a>
                         </li>
@@ -139,7 +139,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
                         <li>
                             <a href="#"
                                 class="validate o-icon- fas fa-sign-in-alt"
-                                data-validate-url="<?= $escapeAttr($generatedResource->adminUrl('validate')) ?>"
+                                data-validate-url="<?= $escapeAttr($aiRecord->adminUrl('validate')) ?>"
                                 data-status="validate"
                                 title="<?= $txt = $escapeAttr($translate('Validate all values')) ?>"
                                 aria-label="<?= $txt ?>"></a>
@@ -153,11 +153,11 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
                                 aria-label="<?= $txt ?>"></span>
                         </li>
                         <?php endif; ?>
-                        <?php if ($generatedResource->userIsAllowed('delete')): ?>
+                        <?php if ($aiRecord->userIsAllowed('delete')): ?>
                         <li>
                             <?= $hyperlink('', '#', [
                                 'data-sidebar-selector' => '#sidebar',
-                                'data-sidebar-content-url' => $generatedResource->adminUrl('delete-confirm'),
+                                'data-sidebar-content-url' => $aiRecord->adminUrl('delete-confirm'),
                                 'class' => 'o-icon-delete sidebar-content',
                                 'title' => $translate('Delete'),
                             ]) ?>
@@ -166,7 +166,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
                         <li>
                             <?= $hyperlink('', '#', [
                                 'data-sidebar-selector' => '#sidebar',
-                                'data-sidebar-content-url' => $generatedResource->adminUrl('show-details'),
+                                'data-sidebar-content-url' => $aiRecord->adminUrl('show-details'),
                                 'class' => 'o-icon-more sidebar-content',
                                 'title' => $translate('Details'),
                             ]) ?>
@@ -174,7 +174,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
                     </ul>
                 </td>
                 <td><?= $ownerText ?></td>
-                <td><?= $escape($i18n->dateFormat($generatedResource->created(), 'medium', 'short')) ?></td>
+                <td><?= $escape($i18n->dateFormat($aiRecord->created(), 'medium', 'short')) ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -204,10 +204,10 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
     ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-confirm">
-            <h3><?= $translate('Delete generated resources') ?></h3>
-            <p><?= $translate('Are you sure you would like to delete the selected generated resources?') ?></p>
+            <h3><?= $translate('Delete ai records') ?></h3>
+            <p><?= $translate('Are you sure you would like to delete the selected ai records?') ?></p>
             <p class="error"><?= sprintf(
-                $translate('%1$s: this action will permanently delete %2$s generated resources and cannot be undone.'),
+                $translate('%1$s: this action will permanently delete %2$s ai records and cannot be undone.'),
                 sprintf('<strong>%s</strong>', $translate('Warning')),
                 '<strong><span id="delete-selected-count"></span></strong>'
             ) ?></p>
@@ -222,10 +222,10 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
     ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-confirm">
-            <h3><?= $translate('Delete generated resources') ?></h3>
-            <p><?= $translate('Are you sure you would like to delete all generated resources on all pages of this result?') ?></p>
+            <h3><?= $translate('Delete ai records') ?></h3>
+            <p><?= $translate('Are you sure you would like to delete all ai records on all pages of this result?') ?></p>
             <p class="error"><?= sprintf(
-                $translate('%1$s: this action will permanently delete %2$s generated resources and cannot be undone.'),
+                $translate('%1$s: this action will permanently delete %2$s ai records and cannot be undone.'),
                 sprintf('<strong>%s</strong>', $translate('Warning')),
                 sprintf('<strong>%s</strong>', number_format($this->pagination()->getPaginator()->getTotalCount()))
             ) ?></p>
@@ -265,7 +265,7 @@ $('#sidebar-delete-all').on('click', 'input[name="confirm-delete-all-check"]', f
 <?php else: ?>
 
 <div class="no-resources">
-    <p><?= $translate('Omeka could not find any generated resources.') ?></p>
+    <p><?= $translate('Omeka could not find any ai records.') ?></p>
 </div>
 
 <?php endif; ?>
@@ -277,7 +277,7 @@ $('#sidebar-delete-all').on('click', 'input[name="confirm-delete-all-check"]', f
     ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-search-form" class="disable-unsaved-warning">
-            <h3><?= $translate('Search generated resources') ?></h3>
+            <h3><?= $translate('Search ai records') ?></h3>
             <?php // echo $hyperlink($translate('Advanced search'), $url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']) ?>
             <?= $this->form($formSearch) ?>
         </div>

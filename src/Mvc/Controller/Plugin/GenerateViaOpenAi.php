@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Mvc\Controller\Plugin;
+namespace AiGenerator\Mvc\Controller\Plugin;
 
 use Common\Stdlib\EasyMeta;
 use Common\Stdlib\PsrMessage;
-use Generate\Api\Representation\GeneratedResourceRepresentation;
+use AiGenerator\Api\Representation\AiRecordRepresentation;
 use Laminas\Authentication\AuthenticationServiceInterface;
 use Laminas\I18n\Translator\TranslatorInterface;
 use Laminas\Log\LoggerInterface;
@@ -68,7 +68,7 @@ class GenerateViaOpenAi extends AbstractPlugin
     protected $translator;
 
     /**
-     * @var \Generate\Mvc\Controller\Plugin\ValidateRecordOrCreateOrUpdate
+     * @var \AiGenerator\Mvc\Controller\Plugin\ValidateRecordOrCreateOrUpdate
      */
     protected $validateRecordOrCreateOrUpdate;
 
@@ -129,21 +129,21 @@ class GenerateViaOpenAi extends AbstractPlugin
      *
      * @var array $options
      * - model (string): the model to use.
-     * - max_tokens (int): the max tokens to use for a request (0 for no limit).
+     * - max_tokens (int): the max tokens to use for a request.
      * - derivative (string): the derivative image type or original to process.
-     * - prompt_system (string|false): specific prompt for the system, that
-     *   defines the context of the session.
+     * - prompt_system (string): prompt for the system, that defines the context
+     *   of the session. Empty string is allowed. Null means default prompt.
      * - prompt_user (string): specific prompt. May be a simple word when the
-     *   context is enough.
+     *   context is enough. Empty string is allowed. Null means default prompt.
      * - process (string): "json" (default) or "text". "json" always outputs
      *   valid json, but it is twice the price of a simple textual prompt
      *   requesting json, but this one may be invalid.
      * - validate (bool): validate response automatically if user has rights.
      */
-    public function __invoke(ItemRepresentation|MediaRepresentation $resource, array $options = []): ?GeneratedResourceRepresentation
+    public function __invoke(ItemRepresentation|MediaRepresentation $resource, array $options = []): ?AiRecordRepresentation
     {
         // Generating may be expensive, so there is a specific check for roles.
-        $generateRoles = $this->settings->get('generate_roles') ?: [];
+        $generateRoles = $this->settings->get('aigenerator_roles') ?: [];
         $user = $this->authentication->getIdentity();
         if (!$user || !in_array($user->getRole(), $generateRoles)) {
             return null;
@@ -157,19 +157,19 @@ class GenerateViaOpenAi extends AbstractPlugin
         $this->skipMessenger = !$this->status->isAdminRequest()
             && !$this->status->isSiteRequest();
 
-        $models = $this->settings->get('generate_models') ?: [];
+        $models = $this->settings->get('aigenerator_models') ?: [];
         if (!$models) {
             $this->useMessenger || $this->messenger->addWarning(new PsrMessage(
                 'The list of models is empty.' // @translate
             ));
             $this->logger->warn(
-                '[Generate] The list of models is empty.' // @translate
+                '[AiGenerator] The list of models is empty.' // @translate
             );
             return null;
         }
 
-        $model = empty($options['model'])
-            ? trim((string) $this->settings->get('generate_model'))
+        $model = ($options['model'] ?? null) === null
+            ? trim((string) $this->settings->get('aigenerator_model'))
             : trim((string) $options['model']);
         if (!isset($models[$model])) {
             $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
@@ -177,34 +177,36 @@ class GenerateViaOpenAi extends AbstractPlugin
                 ['model' => $model]
             ));
             $this->logger->warn(
-                '[Generate] The model "{model}" is not in the list of allowed models.', // @translate
+                '[AiGenerator] The model "{model}" is not in the list of allowed models.', // @translate
                 ['model' => $model]
             );
+            return null;
         }
 
-        $maxTokens = empty($options['max_tokens'])
-            ? (int) $this->settings->get('generate_max_tokens')
+        $maxTokens = ($options['max_tokens'] ?? null) === null
+            ? (int) $this->settings->get('aigenerator_max_tokens')
             : (int) $options['max_tokens'];
 
         $derivative = empty($options['derivative'])
-            ? $this->settings->get('generate_derivative')
-            : 'medium';
+            ? $this->settings->get('aigenerator_derivative', 'medium')
+            : $options['derivative'];
+        $derivative = $derivative ?: 'medium';
 
         // The prompt for session or for user may be skipped, not the two.
 
-        if (empty($options['prompt_system']) && $options['prompt_system'] !== false) {
-            $options['prompt_system'] = trim((string) $this->settings->get('generate_prompt_system'));
-        }
+        $promptSystem = ($options['prompt_system'] ?? null) === null
+            ? trim((string) $this->settings->get('aigenerator_prompt_system'))
+            : trim((string) $options['prompt_system']);
 
-        if (empty($options['prompt_user']) && $options['prompt_user'] !== false) {
-            $options['prompt_user'] = trim((string) $this->settings->get('generate_prompt_user'));
-        }
+        $promptUser = ($options['prompt_user'] ?? null) === null
+            ? trim((string) $this->settings->get('aigenerator_prompt_user'))
+            : trim((string) $options['prompt_user']);
 
-        if (empty($options['prompt_user']) && empty($options['prompt_user'])) {
+        if ($promptSystem === '' && $promptUser === '') {
             $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
-                'The prompt is not defined, so the record cannot be generated.' // @translate
+                'No prompt is defined, so the record cannot be generated.' // @translate
             ));
-            $this->logger->warn('[Generate] Prompt is not defined.'); // @translate
+            $this->logger->warn('[AiGenerator] Prompts are not defined.'); // @translate
             return null;
         }
 
@@ -220,7 +222,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                     'The item has no file, so the record cannot be generated.' // @translate
                 ));
                 $this->logger->warn(
-                    '[Generate] The item #{item_id} has no file.', // @translate
+                    '[AiGenerator] The item #{item_id} has no file.', // @translate
                     ['item_id' => $resource->id()]
                 );
                 return null;
@@ -249,7 +251,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                     'The resource is not a file, not an image or the original file is missing, so the record cannot be generated.' // @translate
                 ));
                 $this->logger->warn(
-                    '[Generate] The media #{media_id} is not a file, not an image or the original file is missing.', // @translate
+                    '[AiGenerator] The media #{media_id} is not a file, not an image or the original file is missing.', // @translate
                     ['media_id' => $resource->id()]
                 );
             } else {
@@ -257,7 +259,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                     'The item has no files, or no image or no original file, so the record cannot be generated.' // @translate
                 ));
                 $this->logger->warn(
-                    '[Generate] The item #{item_id} has no files, or no image or no original file.', // @translate
+                    '[AiGenerator] The item #{item_id} has no files, or no image or no original file.', // @translate
                     ['item_id' => $resource->id()]
                 );
             }
@@ -268,8 +270,8 @@ class GenerateViaOpenAi extends AbstractPlugin
         // "chat/completions" does not seem to be supported, so use chat by
         // default, for textual data or json.
 
-        $promptSystem = $this->preparePrompt($resource, $options['prompt_system'], $urls);
-        $promptUser = $this->preparePrompt($resource, $options['prompt_user'], $urls);
+        $promptSystem = $this->preparePrompt($resource, $promptSystem, $urls);
+        $promptUser = $this->preparePrompt($resource, $promptUser, $urls);
 
         $messages = [];
 
@@ -286,7 +288,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                     'The format has no properties. In that case, the list of properties should be defined manually in the prompt.' // @translate
                 ));
                 $this->logger->warn(
-                    '[Generate] Error for resource #{resource_id}: the format has no properties. In that case, the list of properties should be defined manually in the prompt.', // @translate
+                    '[AiGenerator] Error for resource #{resource_id}: the format has no properties. In that case, the list of properties should be defined manually in the prompt.', // @translate
                     ['resource_id' => $resource->id()]
                 );
             }
@@ -350,7 +352,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                     'The structure defined from the template is empty or incorrect.' // @translate
                 );
                 $this->logger->err(
-                    '[Generate] Error for resource #{resource_id}: the structure defined from the template is empty or incorrect.', // @translate
+                    '[AiGenerator] Error for resource #{resource_id}: the structure defined from the template is empty or incorrect.', // @translate
                     ['resource_id' => $resource->id()]
                 );
                 return null;
@@ -383,7 +385,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 ['msg' => $e->getMessage()]
             ));
             $this->logger->err(
-                '[Generate] Exception for resource #{resource_id}: {msg}', // @translate
+                '[AiGenerator] Exception for resource #{resource_id}: {msg}', // @translate
                 ['resource_id' => $resource->id(), 'msg' => $e->getMessage()]
             );
             return null;
@@ -429,38 +431,38 @@ class GenerateViaOpenAi extends AbstractPlugin
         ];
 
         try {
-            $generatedResource = $this->api->create('generated_resources', $data)->getContent();
+            $aiRecord = $this->api->create('ai_records', $data)->getContent();
         } catch (\Exception $e) {
             $this->skipMessenger || $this->messenger->addError(new PsrMessage(
-                'An exception occurred when creating resource: {msg}', // @translate
+                'An exception occurred when creating ai record: {msg}', // @translate
                 ['msg' => $e->getMessage()]
             ));
             $this->logger->err(
-                '[Generate] Exception when creating generated resource for resource #{resource_id}: {msg}', // @translate
+                '[AiGenerator] Exception when creating ai record for resource #{resource_id}: {msg}', // @translate
                 ['resource_id' => $resource->id(), 'msg' => $e->getMessage()]
             );
             return null;
         }
 
         if ($validate
-            && $this->acl->userIsAllowed(\Generate\Entity\GeneratedResource::class, 'update')
+            && $this->acl->userIsAllowed(\AiGenerator\Entity\AiRecord::class, 'update')
         ) {
-            $resourceData = $generatedResource->proposalToResourceData();
+            $resourceData = $aiRecord->proposalToResourceData();
             if ($resourceData) {
                 $errorStore = new ErrorStore();
-                $this->validateRecordOrCreateOrUpdate->__invoke($generatedResource, $resourceData, $errorStore, true, false, !$this->skipMessenger);
+                $this->validateRecordOrCreateOrUpdate->__invoke($aiRecord, $resourceData, $errorStore, true, false, !$this->skipMessenger);
             } else {
                 $this->skipMessenger || $this->messenger->addError(new PsrMessage(
-                    'Generated resource not valid.' // @translate
+                    'AI record not valid.' // @translate
                 ));
                 $this->logger->err(
-                    '[Generate] Generated resource #{generated_resource_id}: not valid.', // @translate
-                    ['generated_resource_id' => $generatedResource->id()]
+                    '[AiGenerator] AI record #{ai_record_id}: not valid.', // @translate
+                    ['ai_record_id' => $aiRecord->id()]
                 );
             }
         }
 
-        return $generatedResource;
+        return $aiRecord;
     }
 
     /**
@@ -488,7 +490,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 ['placeholder' => $placeholder]
             ));
             $this->logger->warn(
-                '[Generate] The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
+                '[AiGenerator] The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
                 ['placeholder' => $placeholder]
             );
             return null;
@@ -603,7 +605,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 'The process requires a resource with a template with generatable properties.' // @translate
             ));
             $this->logger->warn(
-                '[Generate] For resource #{resource_id}, the process requires a resource with a template with generatable properties.', // @translate
+                '[AiGenerator] For resource #{resource_id}, the process requires a resource with a template with generatable properties.', // @translate
                 ['resource_id' => $resource->id()]
             );
             return null;
@@ -674,7 +676,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 'The process requires a resource with a template with generatable properties.' // @translate
             ));
             $this->logger->warn(
-                '[Generate] For resource #{resource_id}, the process requires a resource with a template with generatable properties.', // @translate
+                '[AiGenerator] For resource #{resource_id}, the process requires a resource with a template with generatable properties.', // @translate
                 ['resource_id' => $resource->id()]
             );
             return null;

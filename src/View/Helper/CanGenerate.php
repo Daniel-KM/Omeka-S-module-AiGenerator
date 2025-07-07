@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\View\Helper;
+namespace AiGenerator\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 
@@ -15,6 +15,6 @@ class CanGenerate extends AbstractHelper
         $setting = $view->plugin('setting');
         $user = $view->identity();
         return $user
-            && in_array($user->getRole(), $setting('generate_roles', []) ?? []);
+            && in_array($user->getRole(), $setting('aigenerator_roles', []) ?? []);
     }
 }

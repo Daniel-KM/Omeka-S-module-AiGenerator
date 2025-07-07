@@ -1,3 +1,3 @@
 SET FOREIGN_KEY_CHECKS=0;
-DROP TABLE `generated_resource`;
+DROP TABLE `ai_record`;
 SET FOREIGN_KEY_CHECKS=1;

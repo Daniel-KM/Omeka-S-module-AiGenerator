@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Mvc\Controller\Plugin;
+namespace AiGenerator\Mvc\Controller\Plugin;
 
 use ArrayObject;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
@@ -22,8 +22,8 @@ class GenerativeData extends AbstractPlugin
      * standard data types are allowed (literal, uri, resource, resource:item, resource:media, resource:itemset).
      * So in fact, only literal and uri, because the AI doesn't know resources.
      *
-     * "updatable" is "editable" in Contribution (for a future version).
-     * "generatable" is "fillable" in Contribution.
+     * "updatable" is "editable" in Contribute (for a future version).
+     * "generatable" is "fillable" in Contribute.
      *
      * Furthermore, a main option allow to make all properties fillable, or only
      * specific ones or none, according to the resource template setting.
@@ -124,7 +124,7 @@ class GenerativeData extends AbstractPlugin
         // submit partially.
         if (!$isSubTemplate) {
             /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation[] $resourceTemplateMedias */
-            $resourceTemplateMediaIds = $resourceTemplate->dataValue('generate_templates_media') ?: [];
+            $resourceTemplateMediaIds = $resourceTemplate->dataValue('airecord_templates_media') ?: [];
             foreach ($resourceTemplateMediaIds as $resourceTemplateMediaId) {
                 $resourceTemplateMedia = $this->resourceTemplate($resourceTemplateMediaId);
                 if (!$resourceTemplateMedia) {
@@ -262,7 +262,7 @@ class GenerativeData extends AbstractPlugin
      *
      * Like main template, the media templates should have at least one property.
      *
-     * @return \Generate\Mvc\Controller\Plugin\GenerativeData[]
+     * @return \AiGenerator\Mvc\Controller\Plugin\GenerativeData[]
      */
     public function generativeMedias(): array
     {
@@ -281,7 +281,7 @@ class GenerativeData extends AbstractPlugin
         $this->data['generative_medias'] = [];
         foreach ($this->data['templates_media'] as $templateMediaId => $templateMedia) {
             // Clone() allows to get to generative data with a different config.
-            /** @var \Generate\Mvc\Controller\Plugin\GenerativeData $generativeMedia */
+            /** @var \AiGenerator\Mvc\Controller\Plugin\GenerativeData $generativeMedia */
             $generativeMedia = clone $this->getController()->plugin('generativeData');
             $generativeMedia = $generativeMedia($templateMedia, true);
             if ($generativeMedia->isGenerative()) {
@@ -302,7 +302,7 @@ class GenerativeData extends AbstractPlugin
      *
      * Like main template, the media template should have at least one property.
      */
-    public function generativeMedia(?int $mediaTemplateId = null): ?\Generate\Mvc\Controller\Plugin\GenerativeData
+    public function generativeMedia(?int $mediaTemplateId = null): ?\AiGenerator\Mvc\Controller\Plugin\GenerativeData
     {
         $generativeMedias = $this->generativeMedias();
         if ($mediaTemplateId) {

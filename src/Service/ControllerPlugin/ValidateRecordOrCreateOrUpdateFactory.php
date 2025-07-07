@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Service\ControllerPlugin;
+namespace AiGenerator\Service\ControllerPlugin;
 
-use Generate\Mvc\Controller\Plugin\ValidateRecordOrCreateOrUpdate;
+use AiGenerator\Mvc\Controller\Plugin\ValidateRecordOrCreateOrUpdate;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 

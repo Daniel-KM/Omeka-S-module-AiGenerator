@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Form;
+namespace AiGenerator\Form;
 
 use Common\Form\Element as CommonElement;
 use Laminas\Form\Element;
@@ -9,16 +9,16 @@ use Omeka\Form\Element as OmekaElement;
 
 class SettingsFieldset extends Fieldset
 {
-    protected $label = 'Generate Resource Metadata'; // @translate
+    protected $label = 'AI Record Generator'; // @translate
 
     protected $elementGroups = [
-        'generate' => 'Generate Resource Metadata', // @translate
+        'ai_generator' => 'AI Record Generator', // @translate
     ];
 
     public function init(): void
     {
         $this
-            ->setAttribute('id', 'generate')
+            ->setAttribute('id', 'ai-generator')
             ->setOption('element_groups', $this->elementGroups)
 
             ->add([
@@ -26,14 +26,14 @@ class SettingsFieldset extends Fieldset
                 // Anyway, it cannot be used simply, because it requires a value.
                 // 'type' => 'Omeka\Form\Element\RoleSelect',
                 'type' => CommonElement\OptionalRoleSelect::class,
-                'name' => 'generate_roles',
+                'name' => 'aigenerator_roles',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Roles allowed to generate via AI', // @translate
                     'empty_option' => '',
                 ],
                 'attributes' => [
-                    'id' => 'generate_roles',
+                    'id' => 'aigenerator_roles',
                     'multiple' => true,
                     'required' => false,
                     'class' => 'chosen-select',
@@ -43,28 +43,28 @@ class SettingsFieldset extends Fieldset
 
             ->add([
                 'type' => Element\Checkbox::class,
-                'name' => 'generate_validate',
+                'name' => 'aigenerator_validate',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Validate by default if user has rights', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_validate',
+                    'id' => 'aigenerator_validate',
                 ],
             ])
 
             ->add([
                 'type' => OmekaElement\ArrayTextarea::class,
-                'name' => 'generate_models',
+                'name' => 'aigenerator_models',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'List of available models (as name = label)', // @translate
                     'info' => 'To analyze an image costs about 300 to 5000 tokens, according to the model, the image size, the length of the prompt and the length of the response. Warning: a multiplicator of 1.6 to 2.6 is used to analyze images.', // @translate
                     'documentation' => 'https://platform.openai.com/docs/pricing',
                     'as_key_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'generate_models',
+                    'id' => 'aigenerator_models',
                     'required' => false,
                     'placeholder' => <<<'TXT'
                         gpt-4.1-nano = GPT 4.1 nano ($0.50 / 1M tokens)
@@ -79,35 +79,35 @@ class SettingsFieldset extends Fieldset
             ])
             ->add([
                 'type' => Element\Text::class,
-                'name' => 'generate_model',
+                'name' => 'aigenerator_model',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Default model name', // @translate
                     'info' => 'Use exact name from above field.', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_model',
+                    'id' => 'aigenerator_model',
                     'required' => false,
                     'placeholder' => 'gpt-4.1-nano',
                 ],
             ])
             ->add([
                 'type' => Element\Text::class,
-                'name' => 'generate_max_tokens',
+                'name' => 'aigenerator_max_tokens',
                 'options' => [
-                    'element_group' => 'generate',
-                    'label' => 'Max tokens by request', // @translate
+                    'element_group' => 'ai_generator',
+                    'label' => 'Default max tokens by request', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_max_tokens',
+                    'id' => 'aigenerator_max_tokens',
                     'required' => false,
                 ],
             ])
             ->add([
                 'type' => CommonElement\OptionalRadio::class,
-                'name' => 'generate_derivative',
+                'name' => 'aigenerator_derivative',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Default derivative image', // @translate
                     'value_options' => [
                         'original' => 'Original', // @translate
@@ -117,48 +117,48 @@ class SettingsFieldset extends Fieldset
                     ],
                 ],
                 'attributes' => [
-                    'id' => 'generate_derivative',
+                    'id' => 'aigenerator_derivative',
                     'required' => false,
                 ],
             ])
 
             ->add([
                 'type' => Element\Textarea::class,
-                'name' => 'generate_prompt_system',
+                'name' => 'aigenerator_prompt_system',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Prompt to set context of a session for resource analysis', // @translate
                     'info' => 'Write the prompt in the language the record should be. Keep the prompt short to take care of credits.', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_prompt_system',
+                    'id' => 'aigenerator_prompt_system',
                     'required' => false,
                 ],
             ])
             ->add([
                 'type' => Element\Textarea::class,
-                'name' => 'generate_prompt_user',
+                'name' => 'aigenerator_prompt_user',
                 'options' => [
-                    'element_group' => 'generate',
-                    'label' => 'Prompt to generate resource metadata', // @translate
-                    'info' => 'May be empty when the prompt is complete.', // @translate
+                    'element_group' => 'ai_generator',
+                    'label' => 'Prompt to generate ai record', // @translate
+                    'info' => 'May be empty when the prompt for context is complete.', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_prompt_user',
+                    'id' => 'aigenerator_prompt_user',
                     'required' => false,
                 ],
             ])
 
             ->add([
                 'type' => CommonElement\OptionalItemSetSelect::class,
-                'name' => 'generate_item_sets_auto',
+                'name' => 'aigenerator_item_sets_auto',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'Item sets for automatic generation', // @translate
                     'empty_option' => '',
                 ],
                 'attributes' => [
-                    'id' => 'generate_item_sets_auto',
+                    'id' => 'aigenerator_item_sets_auto',
                     'class' => 'chosen-select',
                     'multiple' => true,
                     'data-placeholder' => 'Select item sets…', // @translate
@@ -167,13 +167,13 @@ class SettingsFieldset extends Fieldset
 
             ->add([
                 'type' => Element\Checkbox::class,
-                'name' => 'generate_hide_flag_review',
+                'name' => 'aigenerator_hide_flag_review',
                 'options' => [
-                    'element_group' => 'generate',
+                    'element_group' => 'ai_generator',
                     'label' => 'HIde the flag review/unreviewed', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_hide_flag_review',
+                    'id' => 'aigenerator_hide_flag_review',
                 ],
             ])
         ;

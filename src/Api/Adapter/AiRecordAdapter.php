@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Api\Adapter;
+namespace AiGenerator\Api\Adapter;
 
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\QueryBuilder;
@@ -9,7 +9,7 @@ use Omeka\Api\Request;
 use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
 
-class GeneratedResourceAdapter extends AbstractEntityAdapter
+class AiRecordAdapter extends AbstractEntityAdapter
 {
     protected $sortFields = [
         'id' => 'id',
@@ -40,17 +40,17 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
 
     public function getResourceName()
     {
-        return 'generated_resources';
+        return 'ai_records';
     }
 
     public function getRepresentationClass()
     {
-        return \Generate\Api\Representation\GeneratedResourceRepresentation::class;
+        return \AiGenerator\Api\Representation\AiRecordRepresentation::class;
     }
 
     public function getEntityClass()
     {
-        return \Generate\Entity\GeneratedResource::class;
+        return \AiGenerator\Entity\AiRecord::class;
     }
 
     public function buildQuery(QueryBuilder $qb, array $query): void
@@ -150,7 +150,7 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
                 // Not available in orm, but via direct dbal sql.
                 $sql = <<<'SQL'
                     SELECT `id`
-                    FROM `generated_resource`
+                    FROM `ai_record`
                     WHERE JSON_EXTRACT(`proposal`, "$.template") IN (:templates);
                     SQL;
                 /** @var \Doctrine\DBAL\Connection $connection */
@@ -191,7 +191,7 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
                     // Not available in orm, but via direct dbal sql.
                     $sql = <<<SQL
                         SELECT `id`
-                        FROM `generated_resource`
+                        FROM `ai_record`
                         WHERE JSON_EXTRACT(`proposal`, "$.{$property}[*].proposed.{$keyType}") IN (:values);
                         SQL;
                     /** @var \Doctrine\DBAL\Connection $connection */
@@ -259,7 +259,7 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
     {
         // TODO Use shouldHydrate() and validateEntity().
 
-        /** @var \Generate\Entity\GeneratedResource $entity */
+        /** @var \AiGenerator\Entity\AiRecord $entity */
 
         $data = $request->getContent();
 
@@ -310,7 +310,7 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
      *
      * @see \Annotate\Api\Adapter\QueryDateTimeTrait::searchDateTime()
      * @see \Contribute\Api\Adapter\ContributionAdapter::buildQueryDateComparison()
-     * @see \Generate\Api\Adapter\GeneratedResourceAdapter::buildQueryDateComparison()
+     * @see \AiGenerator\Api\Adapter\AiRecordAdapter::buildQueryDateComparison()
      * @see \Log\Api\Adapter\LogAdapter::buildQueryDateComparison()
      *
      * @todo Normalize with NumericDataTypes.

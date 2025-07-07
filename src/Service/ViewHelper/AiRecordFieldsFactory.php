@@ -1,18 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Service\ViewHelper;
+namespace AiGenerator\Service\ViewHelper;
 
-use Generate\View\Helper\GeneratedResourceFields;
+use AiGenerator\View\Helper\AiRecordFields;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
-class GeneratedResourceFieldsFactory implements FactoryInterface
+class AiRecordFieldsFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $plugins = $services->get('ControllerPluginManager');
         $moduleManager = $services->get('Omeka\ModuleManager');
-        return new GeneratedResourceFields(
+        return new AiRecordFields(
             $services->get('Omeka\ApiManager'),
             $plugins->get('generativeData'),
             $services->get('Common\EasyMeta'),

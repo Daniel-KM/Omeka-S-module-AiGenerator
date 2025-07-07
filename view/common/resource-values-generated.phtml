@@ -2,7 +2,8 @@
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var \Omeka\Api\Representation\SiteRepresentation $site
- * @var \Generate\Api\Representation\GeneratedResourceRepresentation $generatedResource
+ * @var \AiGenerator\Api\Representation\AiRecordRepresentation $aiRecord
+ * @var \AiGenerator\Api\Representation\AiRecordRepresentation $resource
  * @var array $templateProperties
  * @var array $values
  * @var array $valuesMedias
@@ -18,10 +19,10 @@ $labelInfo = $setting('property_label_information');
 $showLocale = true;
 ?>
 
-<dl class="generated-resource">
+<dl class="ai-record">
 
 <?php foreach ($values as $term => $propertyData): ?>
-    <?php if (empty($propertyData['generated_resources'])) continue; ?>
+    <?php if (empty($propertyData['ai_records'])) continue; ?>
     <div class="property">
         <dt>
             <?= $escape($propertyData['alternate_label'] ?: $translate($propertyData['property']->label())) ?>
@@ -33,11 +34,11 @@ $showLocale = true;
             <span class="field-term">(<?= $escape($propertyData['property']->vocabulary()->label()) ?>)</span>
             <?php endif; ?>
         </dt>
-        <?php foreach ($propertyData['generated_resources'] as $generatedResourceData):
-            if (!empty($generatedResourceData['empty'])) continue;
-            $valueType = $generatedResourceData['type'];
-            $valueBaseType = $generatedResourceData['basetype'];
-            $valueLang = $generatedResourceData['lang'] ?? '';
+        <?php foreach ($propertyData['ai_records'] as $aiRecordData):
+            if (!empty($aiRecordData['empty'])) continue;
+            $valueType = $aiRecordData['type'];
+            $valueBaseType = $aiRecordData['basetype'];
+            $valueLang = $aiRecordData['lang'] ?? '';
             $class = ['value'];
             // TODO Improve.
             if ($valueBaseType === 'resource') {
@@ -52,49 +53,49 @@ $showLocale = true;
             <?php if ($showLocale && $valueLang): ?>
             <span class="language"><?= $valueLang ?></span>
             <?php endif; ?>
-            <?php if (!empty($generatedResourceData['new'])): ?>
+            <?php if (!empty($aiRecordData['new'])): ?>
             <span class="value-content"><?php
                     if ($valueBaseType === 'uri'):
-                        echo $escape($generatedResourceData['proposed']['@uri'] . ' / ' . $generatedResourceData['proposed']['@label']);
+                        echo $escape($aiRecordData['proposed']['@uri'] . ' / ' . $aiRecordData['proposed']['@label']);
                     elseif ($valueBaseType === 'resource'):
                         try {
-                            $res = $api->read('resources', ['id' => $generatedResourceData['proposed']['@resource']])->getContent();
+                            $res = $api->read('resources', ['id' => $aiRecordData['proposed']['@resource']])->getContent();
                             echo $res->link($res->displayTitle());
                         } catch (\Exception $e) {
-                            echo sprintf($translate('%s [unavailable]'), $generatedResourceData['proposed']['@resource']);
+                            echo sprintf($translate('%s [unavailable]'), $aiRecordData['proposed']['@resource']);
                         }
                     else:
-                        echo $escape($generatedResourceData['proposed']['@value']);
+                        echo $escape($aiRecordData['proposed']['@value']);
                     endif;
             ?></span>
                 <?php else: ?>
             <dl>
                 <dd>
                     <?php if ($valueBaseType === 'uri'):
-                        echo $escape($generatedResourceData['original']['@uri'] . ' / ' . $generatedResourceData['original']['@label']);
+                        echo $escape($aiRecordData['original']['@uri'] . ' / ' . $aiRecordData['original']['@label']);
                     elseif ($valueBaseType === 'resource'):
                         try {
-                            $res = $api->read('resources', ['id' => $generatedResourceData['original']['@resource']])->getContent();
+                            $res = $api->read('resources', ['id' => $aiRecordData['original']['@resource']])->getContent();
                             echo $res->link($res->displayTitle());
                         } catch (\Exception $e) {
-                            echo sprintf($translate('%s [unavailable]'), $generatedResourceData['original']['@resource']);
+                            echo sprintf($translate('%s [unavailable]'), $aiRecordData['original']['@resource']);
                         };
                     else:
-                        echo $escape($generatedResourceData['original']['@value']);
+                        echo $escape($aiRecordData['original']['@value']);
                     endif; ?>
                 </dd>
                 <dd>
                     <?php if ($valueBaseType === 'uri'):
-                        echo $escape($generatedResourceData['proposed']['@uri'] . ' / ' . $generatedResourceData['proposed']['@label']);
+                        echo $escape($aiRecordData['proposed']['@uri'] . ' / ' . $aiRecordData['proposed']['@label']);
                     elseif ($valueBaseType === 'resource'):
                         try {
-                            $res = $api->read('resources', ['id' => $generatedResourceData['proposed']['@resource']])->getContent();
+                            $res = $api->read('resources', ['id' => $aiRecordData['proposed']['@resource']])->getContent();
                             echo $res->link($res->displayTitle());
                         } catch (\Exception $e) {
-                            echo sprintf($translate('%s [unavailable]'), $generatedResourceData['proposed']['@resource']);
+                            echo sprintf($translate('%s [unavailable]'), $aiRecordData['proposed']['@resource']);
                         }
                     else:
-                        echo $escape($generatedResourceData['proposed']['@value']);
+                        echo $escape($aiRecordData['proposed']['@value']);
                     endif; ?>
                 </dd>
             </dl>

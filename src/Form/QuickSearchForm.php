@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Form;
+namespace AiGenerator\Form;
 
 use Laminas\Form\Element;
 use Laminas\Form\Form;

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate;
+namespace AiGenerator;
 
 if (!class_exists('Common\TraitModule', false)) {
     require_once dirname(__DIR__) . '/Common/TraitModule.php';
@@ -8,7 +8,7 @@ if (!class_exists('Common\TraitModule', false)) {
 
 use Common\Stdlib\PsrMessage;
 use Common\TraitModule;
-use Generate\Form\BatchEditFieldset;
+use AiGenerator\Form\BatchEditFieldset;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Form\Fieldset;
@@ -20,9 +20,9 @@ use Omeka\Module\AbstractModule;
 use Omeka\Permissions\Assertion\OwnsEntityAssertion;
 
 /**
- * Generate Resource Metadata.
+ * AI Record Generator.
  *
- * @copyright Daniel Berthereau, 2025
+ * @copyright Daniel Berthereau, 2019-2025
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  */
 class Module extends AbstractModule
@@ -81,7 +81,7 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
 
-        $settings->set('generate_roles', [
+        $settings->set('aigenerator_roles', [
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
             \Omeka\Permissions\Acl::ROLE_SITE_ADMIN,
             \Omeka\Permissions\Acl::ROLE_EDITOR,
@@ -94,8 +94,8 @@ class Module extends AbstractModule
     {
         $translatables = [
             'settings' => [
-                'generate_prompt_system',
-                'generate_prompt_user',
+                'aigenerator_prompt_system',
+                'aigenerator_prompt_user',
             ],
         ];
         return isset($translatables[$settingsType])
@@ -115,7 +115,7 @@ class Module extends AbstractModule
          */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
 
-        // Users who can edit resources can update generations.
+        // Users who can edit resources can update ai records.
         // A check is done on the specific resource for some roles.
         $authors = [
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
@@ -136,7 +136,7 @@ class Module extends AbstractModule
             ->allow(
                 $authors,
                 [
-                    'Generate\Controller\Admin\Index',
+                    'AiGenerator\Controller\Admin\Index',
                 ],
                 [
                     'index',
@@ -153,7 +153,7 @@ class Module extends AbstractModule
             ->allow(
                 $authors,
                 [
-                    \Generate\Api\Adapter\GeneratedResourceAdapter::class,
+                    \AiGenerator\Api\Adapter\AiRecordAdapter::class,
                 ],
                 [
                     'read',
@@ -166,7 +166,7 @@ class Module extends AbstractModule
             ->allow(
                 $authors,
                 [
-                    \Generate\Entity\GeneratedResource::class,
+                    \AiGenerator\Entity\AiRecord::class,
                 ],
                 [
                     'create',
@@ -179,19 +179,20 @@ class Module extends AbstractModule
                     \Omeka\Permissions\Acl::ROLE_AUTHOR,
                 ],
                 [
-                    \Generate\Entity\GeneratedResource::class,
+                    \AiGenerator\Entity\AiRecord::class,
                 ],
                 [
                     'delete',
                 ],
                 new OwnsEntityAssertion()
             )
+            // TODO Author can validate if its own record.
 
             // Administration.
             ->allow(
                 $validators,
                 [
-                    'Generate\Controller\Admin\Index',
+                    'AiGenerator\Controller\Admin\Index',
                 ],
                 [
                     'index',
@@ -216,7 +217,7 @@ class Module extends AbstractModule
             ->allow(
                 $validators,
                 [
-                    \Generate\Api\Adapter\GeneratedResourceAdapter::class,
+                    \AiGenerator\Api\Adapter\AiRecordAdapter::class,
                 ],
                 [
                     'read',
@@ -230,7 +231,7 @@ class Module extends AbstractModule
             ->allow(
                 $validators,
                 [
-                    \Generate\Entity\GeneratedResource::class,
+                    \AiGenerator\Entity\AiRecord::class,
                 ],
                 [
                     'create',
@@ -252,8 +253,8 @@ class Module extends AbstractModule
             // \Annotate\Api\Adapter\AnnotationAdapter::class => \Annotate\Controller\Admin\AnnotationController::class,
         ];
         foreach ($adaptersAndControllers as $adapter => $controller) {
-            // Create metadata via llm. Use the api post to manage file simpler:
-            // the aim is to create a Generated Resource, not a Resource.
+            // Create ai record. Use api post to manage uploaded file simpler:
+            // the aim is to create an AI Record, not a Resource.
             $sharedEventManager->attach(
                 $adapter,
                 'api.create.post',
@@ -270,7 +271,7 @@ class Module extends AbstractModule
             $sharedEventManager->attach(
                 $adapter,
                 'api.hydrate.post',
-                [$this, 'handleValidateGeneratedResource'],
+                [$this, 'handleValidateAiRecord'],
                 -900
             );
 
@@ -318,13 +319,6 @@ class Module extends AbstractModule
                 'api.preprocess_batch_update',
                 [$this, 'handleResourceBatchUpdatePreprocess']
             );
-            /*
-            $sharedEventManager->attach(
-                $adapter,
-                'api.batch_update.post',
-                [$this, 'handleResourceBatchUpdatePost']
-            );
-            */
         }
 
         // Extend the batch edit form via js.
@@ -339,12 +333,6 @@ class Module extends AbstractModule
             [$this, 'addBatchUpdateFormElements']
         );
 
-        $sharedEventManager->attach(
-            'Generate\Controller\Admin\Generation',
-            'view.browse.before',
-            [$this, 'addHeadersAdmin']
-        );
-
         // Handle main settings.
         $sharedEventManager->attach(
             \Omeka\Form\SettingForm::class,
@@ -352,7 +340,7 @@ class Module extends AbstractModule
             [$this, 'handleMainSettings']
         );
 
-        // TODO Check if dependency to Advanced Resource Template is still required.
+        // TODO Check if dependency to Advanced Resource Template is still required: data can be stored somewhere else?
 
         $sharedEventManager->attach(
             // \Omeka\Form\ResourceTemplateForm::class,
@@ -368,12 +356,7 @@ class Module extends AbstractModule
         );
     }
 
-    public function handleResourceBatchUpdatePost(Event $event): void
-    {
-        // Useless for now.
-    }
-
-    /**
+   /**
      * Clean params for batch update and set option for individual update.
      */
     public function handleResourceBatchUpdatePreprocess(Event $event): void
@@ -383,35 +366,29 @@ class Module extends AbstractModule
         $post = $request->getContent();
         $data = $event->getParam('data');
 
-        if (empty($post['generate']['generate_metadata'])) {
-            unset($data['generate']);
+        if (empty($post['ai_generator']['generate'])) {
+            unset($data['ai_generator']);
             $event->setParam('data', $data);
             return;
         }
 
-        $data['generate'] = [
-            'generate_metadata' => true,
-            'generate_validate' => !empty($post['generate']['generate_validate']),
-            'generate_model' => $post['generate']['generate_model'] ?? null,
-            'generate_max_tokens' => $post['generate']['generate_max_tokens'] ?? null,
-            'generate_derivative' => $post['generate']['generate_derivative'] ?? null,
-            'generate_prompt_system' => $post['generate']['generate_prompt_system'] ?? null,
-            'generate_prompt_user' => $post['generate']['generate_prompt_user'] ?? null,
+        // Empty string means empty string; null means default value.
+        $data['ai_generator'] = [
+            'generate' => true,
+            'validate' => !empty($post['ai_generator']['validate']),
+            'model' => $post['ai_generator']['model'] ?? null,
+            'max_tokens' => $post['ai_generator']['max_tokens'] ?? null,
+            'derivative' => $post['ai_generator']['derivative'] ?? null,
+            'prompt_system' => $post['ai_generator']['prompt_system'] ?? null,
+            'prompt_user' => $post['ai_generator']['prompt_user'] ?? null,
         ];
         $event->setParam('data', $data);
 
+        unset($data['ai_generator']['generate']);
+
         $this->getServiceLocator()->get('Omeka\Logger')->info(
-            "Generated metadata with options:\n{json}", // @translate
-            [
-                'json' => [
-                    'model' => $data['generate']['generate_model'],
-                    'validate' => !empty($post['generate']['generate_validate']),
-                    'max_tokens' => $data['generate']['generate_max_tokens'],
-                    'derivative' => $data['generate']['generate_derivative'],
-                    'prompt_system' => $data['generate']['generate_prompt_system'],
-                    'prompt_user' => $data['generate']['generate_prompt_user'],
-                ],
-            ]
+            "Generate ai records with options:\n{json}", // @translate
+            ['json' => $post['ai_generator']],
         );
     }
 
@@ -437,19 +414,19 @@ class Module extends AbstractModule
         $adapter = $services->get('Omeka\ApiAdapterManager')->get($resource->getResourceName());
         $representation = $adapter->getRepresentation($resource);
 
-        // Check if generation is enabled.
-        // Generation may be set via resource form or batch edit form.
+        // Check if ai generator should be run.
+        // The generation may be set via resource form or batch edit form.
         // It may be processed automatically when the resource is in the
         // specified item sets.
 
         $request = $event->getParam('request');
         $resourceData = $request->getContent();
 
-        $generate = $resourceData['generate'] ?? $resourceData;
+        $generate = $resourceData['ai_generator'] ?? [];
 
-        if (empty($generate['generate_metadata'])) {
+        if (empty($generate['generate'])) {
             $settings = $services->get('Omeka\Settings');
-            $itemSetsAuto = $settings->get('generate_item_sets_auto');
+            $itemSetsAuto = $settings->get('aigenerator_item_sets_auto');
             if (!$itemSetsAuto) {
                 return;
             }
@@ -461,11 +438,8 @@ class Module extends AbstractModule
             }
             // Check if the record is already generated.
             $api = $services->get('Omeka\ApiManager');
-            $total = $api->search('generated_resources', [
-                // TODO Item or media? The same for now, so item.
-                'resource_id' => $item->id(),
-                'limit' => 0,
-            ])->getTotalResults();
+            // TODO Item or media? The same for now, so item.
+            $total = $api->search('ai_records', ['resource_id' => $item->id(),'limit' => 0])->getTotalResults();
             if ($total) {
                 return;
             }
@@ -474,14 +448,15 @@ class Module extends AbstractModule
         $plugins = $services->get('ControllerPluginManager');
         $generateViaOpenAi = $plugins->get('generateViaOpenAi');
 
-        // Prepare options.
+        // Prepare all options, even not passed.
+        // Empty string means empty string; null means default value.
         $args = [
-            'model' => $generate['generate_model'] ?? null,
-            'validate' => !empty($generate['generate_validate']),
-            'max_tokens' => $generate['generate_max_tokens'] ?? null,
-            'derivative' => $generate['generate_derivative'] ?? null,
-            'prompt_system' => $generate['generate_prompt_system'] ?? null,
-            'prompt_user' => $generate['generate_prompt_user'] ?? null,
+            'model' => $generate['model'] ?? null,
+            'validate' => !empty($generate['validate']),
+            'max_tokens' => $generate['max_tokens'] ?? null,
+            'derivative' => $generate['derivative'] ?? null,
+            'prompt_system' => $generate['prompt_system'] ?? null,
+            'prompt_user' => $generate['prompt_user'] ?? null,
         ];
 
         $generateViaOpenAi($representation, $args);
@@ -490,17 +465,17 @@ class Module extends AbstractModule
     /**
      * Add an error during hydration to avoid to save a resource to validate.
      *
-     * Context: When a generated resource is converted into an item, it should be
+     * Context: When an ai record is converted into an item, it should be
      * checked first. Some checks are done via events in api and hydration.
-     * So the process requires options "isGeneratedResource" and"validateOnly"
+     * So the process requires options "isAiRecord" and"validateOnly"
      * At the end, an error is added to the error store to avoid to save the
      * resource.
      */
-    public function handleValidateGeneratedResource(Event $event): void
+    public function handleValidateAiRecord(Event $event): void
     {
         /** @var \Omeka\Api\Request $request */
         $request = $event->getParam('request');
-        if (!$request->getOption('isGeneratedResource')
+        if (!$request->getOption('isAiRecord')
             || !$request->getOption('validateOnly')
             || $request->getOption('flushEntityManager')
         ) {
@@ -536,9 +511,9 @@ class Module extends AbstractModule
         $view = $event->getTarget();
         $assetUrl = $view->plugin('assetUrl');
         $view->headLink()
-            ->appendStylesheet($assetUrl('css/generate-admin.css', 'Generate'));
+            ->appendStylesheet($assetUrl('css/ai-generator-admin.css', 'AiGenerator'));
         $view->headScript()
-            ->appendFile($assetUrl('js/generate-admin.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
+            ->appendFile($assetUrl('js/ai-generator-admin.js', 'AiGenerator'), 'text/javascript', ['defer' => 'defer']);
     }
 
     public function addResourceFormElements(Event $event): void
@@ -548,7 +523,7 @@ class Module extends AbstractModule
             return;
         }
 
-        $fieldset->get('generate_metadata')->setOption('info', null);
+        $fieldset->get('generate')->setOption('info', null);
 
         $view = $event->getTarget();
 
@@ -556,7 +531,12 @@ class Module extends AbstractModule
 
         // TODO Add an info if the resource is in a specified item set and automatically processed?
 
-        echo $view->formCollection($fieldset, false);
+        // Wrap fieldset to get full element names because it's echoed directly.
+        $form = new \Laminas\Form\Form();
+        $form->add($fieldset);
+        $fieldset->prepareElement($form);
+
+        echo $view->formCollection($fieldset, true);
     }
 
     public function addBatchUpdateFormElements(Event $event): void
@@ -574,7 +554,7 @@ class Module extends AbstractModule
         $form->add($fieldset);
 
         $groups = $form->getOption('element_groups');
-        $groups['generate'] = 'Generate metadata'; // @translate
+        $groups['ai_generator'] = 'AI Record Generator'; // @translate
         $form->setOption('element_groups', $groups);
     }
 
@@ -591,9 +571,10 @@ class Module extends AbstractModule
          */
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
+        $translator = $this->getServiceLocator()->get('MvcTranslator');
 
         // Generating may be expensive, so there is a specific check for roles.
-        $generateRoles = $settings->get('generate_roles');
+        $generateRoles = $settings->get('aigenerator_roles');
         $user = $services->get('Omeka\AuthenticationService')->getIdentity();
         if (!$user || !in_array($user->getRole(), $generateRoles)) {
             return null;
@@ -601,7 +582,7 @@ class Module extends AbstractModule
 
         $acl = $services->get('Omeka\Acl');
 
-        $canValidate = $acl->userIsAllowed(\Generate\Entity\GeneratedResource::class, 'update');
+        $canValidate = $acl->userIsAllowed(\AiGenerator\Entity\AiRecord::class, 'update');
 
         $thumbnailManager = $services->get('Omeka\File\ThumbnailManager');
         $derivatives = $thumbnailManager->getTypes();
@@ -612,58 +593,54 @@ class Module extends AbstractModule
             $derivatives['medium'] = 'Midsized'; // @translate
         }
 
-        $apiKey = $settings->get('generate_api_key_openai');
+        // The default is used only when value is not stored iin database, so
+        // when badly installed.
+        $defaults = $this->getModuleConfig('settings');
 
-        $validate = (bool) $settings->get('generate_validate');
-        $models = $settings->get('generate_models')
-            ?: $this->getModuleConfig('settings')['generate_models'];
-        $model = trim((string) $settings->get('generate_model'))
-            ?: $this->getModuleConfig('settings')['generate_model'];
-        $maxTokens = (int) $settings->get('generate_max_tokens')
-            ?: (int) $this->getModuleConfig('settings')['generate_max_tokens'];
-        $derivative = trim((string) $settings->get('generate_derivative'))
-            ?: trim((string) $this->getModuleConfig('settings')['generate_derivative']);
-        $promptSystem = trim((string) $settings->get('generate_prompt_system'))
-            ?: $this->getModuleConfig('settings')['generate_prompt_system'];
-        $promptUser = trim((string) $settings->get('generate_prompt_user'))
-            ?: $this->getModuleConfig('settings')['generate_prompt_user'];
+        $apiKey = $settings->get('aigenerator_openai_api_key');
+        $validate = $canValidate && $settings->get('aigenerator_validate');
+        $models = $settings->get('aigenerator_models', $defaults['aigenerator_models']);
+        $model = trim((string) $settings->get('aigenerator_model', $defaults['aigenerator_models']));
+        $maxTokens = (int) $settings->get('aigenerator_max_tokens', $defaults['aigenerator_max_tokens']);
+        $derivative = trim((string) $settings->get('aigenerator_derivative', $defaults['aigenerator_derivative']));
+        $promptSystem = trim((string) $settings->get('aigenerator_prompt_system', $translator->translate($defaults['aigenerator_prompt_system'])));
+        $promptUser = trim((string) $settings->get('aigenerator_prompt_user', $translator->translate($defaults['aigenerator_prompt_user'])));
 
-        /** @var \Generate\Form\BatchEditFieldset $fieldset */
+        /** @var \AiGenerator\Form\BatchEditFieldset $fieldset */
         $formElementManager = $services->get('FormElementManager');
         $fieldset = $formElementManager->get(BatchEditFieldset::class);
         $fieldset
-            ->get('generate_metadata')
+            ->get('generate')
             ->setLabel(
                 empty($apiKey)
-                    ? 'Generate metadata (api key undefined)' // @translate
-                    : 'Generate metadata' // @translate
+                    ? 'Generate (api key undefined)' // @translate
+                    : 'Generate' // @translate
             )
             ->setAttribute('disabled', empty($apiKey) ? 'disabled' : false);
+        if ($canValidate) {
+            $fieldset
+                ->get('validate')
+                ->setValue((int) $validate);
+        } else {
+            $fieldset->remove('validate');
+        }
         $fieldset
-            ->get('generate_model')
+            ->get('model')
             ->setValueOptions($models)
             ->setValue($model);
         $fieldset
-            ->get('generate_max_tokens')
+            ->get('max_tokens')
             ->setValue($maxTokens);
         $fieldset
-            ->get('generate_derivative')
+            ->get('derivative')
             ->setValueOptions($derivatives)
             ->setValue($derivative);
         $fieldset
-            ->get('generate_prompt_system')
+            ->get('prompt_system')
             ->setValue($promptSystem);
         $fieldset
-            ->get('generate_prompt_user')
+            ->get('prompt_user')
             ->setValue($promptUser);
-
-        if ($canValidate) {
-            $fieldset
-                ->get('generate_validate')
-                ->setValue((int) $validate);
-        } else {
-            $fieldset->remove('generate_validate');
-        }
 
         return $fieldset;
     }
@@ -676,7 +653,7 @@ class Module extends AbstractModule
     public function appendTab(Event $event): void
     {
         $sectionNav = $event->getParam('section_nav');
-        $sectionNav['generated-resource'] = 'Generated'; // @translate
+        $sectionNav['ai-records'] = 'AI records'; // @translate
         $event->setParam('section_nav', $sectionNav);
     }
 
@@ -693,8 +670,8 @@ class Module extends AbstractModule
 
         $resource = $view->resource;
 
-        $generatedResources = $api
-            ->search('generated_resources', [
+        $aiRecords = $api
+            ->search('ai_records', [
                 'resource_id' => $resource->id(),
                 'sort_by' => 'modified',
                 'sort_order' => 'DESC',
@@ -706,9 +683,9 @@ class Module extends AbstractModule
         $siteSlug = $defaultSite('slug');
 
         $fieldset = $this->checkAndPrepareGenerateFieldset();
-        $fieldset->get('generate_metadata')->setOption('info', null);
+        $fieldset->get('generate')->setOption('info', null);
 
-        echo '<div id="generated-resource" class="section">';
+        echo '<div id="ai-records" class="section">';
 
         if ($fieldset) {
             $fieldset
@@ -724,21 +701,22 @@ class Module extends AbstractModule
                     'name' => 'submit',
                     'type' => \Laminas\Form\Element\Submit::class,
                     'options' => [
-                        'element_group' => 'generate',
+                        'element_group' => 'ai_generator',
                         'label' => ' ',
                     ],
                     'attributes' => [
                         'id' => 'generate-submit',
                         'type' => 'submit',
-                        'class' => 'generate-settings',
+                        'class' => 'ai-generator-settings',
                         'value' => 'Submit', // @translate
                     ],
                 ]);
             $form = new \Laminas\Form\Form();
             $form
                 ->setAttributes([
-                    'id' => 'generate-resource-form',
-                    'action' => $view->url('admin/generated-resource/default', ['action' => 'add'], true),
+                    'id' => 'ai-record-form',
+                    'action' => $view->url('admin/ai-record/default', ['action' => 'add'], true),
+                    // TODO Find why the submit is a get (js).
                     'method' => '¨POST',
                     'enctype' => 'multipart/form-data',
                 ])
@@ -748,9 +726,9 @@ class Module extends AbstractModule
             echo strtr($view->form($form, false), ['<legend>{__}</legend>' => '']);
         }
 
-        echo $view->partial('common/admin/generated-resources-list', [
+        echo $view->partial('common/admin/ai-records-list', [
             'resource' => $resource,
-            'generatedResources' => $generatedResources,
+            'aiRecords' => $aiRecords,
             'siteSlug' => $siteSlug,
         ]);
 
@@ -764,32 +742,27 @@ class Module extends AbstractModule
      */
     public function viewDetails(Event $event): void
     {
-        $view = $event->getTarget();
         $services = $this->getServiceLocator();
+        $view = $event->getTarget();
+        $api = $services->get('Omeka\ApiManager');
         $translate = $view->plugin('translate');
         $translator = $services->get('MvcTranslator');
 
+
         $resource = $event->getParam('entity');
-        $total = $view->api()
-            ->search('generated_resources', [
-                'resource_id' => $resource->id(),
-                'limit' => 0,
-            ])
+        $total = $api
+            ->search('ai_records', ['resource_id' => $resource->id(),'limit' => 0])
             ->getTotalResults();
-        $totalNotReviewed = $view->api()
-            ->search('generated_resources', [
-                'resource_id' => $resource->id(),
-                'reviewed' => '0',
-                'limit' => 0,
-            ])
+        $totalNotReviewed = $api
+            ->search('ai_records', ['resource_id' => $resource->id(),'reviewed' => '0','limit' => 0])
             ->getTotalResults();
-        $heading = $translate('Generated resources'); // @translate
+        $heading = $translate('AI records'); // @translate
         $message = $total
             ? new PsrMessage(
-                '{total} generated resources ({count} not reviewed)', // @translate
+                '{total} ai records ({count} not reviewed)', // @translate
                 ['total' => $total, 'count' => $totalNotReviewed]
             )
-            : new PsrMessage('No generated resource'); // @translate
+            : new PsrMessage('No ai records'); // @translate
         $message->setTranslator($translator);
         echo <<<HTML
             <div class="meta-group">

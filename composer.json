@@ -1,6 +1,6 @@
 {
-    "name": "daniel-km/omeka-s-module-generate",
-    "description": "Module for Omeka S that allows to generate resource metadata through a generator like ChatGPT and to validate them.",
+    "name": "daniel-km/omeka-s-module-ai-generator",
+    "description": "Module for Omeka S that allows to generate resource metadata through an AI generator and to validate them.",
     "type": "library",
     "license": "CECILL-2.1",
     "authors": [
@@ -9,16 +9,16 @@
             "email": "Daniel.packagist@Berthereau.net"
         }
     ],
-    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-Generate",
+    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-AiGenerator",
     "support": {
-        "issues": "https://gitlab.com/Daniel-KM/Omeka-S-module-Generate/-/issues",
+        "issues": "https://gitlab.com/Daniel-KM/Omeka-S-module-AiGenerator/-/issues",
         "forum": "https://forum.omeka.org/"
     },
     "keywords": [
         "Omeka S",
         "module",
         "curation",
-        "generated metadata",
+        "AI generator",
         "ChatGPT"
     ],
     "require": {

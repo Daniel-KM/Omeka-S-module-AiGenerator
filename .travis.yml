@@ -1,11 +1,9 @@
 language: php
 
 php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
-  - 7.3
+  - 8.2
+  - 8.3
+  - 8.4
 
 sudo: false
 
@@ -20,7 +18,7 @@ before_install:
 install:
   - cd ../..
   - git clone --depth 1 https://github.com/omeka/omeka-s.git
-  - cp -a $(readlink -e $(cd -)) omeka-s/modules/Generate
+  - cp -a $(readlink -e $(cd -)) omeka-s/modules/AiGenerator
   - cd omeka-s
   - npm install
   - ./node_modules/gulp/bin/gulp.js init

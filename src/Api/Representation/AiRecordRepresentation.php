@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\Api\Representation;
+namespace AiGenerator\Api\Representation;
 
 use DateTime;
 use Omeka\Api\Exception;
@@ -8,10 +8,10 @@ use Omeka\Api\Representation\AbstractEntityRepresentation;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 use Omeka\Api\Representation\ValueRepresentation;
 
-class GeneratedResourceRepresentation extends AbstractEntityRepresentation
+class AiRecordRepresentation extends AbstractEntityRepresentation
 {
     /**
-     * @var \Generate\Entity\GeneratedResource
+     * @var \AiGenerator\Entity\AiRecord
      */
     protected $resource;
 
@@ -25,28 +25,28 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      */
     public function resourceName(): string
     {
-        return 'generated_resources';
+        return 'ai_records';
     }
 
     public function getControllerName()
     {
-        return 'generated-resource';
+        return 'ai-record';
     }
 
     public function getJsonLdType()
     {
-        return 'o:GeneratedResource';
+        return 'o:AiRecord';
     }
 
     public function getJsonLd()
     {
-        $generatedResource = $this->resource();
+        $relatedResource = $this->resource();
         $owner = $this->owner();
         $modified = $this->modified();
 
         return [
             'o:id' => $this->id(),
-            'o:resource' => $generatedResource ? $generatedResource->getReference()->jsonSerialize() : null,
+            'o:resource' => $relatedResource ? $relatedResource->getReference()->jsonSerialize() : null,
             'o:owner' => $owner ? $owner->getReference()->jsonSerialize() : null,
             'o:model' => $this->model(),
             'o:response_id' => $this->responseId(),
@@ -67,11 +67,14 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
         ];
     }
 
+    /**
+     * Get the related resource.
+     */
     public function resource(): ?\Omeka\Api\Representation\AbstractResourceEntityRepresentation
     {
-        $generatedResource = $this->resource->getResource();
-        return $generatedResource
-            ? $this->getAdapter('resources')->getRepresentation($generatedResource)
+        $relatedResource = $this->resource->getResource();
+        return $relatedResource
+        ? $this->getAdapter('resources')->getRepresentation($relatedResource)
             : null;
     }
 
@@ -117,20 +120,22 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
     /**
      * The resource template is the resource one once submitted or when
      * correcting, else the one proposed by the user.
+     * For now, this is always the template of the original resource, but the
+     * process is kept like Contribute for future evolution.
      */
     public function resourceTemplate(): ?ResourceTemplateRepresentation
     {
-        $generatedResource = $this->resource();
-        if ($generatedResource) {
-            $resourceTemplate = $generatedResource->resourceTemplate();
+        $relatedResource = $this->resource();
+        if ($relatedResource) {
+            $resourceTemplate = $relatedResource->resourceTemplate();
         }
         if (empty($resourceTemplate)) {
             $proposal = $this->resource->getProposal();
-            $resourceTemplate = $proposal['template'] ?? null;
-            if ($resourceTemplate) {
+            $resourceTemplateId = $proposal['template'] ?? null;
+            if ($resourceTemplateId) {
                 $templateAdapter = $this->getAdapter('resource_templates');
                 try {
-                    $resourceTemplate = $templateAdapter->findEntity(['id' => $resourceTemplate]);
+                    $resourceTemplate = $templateAdapter->findEntity(['id' => $resourceTemplateId]);
                     $resourceTemplate = $templateAdapter->getRepresentation($resourceTemplate);
                 } catch (Exception\NotFoundException $e) {
                     $resourceTemplate = null;
@@ -232,11 +237,11 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
         if ($string === '') {
             return null;
         }
-        $generatedResource = $this->resource();
-        if (!$generatedResource) {
+        $relatedResource = $this->resource();
+        if (!$relatedResource) {
             return null;
         }
-        $values = $generatedResource->value($term, ['all' => true]);
+        $values = $relatedResource->value($term, ['all' => true]);
         foreach ($values as $value) {
             if ((string) $value->value() === $string) {
                 return $value;
@@ -254,11 +259,11 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
         if (!$int) {
             return null;
         }
-        $generatedResource = $this->resource();
-        if (!$generatedResource) {
+        $relatedResource = $this->resource();
+        if (!$relatedResource) {
             return null;
         }
-        $values = $generatedResource->value($term, ['all' => true]);
+        $values = $relatedResource->value($term, ['all' => true]);
         $valueResource = null;
         foreach ($values as $value) {
             $valueResource = $value->valueResource();
@@ -277,12 +282,12 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
         if ($string === '') {
             return null;
         }
-        $generatedResource = $this->resource();
-        if (!$generatedResource) {
+        $relatedResource = $this->resource();
+        if (!$relatedResource) {
             return null;
         }
         // To get only uris and value suggest/custom vocab values require to get all values.
-        $values = $generatedResource->value($term, ['all' => true]);
+        $values = $relatedResource->value($term, ['all' => true]);
         foreach ($values as $value) {
             if ($value->uri() === $string) {
                 return $value;
@@ -300,9 +305,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      * @todo Factorize with \Contribute\Site\ContributionController::prepareProposal()
      * @todo Factorize with \Contribute\View\Helper\ContributionFields
      * @todo Factorize with \Contribute\Api\Representation\ContributionRepresentation::proposalToResourceData()
-     * @todo Factorize with \Generate\Controller\Admin\IndexController::prepareProposal()
-     * @todo Factorize with \Generate\View\Helper\GeneratedResourceFields
-     * @todo Factorize with \Generate\Api\Representation\GeneratedResourceRepresentation::proposalToResourceData()
+     * @todo Factorize with \AiGenerator\Controller\Admin\IndexController::prepareProposal()
+     * @todo Factorize with \AiGenerator\View\Helper\AiRecordFields
+     * @todo Factorize with \AiGenerator\Api\Representation\AiRecordRepresentation::proposalToResourceData()
      *
      * @todo Simplify when the status "is patch" or "new resource" (at least remove all original data).
      */
@@ -629,9 +634,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
     /**
      * Check values of the exiting resource with the proposal and get api data.
      *
-     * @todo Factorize with \Generate\Controller\Admin\IndexController::prepareProposal()
-     * @todo Factorize with \Generate\View\Helper\GeneratedResourceFields
-     * @todo Factorize with \Generate\Api\Representation\GeneratedResourceRepresentation::proposalNormalizeForValidation()
+     * @todo Factorize with \AiGenerator\Controller\Admin\IndexController::prepareProposal()
+     * @todo Factorize with \AiGenerator\View\Helper\AiRecordFields
+     * @todo Factorize with \AiGenerator\Api\Representation\AiRecordRepresentation::proposalNormalizeForValidation()
      *
      * @todo Simplify when the status "is patch" or "new resource" (at least remove all original data).
      *
@@ -653,8 +658,8 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
             return null;
         }
 
-        $resource = $this->resource();
-        $existingValues = $resource ? $resource->values() : [];
+        $relatedResource = $this->resource();
+        $existingValues = $relatedResource ? $relatedResource->values() : [];
 
         $resourceTemplate = $generative->template();
         $proposal = $this->proposalNormalizeForValidation();
@@ -826,7 +831,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                 }
 
                 switch ($mainType) {
-                    // Like proposalNormalizeForValidation() and unlike Contribution,
+                    // Like proposalNormalizeForValidation() and unlike Contribute,
                     // the type "unknown" is like literal.
                     case 'unknown':
                     case 'literal':
@@ -875,7 +880,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
     /**
      * Get generative data (editable, fillable, etc.) via resource template.
      */
-    public function generativeData(): \Generate\Mvc\Controller\Plugin\GenerativeData
+    public function generativeData(): \AiGenerator\Mvc\Controller\Plugin\GenerativeData
     {
         static $generative;
         if (!$generative) {
@@ -1005,9 +1010,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      */
     public function thumbnail()
     {
-        $generatedResource = $this->resource();
-        return $generatedResource
-            ? $generatedResource->thumbnail()
+        $relatedResource = $this->resource();
+        return $relatedResource
+            ? $relatedResource->thumbnail()
             : null;
     }
 
@@ -1016,9 +1021,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      */
     public function title(): string
     {
-        $generatedResource = $this->resource();
-        return $generatedResource
-            ? (string) $generatedResource->getTitle()
+        $relatedResource = $this->resource();
+        return $relatedResource
+        ? (string) $relatedResource->getTitle()
             : '';
     }
 
@@ -1029,9 +1034,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      */
     public function displayTitle(?string $default = null): ?string
     {
-        $generatedResource = $this->resource();
-        if ($generatedResource) {
-            return $generatedResource->displayTitle($default);
+        $relatedResource = $this->resource();
+        if ($relatedResource) {
+            return $relatedResource->displayTitle($default);
         }
 
         $template = $this->resourceTemplate();
@@ -1053,7 +1058,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      * Values of the linked template (media) are not included.
      *
      * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::values()
-     * @uses \Generate\View\Helper\GeneratedResourceFields
+     * @uses \AiGenerator\View\Helper\AiRecordFields
      */
     public function values(): array
     {
@@ -1061,13 +1066,13 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
             return $this->values;
         }
 
-        /** @var \Generate\View\Helper\GeneratedResourceFields $generatedResourceFields */
-        $generatedResourceFields = $this->getViewHelper('generatedResourceFields');
+        /** @var \AiGenerator\View\Helper\AiRecordFields $aiRecordFields */
+        $aiRecordFields = $this->getViewHelper('aiRecordFields');
 
         // No event triggered for now.
 
-        $generatedResource = $this->resource();
-        $this->values = $generatedResourceFields($generatedResource, $this);
+        $relatedResource = $this->resource();
+        $this->values = $aiRecordFields($relatedResource, $this);
         return $this->values;
     }
 
@@ -1078,12 +1083,13 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      * - viewName: Name of view script, or a view model. Default
      *   "site/resource-values-generated"
      *
-     * @todo Use the same display in show-details and generated-resource-list.
+     * @todo Use the same display in show-details and ai-record-list.
      */
     public function displayValues(array $options = []): string
     {
         $options['site'] = $this->getServiceLocator()->get('ControllerPluginManager')->get('currentSite')();
-        $options['generatedResource'] = $this;
+        $options['aiRecord'] = $this;
+        $options['resource'] = $this;
 
         if (!isset($options['viewName'])) {
             $options['viewName'] = 'common/resource-values-generated';
@@ -1100,7 +1106,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
     }
 
     /**
-     * Get an HTML link to a resource (the generated one).
+     * Get an HTML link to a resource (the generated one, not the ai record).
      *
      * @param string $text The text to be linked
      * @param string $action
@@ -1108,11 +1114,11 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      */
     public function linkResource(string $text, ?string $action = null, array $attributes = []): string
     {
-        $generatedResource = $this->resource();
-        if (!$generatedResource) {
+        $relatedResource = $this->resource();
+        if (!$relatedResource) {
             return $text;
         }
-        $link = $generatedResource->link($text, $action, $attributes);
+        $link = $relatedResource->link($text, $action, $attributes);
         // TODO Link to generated resource?
         // When the resource is a new one, go directly to the resource, since
         // the generaed resource is the source of the resource.
@@ -1120,7 +1126,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
         //     return $link;
         // }
         // TODO Improve the way to append the fragment.
-        return preg_replace('~ href="(.+?)"~', ' href="$1#generated-resource"', $link, 1);
+        return preg_replace('~ href="(.+?)"~', ' href="$1#ai-record"', $link, 1);
     }
 
     /**
@@ -1168,13 +1174,13 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
         $action = null,
         array $attributes = null
     ): string {
-        $generatedResource = $this->resource();
-        if (!$generatedResource) {
+        $relatedResource = $this->resource();
+        if (!$relatedResource) {
             return $this->displayTitle($titleDefault);
         }
-        $link = $generatedResource->linkPretty($thumbnailType, $titleDefault, $action, $attributes);
+        $link = $relatedResource->linkPretty($thumbnailType, $titleDefault, $action, $attributes);
         // TODO Improve the way to append the fragment.
-        return preg_replace('~ href="(.+?)"~', ' href="$1#generated-resource"', $link, 1);
+        return preg_replace('~ href="(.+?)"~', ' href="$1#ai-record"', $link, 1);
     }
 
     /**
@@ -1200,9 +1206,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      */
     public function siteUrlResource($siteSlug = null, $canonical = false, $action = null): ?string
     {
-        $generatedResource = $this->resource();
-        return $generatedResource
-            ? $generatedResource->siteUrl($siteSlug, $canonical, $action)
+        $relatedResource = $this->resource();
+        return $relatedResource
+            ? $relatedResource->siteUrl($siteSlug, $canonical, $action)
             : null;
     }
 
@@ -1233,8 +1239,8 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
     /**
      * Get the list of uris and labels of a specific custom vocab.
      *
-     * @see \Generate\Controller\Admin\IndexController::customVocabUriLabels()
-     * @see \Generate\Api\Representation\GeneratedResourceRepresentation::customVocabUriLabels()
+     * @see \AiGenerator\Controller\Admin\IndexController::customVocabUriLabels()
+     * @see \AiGenerator\Api\Representation\AiRecordRepresentation::customVocabUriLabels()
      *
      * @todo Use EasyMeta or CustomVocab directly.
      */

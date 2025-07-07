@@ -5,7 +5,7 @@
     $(document).ready(function() {
 
         /**
-         * @see ContactUs, Contribute, Generate, Guest, Resa, SearchHistory, Selection, TwoFactorAuth.
+         * @see AiGenerator, ContactUs, Contribute, Guest, Resa, SearchHistory, Selection, TwoFactorAuth.
          */
 
         const beforeSpin = function (element) {
@@ -103,21 +103,21 @@
         };
 
         // Manage check box to generate resource metadata in any form.
-        const generateFieldset = $('#generate-resource-form, .resource-form, #batch-edit-item, #batch-edit-tmedia');
+        const generateFieldset = $('#ai-record-form, .resource-form, #batch-edit-item, #batch-edit-media');
         const handleChangeGenerateMetadata = function() {
-            const input = generateFieldset.find('input[type=checkbox]#generate-metadata');
+            const input = generateFieldset.find('input[type=checkbox]#ai-generator-generate');
             if (input.prop('checked')) {
-                generateFieldset.find('.generate-settings').prop('disabled', false).closest('.field').show();
+                generateFieldset.find('.ai-generator-settings').prop('disabled', false).closest('.field').show();
              } else {
-                generateFieldset.find('.generate-settings').prop('disabled', true).closest('.field').hide();
+                generateFieldset.find('.ai-generator-settings').prop('disabled', true).closest('.field').hide();
              }
          };
 
-        generateFieldset.on('change', 'input[type=checkbox]#generate-metadata', handleChangeGenerateMetadata);
+        generateFieldset.on('change', 'input[type=checkbox]#ai-generator-generate', handleChangeGenerateMetadata);
         handleChangeGenerateMetadata();
 
-        // Mark a generated resource reviewed/unreviewed.
-        $('#content').on('click', '.generated-resource a.status-toggle', function(e) {
+        // Mark an ai record reviewed/unreviewed.
+        $('#content').on('click', '.ai-record a.status-toggle', function(e) {
             e.preventDefault();
 
             var button = $(this);
@@ -133,10 +133,10 @@
                 if (!data.status || data.status !== 'success') {
                     handleAjaxFail(xhr, textStatus);
                 } else {
-                    status = data.data.generated_resource.status;
+                    status = data.data.ai_record.status;
                     button.data('status', status);
-                    button.prop('title', data.data.generated_resource.statusLabel);
-                    button.prop('aria-label', data.data.generated_resource.statusLabel);
+                    button.prop('title', data.data.ai_record.statusLabel);
+                    button.prop('aria-label', data.data.ai_record.statusLabel);
                 }
             })
             .fail(handleAjaxFail)
@@ -146,7 +146,7 @@
         });
 
         // Validate all values of a generated resource.
-        $('#content').on('click', '.generated-resource .actions .o-icon-add', function(e) {
+        $('#content').on('click', '.ai-record .actions .o-icon-add', function(e) {
             e.preventDefault();
             var button = $(this);
             var url = button.prop('href');
@@ -177,7 +177,7 @@
         });
 
         // Validate all values of a generated resource.
-        $('#content').on('click', '.generated-resource a.validate', function(e) {
+        $('#content').on('click', '.ai-record a.validate', function(e) {
             e.preventDefault();
             var button = $(this);
             var url = button.data('validate-url');
@@ -193,13 +193,13 @@
                     handleAjaxFail(xhr, textStatus);
                 } else {
                     // Set the generated resource reviewed in all cases.
-                    status = data.data.generated_resource.reviewed.status;
+                    status = data.data.ai_record.reviewed.status;
                     const buttonReviewed = button.closest('th').find('a.status-toggle');
                     buttonReviewed.data('status', status);
                     buttonReviewed.addClass('o-icon-' + status);
 
                     // Update the validate button.
-                    status = data.data.generated_resource.status;
+                    status = data.data.ai_record.status;
                     // button.prop('title', statusLabel);
                     // button.prop('aria-label', statusLabel);
 
@@ -215,7 +215,7 @@
         });
 
         // Validate a specific value of a generated resource.
-        $('#content').on('click', '.generated-resource a.validate-value', function(e) {
+        $('#content').on('click', '.ai-record a.validate-value', function(e) {
             e.preventDefault();
 
             var button = $(this);
@@ -232,9 +232,9 @@
                     handleAjaxFail(xhr, textStatus);
                 } else {
                     // Update the validate button.
-                    status = data.data.generated_resource.status;
-                    button.prop('title', data.data.generated_resource.statusLabel);
-                    button.prop('aria-label', data.data.generated_resource.statusLabel);
+                    status = data.data.ai_record.status;
+                    button.prop('title', data.data.ai_record.statusLabel);
+                    button.prop('aria-label', data.data.ai_record.statusLabel);
                     // TODO Update the value in the main metadata tab.
                 }
             })

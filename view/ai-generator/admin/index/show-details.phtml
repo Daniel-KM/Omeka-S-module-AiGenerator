@@ -1,7 +1,7 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \Generate\Api\Representation\GeneratedResourceRepresentation $resource
+ * @var \AiGenerator\Api\Representation\AiRecordRepresentation $resource
  * @var bool $linkTitle
  * @var array $values Empty array
  */
@@ -30,18 +30,18 @@ $translate = $plugins->get('translate');
         ?>
         <div class="value"><?= $ownerText ?></div>
     </div>
-    <div class="meta-group generated-resource">
+    <div class="meta-group ai-record">
         <h4><?= $escape($translate('Resource')) ?></h4>
         <div class="value">
             <div class="resource"><?= $resource->resource() ? $resource->resource()->linkPretty() : $escape($translate('No resource')) ?></div>
         </div>
-        <?php if (!$setting('generate_hide_flag_review')): ?>
+        <?php if (!$setting('aigenerator_hide_flag_review')): ?>
         <div class="value">
             <div class="reviewed"><?= $escape($resource->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></div>
         </div>
         <?php endif; ?>
     </div>
-    <div class="meta-group generated-resource">
+    <div class="meta-group ai-record">
         <h4><?= $escape($translate('Proposal')) ?></h4>
         <?php
         $resourceTemplate = $resource->resourceTemplate();

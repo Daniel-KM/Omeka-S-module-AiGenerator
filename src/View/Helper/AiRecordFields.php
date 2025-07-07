@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace Generate\View\Helper;
+namespace AiGenerator\View\Helper;
 
 use Common\Stdlib\EasyMeta;
-use Generate\Api\Representation\GeneratedResourceRepresentation;
-use Generate\Mvc\Controller\Plugin\GenerativeData;
+use AiGenerator\Api\Representation\AiRecordRepresentation;
+use AiGenerator\Mvc\Controller\Plugin\GenerativeData;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Manager as ApiManager;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ResourceTemplateRepresentation;
 
-class GeneratedResourceFields extends AbstractHelper
+class AiRecordFields extends AbstractHelper
 {
     /**
      * @var \Omeka\Api\Manager
@@ -108,7 +108,7 @@ class GeneratedResourceFields extends AbstractHelper
      *     'values' => [
      *       {ValueRepresentation}, …
      *     ],
-     *     'generated_resources' => [
+     *     'ai_records' => [
      *       [
      *         'type' => {string},
      *         'basetype' => {string}, // To make process easier (literal, resource or uri).
@@ -137,9 +137,9 @@ class GeneratedResourceFields extends AbstractHelper
      * @todo Remove the "@" in proposition values (or build a class).
      * @todo Store language.
      *
-     * @todo Factorize with \Generate\Site\GenerationController::prepareProposal()
-     * @todo Factorize with \Generate\Api\Representation\GenerationRepresentation::proposalNormalizeForValidation()
-     * @todo Factorize with \Generate\Api\Representation\GenerationRepresentation::proposalToResourceData()
+     * @todo Factorize with \AiGenerator\Site\GenerationController::prepareProposal()
+     * @todo Factorize with \AiGenerator\Api\Representation\GenerationRepresentation::proposalNormalizeForValidation()
+     * @todo Factorize with \AiGenerator\Api\Representation\GenerationRepresentation::proposalToResourceData()
      *
      * @todo Simplify when the status "is patch" or "new resource" (at least remove all original data).
      *
@@ -151,7 +151,7 @@ class GeneratedResourceFields extends AbstractHelper
      */
     public function __invoke(
         ?AbstractResourceEntityRepresentation $resource = null,
-        ?GeneratedResourceRepresentation $generatedResource = null,
+        ?AiRecordRepresentation $aiRecord = null,
         ?ResourceTemplateRepresentation $resourceTemplate = null,
         ?bool $isSubTemplate = false,
         ?int $indexProposalMedia = null
@@ -173,13 +173,13 @@ class GeneratedResourceFields extends AbstractHelper
             'fillable' => false,
             'datatypes' => [],
             'values' => [],
-            'generated_resources' => [],
+            'ai_records' => [],
         ];
 
         // The generation is always on the stored resource, if any.
         $values = [];
-        if ($generatedResource) {
-            $resource = $generatedResource->resource();
+        if ($aiRecord) {
+            $resource = $aiRecord->resource();
             if ($resource) {
                 $values = $resource->values();
                 if (!$isSubTemplate) {
@@ -187,7 +187,7 @@ class GeneratedResourceFields extends AbstractHelper
                 }
             }
             if (!$isSubTemplate) {
-                $resourceTemplate = $generatedResource->resourceTemplate();
+                $resourceTemplate = $aiRecord->resourceTemplate();
             }
         } elseif ($resource) {
             $resourceTemplate = $resource->resourceTemplate();
@@ -229,7 +229,7 @@ class GeneratedResourceFields extends AbstractHelper
                 'fillable' => $generative->isTermFillable($term),
                 'datatypes' => $generative->dataTypeTerm($term),
                 'values' => $valuesValues,
-                'generated_resources' => [],
+                'ai_records' => [],
             ];
         }
 
@@ -246,7 +246,7 @@ class GeneratedResourceFields extends AbstractHelper
                 $fields[$term]['editable'] = false;
                 $fields[$term]['fillable'] = false;
                 $fields[$term]['datatypes'] = [];
-                $fields[$term]['generated_resources'] = [];
+                $fields[$term]['ai_records'] = [];
                 $fields[$term] = array_replace($defaultField, $fields[$term]);
             }
         }
@@ -288,7 +288,7 @@ class GeneratedResourceFields extends AbstractHelper
                     $uri = null;
                     $label = null;
                 }
-                $fields[$term]['generated_resources'][] = [
+                $fields[$term]['ai_records'][] = [
                     // The type cannot be changed.
                     'type' => $dataType,
                     'basetype' => $baseType,
@@ -311,11 +311,11 @@ class GeneratedResourceFields extends AbstractHelper
             }
         }
 
-        if (!$generatedResource) {
+        if (!$aiRecord) {
             return $this->finalize($fields);
         }
 
-        $proposals = $generatedResource->proposal();
+        $proposals = $aiRecord->proposal();
         if (is_int($indexProposalMedia)) {
             $proposals = $proposals['media'][$indexProposalMedia] ?? [];
         }
@@ -374,9 +374,9 @@ class GeneratedResourceFields extends AbstractHelper
                 'fillable' => true,
                 'datatypes' => ['file'],
                 'values' => [],
-                'generated_resources' => [],
+                'ai_records' => [],
             ];
-            $fields['file']['generated_resources'][] = [
+            $fields['file']['ai_records'][] = [
                 'type' => 'file',
                 'basetype' => 'literal',
                 'lang' => null,
@@ -407,7 +407,7 @@ class GeneratedResourceFields extends AbstractHelper
             if (!isset($proposals[$term])) {
                 continue;
             }
-            foreach ($field['generated_resources'] as &$fieldGeneration) {
+            foreach ($field['ai_records'] as &$fieldGeneration) {
                 $proposed = null;
                 $dataType = $fieldGeneration['type'];
                 if (!$generative->isTermDataType($term, $dataType)) {
@@ -491,7 +491,7 @@ class GeneratedResourceFields extends AbstractHelper
             if (!isset($proposals[$term])) {
                 continue;
             }
-            foreach ($field['generated_resources'] as &$fieldGeneration) {
+            foreach ($field['ai_records'] as &$fieldGeneration) {
                 $proposed = null;
                 $dataType = $fieldGeneration['type'];
                 if (!$generative->isTermDatatype($term, $dataType)) {
@@ -587,7 +587,7 @@ class GeneratedResourceFields extends AbstractHelper
                     'fillable' => false,
                     'datatypes' => ['literal', 'resource', 'uri'],
                     'values' => [],
-                    'generated_resources' => [],
+                    'ai_records' => [],
                 ];
             }
             // $isFillable = $generative->isTermFillable($term);
@@ -619,7 +619,7 @@ class GeneratedResourceFields extends AbstractHelper
                 */
                 $baseType = $this->easyMeta->dataTypeMain($dataType) ?? 'literal';
                 if ($baseType === 'uri') {
-                    $fields[$term]['generated_resources'][] = [
+                    $fields[$term]['ai_records'][] = [
                         'type' => $dataType,
                         'basetype' => 'uri',
                         'new' => true,
@@ -639,7 +639,7 @@ class GeneratedResourceFields extends AbstractHelper
                         ],
                     ];
                 } elseif ($baseType === 'resource') {
-                    $fields[$term]['generated_resources'][] = [
+                    $fields[$term]['ai_records'][] = [
                         'type' => $dataType,
                         'basetype' => 'resource',
                         'new' => true,
@@ -659,7 +659,7 @@ class GeneratedResourceFields extends AbstractHelper
                         ],
                     ];
                 } else {
-                    $fields[$term]['generated_resources'][] = [
+                    $fields[$term]['ai_records'][] = [
                         'type' => $dataType,
                         'basetype' => 'literal',
                         'new' => true,
@@ -696,28 +696,28 @@ class GeneratedResourceFields extends AbstractHelper
             }
             // Remove generations with an invalid or an unavailable type.
             // This is a security fix, but it can remove data.
-            foreach ($field['generated_resources'] as $key => &$fieldGeneration) {
+            foreach ($field['ai_records'] as $key => &$fieldGeneration) {
                 $dataType = $fieldGeneration['type'] ?? '';
                 $typeColon = strtok($dataType, ':');
                 $baseType = $this->easyMeta->datatypeMain($dataType) ?? 'literal';
                 // FIXME Warning, numeric:interval and numeric:duration are not managed.
                 if (!$this->hasNumericDataTypes && $typeColon === 'numeric') {
-                    unset($field['generated_resources'][$key]);
+                    unset($field['ai_records'][$key]);
                     continue;
                 }
                 if (!$this->hasCustomVocab && $typeColon === 'customvocab') {
-                    unset($field['generated_resources'][$key]);
+                    unset($field['ai_records'][$key]);
                     continue;
                 }
                 if (!$this->hasValueSuggest && ($typeColon === 'valuesuggest' || $typeColon === 'valuesuggestall')) {
-                    unset($field['generated_resources'][$key]);
+                    unset($field['ai_records'][$key]);
                     continue;
                 }
             }
             unset($fieldGeneration);
 
             // Clean indexes for old generations.
-            $field['generated_resources'] = array_values($field['generated_resources']);
+            $field['ai_records'] = array_values($field['ai_records']);
             if (!$field['fillable']) {
                 continue;
             }
@@ -734,7 +734,7 @@ class GeneratedResourceFields extends AbstractHelper
             // they are combined.
             // TODO Check for correction, with some values corrected and some appended.
             $countValues = count($field['values']);
-            $countGenerations = count($field['generated_resources']);
+            $countGenerations = count($field['ai_records']);
             $countExisting = $field['editable']
                 ? max($countValues, $countGenerations)
                 : $countValues + $countGenerations;
@@ -750,7 +750,7 @@ class GeneratedResourceFields extends AbstractHelper
             $baseType = $this->easyMeta->dataTypeMain($dataType) ?? 'literal';
             // Prepare empty generations to simplify theme.
             while ($missingValues) {
-                $field['generated_resources'][] = [
+                $field['ai_records'][] = [
                     'type' => $dataType,
                     'basetype' => $baseType,
                     'new' => true,

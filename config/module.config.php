@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Generate;
+namespace AiGenerator;
 
 return [
     'api_adapters' => [
         'invokables' => [
-            'generated_resources' => Api\Adapter\GeneratedResourceAdapter::class,
+            'ai_records' => Api\Adapter\AiRecordAdapter::class,
         ],
     ],
     'entity_manager' => [
@@ -29,14 +29,14 @@ return [
             'canGenerate' => View\Helper\CanGenerate::class,
         ],
         'factories' => [
-            'generatedResourceFields' => Service\ViewHelper\GeneratedResourceFieldsFactory::class,
-            'generatedResourceSearchFilters' => Service\ViewHelper\GeneratedResourceSearchFiltersFactory::class,
+            'aiRecordFields' => Service\ViewHelper\AiRecordFieldsFactory::class,
+            'aiRecordSearchFilters' => Service\ViewHelper\AiRecordSearchFiltersFactory::class,
         ],
     ],
     'form_elements' => [
         'invokables' => [
+            Form\BatchEditFieldset::class => Form\BatchEditFieldset::class,
             Form\ConfigForm::class => Form\ConfigForm::class,
-            Form\GenerateForm::class => Form\GenerateForm::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
         ],
         'factories' => [
@@ -45,14 +45,14 @@ return [
     ],
     'controllers' => [
         'invokables' => [
-            'Generate\Controller\Admin\Index' => Controller\Admin\IndexController::class,
+            'AiGenerator\Controller\Admin\Index' => Controller\Admin\IndexController::class,
         ],
     ],
     'controller_plugins' => [
         'invokables' => [
             'generativeData' => Mvc\Controller\Plugin\GenerativeData::class,
         ],
-        // TODO Create a service for AiGenerator.
+        // TODO Create a service for AiGenerator. Useless for now: there is only one generator.
         'factories' => [
             'generateViaOpenAi' => Service\ControllerPlugin\GenerateViaOpenAiFactory::class,
             'validateRecordOrCreateOrUpdate' => Service\ControllerPlugin\ValidateRecordOrCreateOrUpdateFactory::class,
@@ -60,20 +60,20 @@ return [
     ],
     'navigation' => [
         'AdminResource' => [
-            'generate' => [
-                'label' => 'Generations', // @translate
-                'class' => 'o-icon- generated-resources fa-robot',
-                'route' => 'admin/generated-resource',
+            'ai-generator' => [
+                'label' => 'AI Records', // @translate
+                'class' => 'o-icon- ai-records fa-robot',
+                'route' => 'admin/ai-record',
                 // 'resource' => Controller\Admin\IndexController::class,
                 // 'privilege' => 'browse',
                 'pages' => [
                     [
-                        'route' => 'admin/generated-resources/default',
+                        'route' => 'admin/ai-records/default',
                         'controller' => Controller\Admin\IndexController::class,
                         'visible' => false,
                     ],
                     [
-                        'route' => 'admin/generated-resource/id',
+                        'route' => 'admin/ai-record/id',
                         'controller' => Controller\Admin\IndexController::class,
                         'visible' => false,
                     ],
@@ -85,12 +85,12 @@ return [
         'routes' => [
             'admin' => [
                 'child_routes' => [
-                    'generated-resource' => [
+                    'ai-record' => [
                         'type' => \Laminas\Router\Http\Literal::class,
                         'options' => [
-                            'route' => '/generated-resource',
+                            'route' => '/ai-record',
                             'defaults' => [
-                                '__NAMESPACE__' => 'Generate\Controller\Admin',
+                                '__NAMESPACE__' => 'AiGenerator\Controller\Admin',
                                 'controller' => 'index',
                                 'action' => 'browse',
                             ],
@@ -135,16 +135,16 @@ return [
             ],
         ],
     ],
-    'generate' => [
+    'aigenerator' => [
         'config' => [
-            'generate_openai_api_key' => '',
-            'generate_openai_organization' => '',
-            'generate_openai_project' => '',
+            'aigenerator_openai_api_key' => '',
+            'aigenerator_openai_organization' => '',
+            'aigenerator_openai_project' => '',
         ],
         'settings' => [
-            'generate_roles' => [],
-            'generate_validate' => false,
-            'generate_models' => [
+            'aigenerator_roles' => [],
+            'aigenerator_validate' => false,
+            'aigenerator_models' => [
                 'gpt-4.1-nano' => 'GPT 4.1 nano ($0.50 / 1M tokens)',
                 'gpt-4.1-mini' => 'GPT 4.1 mini ($2 / 1M tokens)',
                 'gpt-4.1' => 'GPT 4.1 ($10 / 1M tokens)',
@@ -153,11 +153,11 @@ return [
                 'gpt-3.5-turbo' => 'GPT 3.5 turbo ($2 / 1M tokens)',
                 'gpt-4.5-preview' => 'GPT 4.5 preview ($225 / 1M tokens)',
             ],
-            'generate_model' => 'gpt-4.1-nano',
-            'generate_max_tokens' => 300,
-            'generate_derivative' => 'medium',
+            'aigenerator_model' => 'gpt-4.1-nano',
+            'aigenerator_max_tokens' => 300,
+            'aigenerator_derivative' => 'medium',
             // Keep the prompt short, else it may cost more tokens than image analysis.
-            'generate_prompt_system' => <<<'TXT'
+            'aigenerator_prompt_system' => <<<'TXT'
                 You are an image analysis system. Describe main content of image for indexing and search purposes.
                 TXT, // @translate
                 /* Example of technical request when a structured output cannot be used.
@@ -167,9 +167,9 @@ return [
                 */
             // This prompt may be useless with chat structure, since the urls
             // are added automatically and the system context is enough.
-            'generate_prompt_user' => 'Analyze image', // @translate
-            'generate_item_sets_auto' => [],
-            'generate_hide_flag_review' => false,
+            'aigenerator_prompt_user' => 'Analyze image', // @translate
+            'aigenerator_item_sets_auto' => [],
+            'aigenerator_hide_flag_review' => false,
         ],
     ],
 ];

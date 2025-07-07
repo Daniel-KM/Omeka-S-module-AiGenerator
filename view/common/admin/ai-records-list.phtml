@@ -1,9 +1,8 @@
 <?php
 /**
  * @var \Laminas\View\Renderer\PhpRenderer $this
- * @var \Generate\Form\GenerateForm $form
  * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
- * @var \Generate\Api\Representation\GeneratedResourceRepresentation[] $generatedResources
+ * @var \AiGenerator\Api\Representation\AiRecordRepresentation[] $aiRecords
  */
 
 $plugins = $this->getHelperPluginManager();
@@ -15,16 +14,16 @@ $translate = $plugins->get('translate');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 
 $this->headLink()
-    ->appendStylesheet($assetUrl('css/generate-admin.css', 'Generate'));
+    ->appendStylesheet($assetUrl('css/ai-generator-admin.css', 'AiGenerator'));
 $this->headScript()
-    ->appendFile($assetUrl('js/generate-admin.js', 'Generate'), 'text/javascript', ['defer' => 'defer']);
+    ->appendFile($assetUrl('js/ai-generator-admin.js', 'AiGenerator'), 'text/javascript', ['defer' => 'defer']);
 ?>
 
-<div class="generated-resources">
+<div class="ai-records">
 
-<?php if (empty($generatedResources)): ?>
+<?php if (empty($aiRecords)): ?>
 
-    <div class="no-resources no-generated-resources">
+    <div class="no-resources no-ai-records">
         <p><?= $translate('There are no generated resources for this resource.') ?></p>
     </div>
 
@@ -40,40 +39,40 @@ $adapterName = $mapResourceAdapters[$resourceName];
 $batchEditRight = $this->userIsAllowed($adapterName, 'batch-update');
 $editRight = $resource->userIsAllowed('update');
 
-$displayFlagReview = !$setting('generate_hide_flag_review');
+$displayFlagReview = !$setting('aigenerator_hide_flag_review');
 
 $labelInfo = $setting('property_label_information');
 ?>
 
-<?php foreach ($generatedResources as $generatedResource):
+<?php foreach ($aiRecords as $aiRecord):
     /**
      * @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
      */
-    $proposal = $generatedResource->proposalNormalizeForValidation();
+    $proposal = $aiRecord->proposalNormalizeForValidation();
     $values = $resource->values();
     $resourceTemplate = $proposal['template'] ?? null;
     // Clean data for the special keys.
     unset($proposal['template'], $proposal['media']);
 
-    $isValidable = $generatedResource->isValidable();
+    $isValidable = $aiRecord->isValidable();
     ?>
-<div class="generated-resource" data-id="<?= $generatedResource->id() ?>" data-linked-id="<?= $generatedResource->resource()?->id() ?>">
-<table class="tablesaw<?= $batchEditRight ? ' batch-edit' : '' ?>" data-tablesaw-mode="stack" data-id="<?= $generatedResource->id() ?>">
+<div class="ai-record" data-id="<?= $aiRecord->id() ?>" data-linked-id="<?= $aiRecord->resource()?->id() ?>">
+<table class="tablesaw<?= $batchEditRight ? ' batch-edit' : '' ?>" data-tablesaw-mode="stack" data-id="<?= $aiRecord->id() ?>">
     <thead>
         <tr>
             <th>
-                <?= $translate('Generated resource') ?>
+                <?= $translate('AI record') ?>
                 <?php /*
-                <span class="generated-resource-id">#<?= $generatedResource->id() ?></span>
+                <span class="ai-record-id">#<?= $aiRecord->id() ?></span>
                 */ ?>
 
-                <span class="generated-resource-id"><?= sprintf($translate('(#%s)'), $generatedResource->id()) ?></span>
-                <span class="generated-resource-date"><?= $this->i18n()->dateFormat($generatedResource->created(), 'medium', 'medium') ?></span>
+                <span class="ai-record-id"><?= sprintf($translate('(#%s)'), $aiRecord->id()) ?></span>
+                <span class="ai-record-date"><?= $this->i18n()->dateFormat($aiRecord->created(), 'medium', 'medium') ?></span>
 
-                <?php /* Unlike Contribution, there is no possible modification of a generated resource for now. ?>
+                <?php /* Unlike Contribution, there is no possible modification of an ai record for now. ?>
                 <?php // TODO Don't check "modified" when the modification is just a change of the flag. ?>
-                <?php if ($generatedResource->created() != $generatedResource->modified()): // Don't use !==. ?>
-                <span class="generated-resource-date-modified"><?= $translate('(modified)') ?></span>
+                <?php if ($aiRecord->created() != $aiRecord->modified()): // Don't use !==. ?>
+                <span class="ai-record-date-modified"><?= $translate('(modified)') ?></span>
                 <?php endif; ?>
                 <?php */ ?>
 
@@ -82,7 +81,7 @@ $labelInfo = $setting('property_label_information');
                 <?php if ($isValidable): ?>
                 <span class="single actions"><a href="#"
                     class="validate o-icon-validate"
-                    data-validate-url="<?= $escapeAttr($generatedResource->adminUrl('validate')) ?>"
+                    data-validate-url="<?= $escapeAttr($aiRecord->adminUrl('validate')) ?>"
                     data-status="validate"
                     title="<?= $txt = $escapeAttr($translate('Validate all values')) ?>"
                     aria-label="<?= $txt ?>"></a></span>
@@ -96,16 +95,16 @@ $labelInfo = $setting('property_label_information');
                 <?php if ($displayFlagReview): ?>
                 <?php if ($isValidable): ?>
                 <span class="single actions"><a href="#"
-                    class="status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                    data-status-toggle-url="<?= $escapeAttr($generatedResource->adminUrl('toggle-status')) ?>"
-                    data-status="<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    class="status-toggle o-icon-<?= $aiRecord->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    data-status-toggle-url="<?= $escapeAttr($aiRecord->adminUrl('toggle-status')) ?>"
+                    data-status="<?= $aiRecord->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
                     title="<?= $txt = $escapeAttr($translate('Toggle status reviewed/unreviewed')) ?>"
                     aria-label="<?= $txt ?>"></a></span>
                 <?php else: ?>
                 <span class="single actions"><span
-                    class="no-action status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                    data-status="<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                    title="<?= $txt = ($escapeAttr($generatedResource->isReviewed() ? $translate('Reviewed') : $translate('Unreviewed'))) ?>"
+                    class="no-action status-toggle o-icon-<?= $aiRecord->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    data-status="<?= $aiRecord->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    title="<?= $txt = ($escapeAttr($aiRecord->isReviewed() ? $translate('Reviewed') : $translate('Unreviewed'))) ?>"
                     aria-label="<?= $txt ?>"
                     ></span></span>
                 <?php endif; ?>
@@ -115,7 +114,7 @@ $labelInfo = $setting('property_label_information');
         </tr>
     </thead>
     <tbody>
-        <tr class="generated-resource-value">
+        <tr class="ai-record-value">
             <td>
                 <dl>
                     <div class="property">
@@ -224,7 +223,7 @@ $labelInfo = $setting('property_label_information');
                                         <?php else: ?>
                                             <a href="#"
                                                 class="validate-value o-icon-validate-value"
-                                                data-validate-value-url="<?= $escapeAttr($generatedResource->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
+                                                data-validate-value-url="<?= $escapeAttr($aiRecord->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                                                 data-status="validate-value"
                                                 aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
                                                 title="<?= $txt ?>"></a>
@@ -278,7 +277,7 @@ $labelInfo = $setting('property_label_information');
                                     <?php else: ?>
                                         <a href="#"
                                             class="validate-value o-icon-validate-value"
-                                            data-validate-value-url="<?= $escapeAttr($generatedResource->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
+                                            data-validate-value-url="<?= $escapeAttr($aiRecord->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                                             data-status="validate-value"
                                             aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
                                             title="<?= $txt ?>"></a>
@@ -325,7 +324,7 @@ $labelInfo = $setting('property_label_information');
                                     <?php else: ?>
                                         <a href="#"
                                             class="validate-value o-icon-validate-value"
-                                            data-validate-value-url="<?= $escapeAttr($generatedResource->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
+                                            data-validate-value-url="<?= $escapeAttr($aiRecord->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                                             data-status="validate-value"
                                             aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
                                             title="<?= $txt ?>"></a>

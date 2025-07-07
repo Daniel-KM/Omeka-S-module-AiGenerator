@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Generate\View\Helper;
+namespace AiGenerator\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Manager as ApiManager;
@@ -8,7 +8,7 @@ use Omeka\Api\Manager as ApiManager;
 /**
  * View helper for rendering search filters.
  */
-class GeneratedResourceSearchFilters extends AbstractHelper
+class AiRecordSearchFilters extends AbstractHelper
 {
     /**
      * The default partial view script.
