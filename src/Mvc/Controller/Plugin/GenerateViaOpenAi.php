@@ -100,6 +100,7 @@ class GenerateViaOpenAi extends AbstractPlugin
      * @var array $options
      * - model (string): the model to use.
      * - max_tokens (int): the max tokens to use for a request (0 for no limit).
+     * - derivative (string): the derivative image type or original to process.
      * - prompt_system (string|false): specific prompt for the system (session).
      *   The configured prompt in settings is used by default, unless false is
      *   passed.
@@ -141,6 +142,10 @@ class GenerateViaOpenAi extends AbstractPlugin
             ? (int) $this->settings->get('generate_max_tokens')
             : (int) $options['max_tokens'];
 
+        $derivative = empty($options['derivative'])
+            ? $this->settings->get('generate_derivative')
+            : 'medium';
+
         // The prompt for session or for user may be skipped, not the two.
 
         if (empty($options['prompt_system']) && $options['prompt_system'] !== false) {
@@ -180,12 +185,13 @@ class GenerateViaOpenAi extends AbstractPlugin
 
         // Get all media files.
         $urls = [];
+        $useOriginal = $derivative === 'original';
         foreach ($medias as $media) {
             if ($media->renderer() === 'file'
-                && $media->hasOriginal()
+                && (($useOriginal && $media->hasOriginal()) || (!$useOriginal && $media->hasThumbnails()))
                 && strtok((string) $media->mediaType(), '/') === 'image'
             ) {
-                $urls[$media->id()] = $this->urlOrBase64($media);
+                $urls[$media->id()] = $this->urlOrBase64($media, $derivative);
             }
         }
 
@@ -404,9 +410,11 @@ class GenerateViaOpenAi extends AbstractPlugin
             : $prompt;
     }
 
-    protected function urlOrBase64(MediaRepresentation $media): string
+    protected function urlOrBase64(MediaRepresentation $media, string $derivative): string
     {
-        $url = $media->originalUrl();
+        $url = $derivative === 'original'
+            ? $media->originalUrl()
+            : $media->thumbnailUrl($derivative);
         if (!$this->isUrlLocal($url)) {
             return $url;
         }

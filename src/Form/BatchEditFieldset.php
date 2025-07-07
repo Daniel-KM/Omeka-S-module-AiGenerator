@@ -72,6 +72,22 @@ class BatchEditFieldset extends Fieldset
                 ],
             ])
             ->add([
+                'name' => 'generate_derivative',
+                'type' => CommonElement\OptionalRadio::class,
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Derivative image', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate-derivative',
+                    'class' => 'generate-settings',
+                    // Enabled via js when checkbox is on.
+                    'disabled' => 'disabled',
+                    // This attribute is required to make "batch edit all" working.
+                    'data-collection-action' => 'replace',
+                ],
+            ])
+            ->add([
                 'type' => Element\Textarea::class,
                 'name' => 'generate_prompt_system',
                 'options' => [

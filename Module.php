@@ -359,6 +359,7 @@ class Module extends AbstractModule
             'generate_metadata' => true,
             'generate_model' => $post['generate']['generate_model'] ?? null,
             'generate_max_tokens' => $post['generate']['generate_max_tokens'] ?? null,
+            'generate_derivative' => $post['generate']['generate_derivative'] ?? null,
             'generate_prompt_system' => $post['generate']['generate_prompt_system'] ?? null,
             'generate_prompt_user' => $post['generate']['generate_prompt_user'] ?? null,
         ];
@@ -370,6 +371,7 @@ class Module extends AbstractModule
                 'json' => [
                     'model' => $data['generate']['generate_model'],
                     'max_tokens' => $data['generate']['generate_max_tokens'],
+                    'derivative' => $data['generate']['generate_derivative'],
                     'prompt_system' => $data['generate']['generate_prompt_system'],
                     'prompt_user' => $data['generate']['generate_prompt_user'],
                 ],
@@ -490,6 +492,7 @@ class Module extends AbstractModule
          * @var \Omeka\Settings\Settings $settings
          * @var \Laminas\View\Renderer\PhpRenderer $view
          * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+         * @var \Omeka\File\ThumbnailManager $thumbnailManager
          * @var \Omeka\Entity\User $user
          */
         $services = $this->getServiceLocator();
@@ -502,6 +505,11 @@ class Module extends AbstractModule
             return;
         }
 
+        $thumbnailManager = $services->get('Omeka\File\ThumbnailManager');
+        $derivatives = $thumbnailManager->getTypes();
+        $derivatives = ['original' => 'Original']
+            + array_combine($derivatives, array_map('ucfirst', $derivatives));
+
         $this->addHeadersAdmin($event);
 
         $apiKey = $settings->get('generate_api_key_openai');
@@ -512,6 +520,8 @@ class Module extends AbstractModule
             ?: $this->getModuleConfig('settings')['generate_model'];
         $maxTokens = (int) $settings->get('generate_max_tokens')
             ?: (int) $this->getModuleConfig('settings')['generate_max_tokens'];
+        $derivative = trim((string) $settings->get('generate_derivative'))
+            ?: trim((string) $this->getModuleConfig('settings')['generate_derivative']);
         $promptSystem = trim((string) $settings->get('generate_prompt_system'))
             ?: $this->getModuleConfig('settings')['generate_prompt_system'];
         $promptUser = trim((string) $settings->get('generate_prompt_user'))
@@ -560,6 +570,19 @@ class Module extends AbstractModule
                 'disabled' => 'disabled',
             ]);
 
+        $elementModel = new \Common\Form\Element\OptionalRadio('generate_derivative');
+        $elementModel
+            ->setLabel('Derivative image') // @translate
+            ->setValueOptions($derivatives)
+            ->setValue($derivative)
+            ->setAttributes([
+                'id' => 'generate-derivative',
+                'value' => $derivative,
+                'class' => 'generate-settings',
+                // Enabled via js when checkbox is on.
+                'disabled' => 'disabled',
+            ]);
+
         $elementPromptSystem = new \Laminas\Form\Element\Textarea('generate_prompt_system');
         $elementPromptSystem
             ->setLabel('Prompt to set context of a session for resource analysis') // @translate
@@ -597,6 +620,7 @@ class Module extends AbstractModule
          * @var \Omeka\Settings\Settings $settings
          * @var \Laminas\View\Renderer\PhpRenderer $view
          * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+         * @var \Omeka\File\ThumbnailManager $thumbnailManager
          * @var \Omeka\Entity\User $user
          */
         $services = $this->getServiceLocator();
@@ -609,6 +633,11 @@ class Module extends AbstractModule
             return;
         }
 
+        $thumbnailManager = $services->get('Omeka\File\ThumbnailManager');
+        $derivatives = $thumbnailManager->getTypes();
+        $derivatives = ['original' => 'Original']
+            + array_combine($derivatives, array_map('ucfirst', $derivatives));
+
         // This is not a view.
         // $this->addHeadersAdmin($event);
 
@@ -620,6 +649,8 @@ class Module extends AbstractModule
             ?: $this->getModuleConfig('settings')['generate_model'];
         $maxTokens = (int) $settings->get('generate_max_tokens')
             ?: (int) $this->getModuleConfig('settings')['generate_max_tokens'];
+        $derivative = trim((string) $settings->get('generate_derivative'))
+            ?: trim((string) $this->getModuleConfig('settings')['generate_derivative']);
         $promptSystem = trim((string) $settings->get('generate_prompt_system'))
             ?: $this->getModuleConfig('settings')['generate_prompt_system'];
         $promptUser = trim((string) $settings->get('generate_prompt_user'))
@@ -648,6 +679,10 @@ class Module extends AbstractModule
         $fieldset
             ->get('generate_max_tokens')
             ->setValue($maxTokens);
+        $fieldset
+            ->get('generate_derivative')
+            ->setValueOptions($derivatives)
+            ->setValue($derivative);
         $fieldset
             ->get('generate_prompt_system')
             ->setValue($promptSystem);

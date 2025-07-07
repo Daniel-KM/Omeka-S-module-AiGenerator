@@ -91,6 +91,24 @@ class SettingsFieldset extends Fieldset
                     'required' => false,
                 ],
             ])
+            ->add([
+                'type' => CommonElement\OptionalRadio::class,
+                'name' => 'generate_derivative',
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Default derivative image', // @translate
+                    'value_options' => [
+                        'original' => 'Original', // @translate
+                        'large' => 'Large', // @translate
+                        'medium' => 'Midsized', // @translate
+                        'square' => 'Square', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'generate_derivative',
+                    'required' => false,
+                ],
+            ])
 
             ->add([
                 'type' => Element\Textarea::class,
