@@ -31,10 +31,12 @@ $translate = $plugins->get('translate');
     </div>
     <div class="meta-group generated-resource">
         <h4><?= $escape($translate('Resource')) ?></h4>
-        <ul class="generated-resource-status">
-            <li class="resource"><?= $resource->resource() ? $resource->resource()->linkPretty() : $escape($translate('No resource')) ?></li>
-            <li class="reviewed"><?= $escape($resource->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></li>
-        </ul>
+        <div class="value">
+            <div class="resource"><?= $resource->resource() ? $resource->resource()->linkPretty() : $escape($translate('No resource')) ?></div>
+        </div>
+        <div class="value">
+            <div class="reviewed"><?= $escape($resource->isReviewed() ? $translate('Is reviewed') : $translate('Is not reviewed')) ?></div>
+        </div>
     </div>
     <div class="meta-group generated-resource">
         <h4><?= $escape($translate('Proposal')) ?></h4>

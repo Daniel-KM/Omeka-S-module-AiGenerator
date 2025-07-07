@@ -43,7 +43,7 @@ $sortHeadings = [
 ];
 
 $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\GeneratedResourceAdapter::class, 'batch_delete');
-$userIsAllowedToCreateResource = $this->userIsAllowed(\Omeka\Api\Adapter\ItemAdapter::class, 'create');
+// $userIsAllowedToCreateResource = $this->userIsAllowed(\Omeka\Api\Adapter\ItemAdapter::class, 'create');
 ?>
 
 <?= $this->pageTitle($translate('Generated resource metadata')) ?>
@@ -98,6 +98,7 @@ $userIsAllowedToCreateResource = $this->userIsAllowed(\Omeka\Api\Adapter\ItemAda
             <?php foreach ($generatedResources as $generatedResource):
             $generatedResourceResource = $generatedResource->resource();
             $resourceTemplate = $generatedResource->resourceTemplate();
+            $isValidable = $generatedResource->isValidable();
             $owner = $generatedResource->owner();
             if ($owner) {
                 $ownerText = $hyperlink($owner->name(), $url('admin/id', ['controller' => 'user', 'action' => 'show', 'id' => $owner->id()]));
@@ -115,37 +116,30 @@ $userIsAllowedToCreateResource = $this->userIsAllowed(\Omeka\Api\Adapter\ItemAda
                     <ul class="actions">
                         <?php if ($generatedResourceResource && $generatedResource->userIsAllowed('update')): ?>
                         <li>
-                            <span class="single actions"><a href="#"
+                            <a href="#"
                                 class="status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
                                 data-status-toggle-url="<?= $escapeAttr($generatedResource->adminUrl('toggle-status')) ?>"
                                 data-status="<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
                                 aria-label="<?= $escapeAttr($translate('Toggle status reviewed/unreviewed')) ?>"
                                 title="<?= $escapeAttr($translate('Toggle status reviewed/unreviewed')) ?>"></a>
-                            </span>
                         </li>
                         <?php endif; ?>
+                        <?php if ($isValidable): ?>
                         <li>
-                            <span class="single actions"><a href="#"
-                                data-url="<?= $escapeAttr($url('admin/generated-resource/id', ['action' => 'send-message', 'id' => $generatedResource->id()], true)) ?>"
-                                class="send-message o-icon- fa-envelope"
-                                aria-label="<?= $escape($translate('Send a message to the author')) ?>"
-                                title="<?= $escape($translate('Send a message to the author')) ?>"></a>
-                            </span>
+                            <a href="#"
+                                class="validate o-icon- fas fa-sign-in-alt"
+                                data-validate-url="<?= $escapeAttr($generatedResource->adminUrl('validate')) ?>"
+                                data-status="validate"
+                                title="<?= $txt = $escapeAttr($translate('Validate all values')) ?>"
+                                aria-label="<?= $txt ?>"></a>
                         </li>
-                        <?php if ($generatedResourceResource): ?>
-                        <li>
-                            <?= $generatedResource->linkResource('', 'show', [
-                                'class' => 'o-icon-edit',
-                                'title' => $translate('Edit'),
-                            ]) ?>
-                        </li>
-                        <?php elseif ($userIsAllowedToCreateResource): ?>
-                        <li>
-                            <?= $hyperlink('', $url('admin/generated-resource/id', ['action' => 'create-resource', 'id' => $generatedResource->id()], true), [
-                                'class' => 'o-icon-add',
-                                'data-id' => $generatedResource->id(),
-                                'title' => $translate('Create resource to be validated'),
-                            ]) ?>
+                        <?php else: ?>
+                       <li>
+                            <span
+                                class="no-action o-icon-unvalidable"
+                                data-status="not-validable"
+                                title="<?= $txt = $escapeAttr($translate('Not validable or already validated')) ?>"
+                                aria-label="<?= $txt ?>"></span>
                         </li>
                         <?php endif; ?>
                         <?php if ($generatedResource->userIsAllowed('delete')): ?>
