@@ -336,9 +336,17 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                 if ($typeTemplate) {
                     $mainType = $mainTypeTemplate;
                 } elseif (empty($proposition['original'])) {
-                    // Unlike Contribution, the default main type is literal to allow property not listed in template.
-                    // It allows to display the value for a property that is not in the template.
-                    // Nevertheless, its process status is "keep", so it cannot fill the resource.
+                    // Unlike Contribution, "unknown" is like literal to allow
+                    // property not listed in template.
+                    // It allows to display the value for a property that is not
+                    // in the template.
+                    // Nevertheless, its process status is "keep", so it cannot
+                    // fill the resource.
+                    // TODO Check or explain why the case "unknown" is different in Generate and Contribute, here and below. Is patch managed well?
+                    // If "unknown", it means that $generativeData->isTermDataType(),
+                    // $generativeData->editable() and $generativeData->fillable()
+                    // are false, so cannot be used and this is an issue.
+                    // $mainType = 'unknown';
                     $mainType = 'literal';
                 } elseif (array_key_exists('@uri', $proposition['original'])) {
                     $mainType = 'uri';
@@ -347,7 +355,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                 } elseif (array_key_exists('@value', $proposition['original'])) {
                     $mainType = 'literal';
                 } else {
-                    $mainType = 'literal';
+                    $mainType = 'unknown';
                 }
 
                 $isTermDataType = $generative->isTermDataType($term, $typeTemplate ?? $mainType);
@@ -564,7 +572,7 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                         $original = $proposition['original']['@value'] ?? '';
 
                         // TODO Unlike contribution, a generative metadata for another property can be allowed when the template is open? No, too much complex and useless.
-                        // Anyway, "unknown" is not possible, since "literal" is set by default.
+                        // Anyway, "unknown" is processed like the case "literal" above.
                         // TODO Copy and simplify literal here?
 
                         // Nothing to do if there is no original.
@@ -774,7 +782,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                 if ($typeTemplate) {
                     $mainType = $mainTypeTemplate;
                 } elseif (empty($proposition['original'])) {
-                    $mainType = 'unknown';
+                    // See above why default type is literal.
+                    // $mainType = 'unknown';
+                    $mainType = 'literal';
                 } elseif (array_key_exists('@uri', $proposition['original'])) {
                     $mainType = 'uri';
                 } elseif (array_key_exists('@resource', $proposition['original'])) {
@@ -786,6 +796,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
                 }
 
                 switch ($mainType) {
+                    // Like proposalNormalizeForValidation() and unlike Contribution,
+                    // the type "unknown" is like literal.
+                    case 'unknown':
                     case 'literal':
                         $data[$term][] = [
                             'type' => $typeTemplate ?? $mainType,

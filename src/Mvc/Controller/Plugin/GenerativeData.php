@@ -18,6 +18,9 @@ class GenerativeData extends AbstractPlugin
      *
      * Unlike module Contribute, all resource templates are allowed.
      * Unlike module Contribute, a resource template is required.
+     * Unlike module Contribute, when not data type is set in the template, the
+     * standard data types are allowed (literal, uri, resource, resource:item, resource:media, resource:itemset).
+     * So in fact, only literal and uri, because the AI doesn't know resources.
      *
      * Furthermore, all properties are fillable by default, according to the
      * resource template settings.

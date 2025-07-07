@@ -134,14 +134,15 @@ $labelInfo = $setting('property_label_information');
                         <?php foreach ($propositions as $key => $proposition):
                             // TODO Manage all types.
                             if (empty($proposition['original'])) {
-                                // TODO See proposalNormalizeForValidation(), that use literal and not unknown, unlike Contribution.
-                                $type = 'literal';
+                                $type = 'unknown';
                             } elseif (array_key_exists('@uri', $proposition['original'])) {
                                 $type = 'uri';
                             } elseif (array_key_exists('@resource', $proposition['original'])) {
                                 $type = 'resource';
-                            } else {
+                            } elseif (array_key_exists('@value', $proposition['original'])) {
                                 $type = 'literal';
+                            } else {
+                                $type = 'unknown';
                             }
                             switch ($type):
                             case 'resource':
@@ -257,6 +258,7 @@ $labelInfo = $setting('property_label_information');
                                 break;
 
                             case 'literal':
+                            case 'unknown':
                             default:
                                 $original = $proposition['original']['@value'] ?? null;
                                 $proposed = $proposition['proposed']['@value'];
