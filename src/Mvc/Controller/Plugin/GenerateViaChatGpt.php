@@ -141,7 +141,7 @@ class GenerateViaChatGpt extends AbstractPlugin
                 && $media->hasOriginal()
                 && strtok((string) $media->mediaType(), '/') === 'image'
             ) {
-                $urls[$media->id()] = $media->originalUrl();
+                $urls[$media->id()] = $this->urlOrBase64($media);
             }
         }
 
@@ -297,5 +297,38 @@ class GenerateViaChatGpt extends AbstractPlugin
         return $replace
             ? strtr($prompt, $replace)
             : $prompt;
+    }
+
+    protected function urlOrBase64(MediaRepresentation $media): string
+    {
+        $url = $media->originalUrl();
+        if (!$this->isUrlLocal($url)) {
+            return $url;
+        }
+        $content = (string) @file_get_contents($url);
+        return sprintf('data:%1$s;base64,%2$s', $media->mediaType(), base64_encode($content));
+    }
+
+    protected function isUrlLocal(string $url): bool
+    {
+        $parsedUrl = parse_url($url);
+
+        // Manage local files.
+        if (!isset($parsedUrl['host'])) {
+            return true;
+        }
+
+        $host = $parsedUrl['host'];
+        $ip = gethostbyname($host);
+
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return true;
+        }
+
+        return $ip === '::1'
+            || $ip === '127.0.0.1'
+            || preg_match('/^10\./', $ip)
+            || preg_match('/^192\.168\./', $ip)
+            || preg_match('/^172\.(1[6-9]|2[0-9]|3[0-1])\./', $ip);
     }
 }
