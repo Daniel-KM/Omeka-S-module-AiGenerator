@@ -14,6 +14,7 @@ use Omeka\Settings\Settings;
 use OpenAI;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
+use Omeka\Api\Representation\ResourceTemplateRepresentation;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 
 class GenerateViaOpenAi extends AbstractPlugin
@@ -278,18 +279,7 @@ class GenerateViaOpenAi extends AbstractPlugin
 
         // Fill the generated resource.
         $resourceTemplate = $resource->resourceTemplate();
-        $proposal = [
-            'template' =>  $resourceTemplate ? $resourceTemplate->id() : null,
-        ];
-
-        // For now, just fill one property, since the response isn't structured.
-        $proposal['curation:data'] = [
-            [
-                'proposed' => [
-                    '@value' => $content,
-                ],
-            ],
-        ];
+        $proposal = $this->fillProposal($content, $resourceTemplate);
 
         // Validate the generated resource.
         /** @see \Contribute\Controller\Site\ContributionController::submitAction() */
@@ -408,6 +398,60 @@ class GenerateViaOpenAi extends AbstractPlugin
         return $replace
             ? strtr($prompt, $replace)
             : $prompt;
+    }
+
+    protected function fillProposal(array|string $content, ?ResourceTemplateRepresentation $resourceTemplate): array
+    {
+        $proposal = [
+            'template' =>  $resourceTemplate ? $resourceTemplate->id() : null,
+        ];
+
+        // Some models don't support structured output, so manage all cases.
+
+        if (!is_array($content)) {
+            // Use the default format, that is wrapped with markdown ```json```.
+            $matches = [];
+            if (!preg_match('~```json\s*(?<json>.*)\s*```~s', $content, $matches)) {
+                $proposal['curation:data'] = [
+                    [
+                        'proposed' => [
+                            '@value' => $content,
+                        ],
+                    ],
+                ];
+                return $proposal;
+            }
+
+            $content = json_decode($matches['json'], true);
+            if (!is_array($content)) {
+                $proposal['curation:data'] = [
+                    [
+                        'proposed' => [
+                            '@value' => $matches['json'],
+                        ],
+                    ],
+                ];
+                return $proposal;
+            }
+        }
+
+        foreach ($content as $key => $value) {
+            // Manage multiple values for the same property, if supported.
+            if (!is_array($value)) {
+                $value = [$value];
+            }
+            foreach ($value as $val) {
+                $proposal[$key] = [
+                    [
+                        'proposed' => [
+                            '@value' => $val,
+                        ],
+                    ],
+                ];
+            }
+        }
+
+        return $proposal;
     }
 
     protected function urlOrBase64(MediaRepresentation $media, string $derivative): string

@@ -156,8 +156,8 @@ return [
             'generate_derivative' => 'medium',
             'generate_prompt_system' => <<<'TXT'
                 You are a system to analyze images. The images are stored in a database and your analyse is used to search and find these images.
-                Therefore, describe the main content of the image which might be relevant for search/find operations.
-                Output the response as a structured json. Return only the requested properties.
+                Therefore, describe the main content of the image which might be relevant for indexing operations.
+                Output the response as a structured json. Each property key may be an empty value, a single value, or an array of values. Return only the requested properties. When a value is unknown, skip it.
                 Example:
                 {properties_sample_json}
                 TXT, // @translate
