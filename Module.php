@@ -149,7 +149,6 @@ class Module extends AbstractModule
                     'add',
                     'delete',
                     'delete-confirm',
-                    'submit',
                 ]
             )
             ->allow(
@@ -655,7 +654,7 @@ class Module extends AbstractModule
     public function appendTab(Event $event): void
     {
         $sectionNav = $event->getParam('section_nav');
-        $sectionNav['ai-records'] = 'AI records'; // @translate
+        $sectionNav['ai-records'] = $this->getServiceLocator()->get('MvcTranslator')->translate('AI records'); // @translate
         $event->setParam('section_nav', $sectionNav);
     }
 
@@ -675,7 +674,7 @@ class Module extends AbstractModule
         $aiRecords = $api
             ->search('ai_records', [
                 'resource_id' => $resource->id(),
-                'sort_by' => 'modified',
+                'sort_by' => 'created',
                 'sort_order' => 'DESC',
             ])
             ->getContent();

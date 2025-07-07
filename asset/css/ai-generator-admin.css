@@ -1,11 +1,12 @@
 @media all {
-    header nav .ai-record:before {
-        content: "\f544"; /* fas fa-robot */
-    }
-    .ai-records .no-resources:before,
-    #ai-record .no-ai-records:before,
-    .ai-record .no-resources:before {
-        content: "\f544"; /* fas fa-robot */
+    header nav .ai-record::before,
+    .ai-record .subhead::before,
+    .ai-records .subhead::before,
+    .ai-record .no-resources::before,
+    .ai-records .no-resources::before,
+    #ai-record .no-ai-records::before,
+    .ai-record .no-resources::before {
+	    content: "\f544"; /* fas fa-robot */
     }
     #ai-records .property {
         display: inherit;
@@ -55,7 +56,8 @@
     .ai-records .resource-details .ai-record-internal-id {
         font-size: 0.7em;
     }
-    .ai-record table .values dd {
+    .show .ai-record table .values,
+    .show .ai-record table .values dd {
         width: 100%;
     }
 
@@ -294,6 +296,7 @@
     }
     .ai-records.browse .sidebar .meta-group.ai-record {
         justify-content: normal;
+        flex-direction: column;
     }
     .ai-records.browse .sidebar .meta-group.ai-record .ai-record {
         padding-left: 12px;

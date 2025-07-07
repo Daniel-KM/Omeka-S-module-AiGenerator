@@ -67,7 +67,6 @@ class SettingsFieldset extends Fieldset
                 ],
                 'attributes' => [
                     'id' => 'aigenerator_models',
-                    'required' => false,
                     'placeholder' => <<<'TXT'
                         gpt-4.1-nano = GPT 4.1 nano ($0.50 / 1M tokens)
                         gpt-4.1-mini = GPT 4.1 mini ($2 / 1M tokens)
@@ -89,7 +88,6 @@ class SettingsFieldset extends Fieldset
                 ],
                 'attributes' => [
                     'id' => 'aigenerator_model',
-                    'required' => false,
                     'placeholder' => 'gpt-4.1-nano',
                 ],
             ])
@@ -134,7 +132,6 @@ class SettingsFieldset extends Fieldset
                 ],
                 'attributes' => [
                     'id' => 'aigenerator_prompt_system',
-                    'required' => false,
                 ],
             ])
             ->add([
@@ -147,7 +144,6 @@ class SettingsFieldset extends Fieldset
                 ],
                 'attributes' => [
                     'id' => 'aigenerator_prompt_user',
-                    'required' => false,
                 ],
             ])
 
@@ -162,6 +158,7 @@ class SettingsFieldset extends Fieldset
                 'attributes' => [
                     'id' => 'aigenerator_item_sets_auto',
                     'class' => 'chosen-select',
+                    'required' => false,
                     'multiple' => true,
                     'data-placeholder' => 'Select item sets…', // @translate
                 ],

@@ -70,7 +70,7 @@ return [
                 // 'privilege' => 'browse',
                 'pages' => [
                     [
-                        'route' => 'admin/ai-records/default',
+                        'route' => 'admin/ai-record/default',
                         'controller' => Controller\Admin\IndexController::class,
                         'visible' => false,
                     ],
@@ -147,15 +147,15 @@ return [
             'aigenerator_roles' => [],
             'aigenerator_validate' => false,
             'aigenerator_models' => [
-                'gpt-4.1-nano' => 'GPT 4.1 nano ($0.50 / 1M tokens)',
-                'gpt-4.1-mini' => 'GPT 4.1 mini ($2 / 1M tokens)',
-                'gpt-4.1' => 'GPT 4.1 ($10 / 1M tokens)',
-                'gpt-4o-mini' => 'GPT 4o mini ($0.75 / 1M tokens, tokens x 10)',
-                'gpt-4o' => 'GPT 4o ($12.5 / 1M tokens)',
+                'gpt-4.1-nano' => 'GPT 4.1 nano ($0.50 / 1M tokens)', // @translate
+                'gpt-4.1-mini' => 'GPT 4.1 mini ($2 / 1M tokens)', // @translate
+                'gpt-4.1' => 'GPT 4.1 ($10 / 1M tokens)', // @translate
+                'gpt-4o-mini' => 'GPT 4o mini ($0.75 / 1M tokens, tokens x 10)', // @translate
+                'gpt-4o' => 'GPT 4o ($12.5 / 1M tokens)', // @translate
                 // TODO How to support images with gpt-3.5?
-                // 'gpt-3.5-turbo' => 'GPT 3.5 turbo ($2 / 1M tokens, tokens x 10)',
+                // 'gpt-3.5-turbo' => 'GPT 3.5 turbo ($2 / 1M tokens, tokens x 10)', // @translate
                 // Require rights, so more purchases on OpenAI.
-                'gpt-4.5-preview' => 'GPT 4.5 preview ($225 / 1M tokens)',
+                'gpt-4.5-preview' => 'GPT 4.5 preview ($225 / 1M tokens)', // @translate
             ],
             'aigenerator_model' => 'gpt-4.1',
             'aigenerator_max_tokens' => 10000,

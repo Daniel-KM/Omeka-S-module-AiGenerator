@@ -220,18 +220,18 @@ $labelInfo = $setting('property_label_information');
 
                                     <span class="single actions">
                                         <?php if ($isValidated): ?>
-                                            <span class="no-action o-icon-validated-value" aria-label="<?= $escapeAttr($translate('Validated')) ?>"></span>
+                                            <span class="no-action o-icon-validated-value" title="<?= $txt = $escapeAttr($translate('Validated')) ?>" aria-label="<?= $txt ?>"></span>
                                         <?php elseif ($process === 'keep'): ?>
-                                            <span class="no-action o-icon-not-validable-value" aria-label="<?= $escapeAttr($translate('Not validable')) ?>"></span>
+                                            <span class="no-action o-icon-not-validable-value" title="<?= $txt = $escapeAttr($translate('Not validable')) ?>" aria-label="<?= $txt ?>"></span>
                                         <?php elseif (!$editRight): ?>
-                                            <span class="no-action o-icon-validate-value no-right" aria-label="<?= $escapeAttr($translate('No right to write')) ?>"></span>
+                                            <span class="no-action o-icon-validate-value no-right" title="<?= $txt = $escapeAttr($translate('No right to write')) ?>" aria-label="<?= $txt ?>"></span>
                                         <?php else: ?>
                                             <a href="#"
                                                 class="validate-value o-icon-validate-value"
                                                 data-validate-value-url="<?= $escapeAttr($aiRecord->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                                                 data-status="validate-value"
-                                                aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
-                                                title="<?= $txt ?>"></a>
+                                                title="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
+                                                aria-label="<?= $txt ?>"></a>
                                         <?php endif; ?>
                                     </span>
 
@@ -274,18 +274,18 @@ $labelInfo = $setting('property_label_information');
 
                                     <span class="single actions">
                                     <?php if ($isValidated): ?>
-                                        <span class="no-action o-icon-validated-value" aria-label="<?= $escapeAttr($translate('Validated')) ?>"></span>
+                                        <span class="no-action o-icon-validated-value" title="<?= $txt = $escapeAttr($translate('Validated')) ?>" aria-label="<?= $txt ?>"></span>
                                     <?php elseif ($process === 'keep'): ?>
-                                        <span class="no-action o-icon-not-validable-value" aria-label="<?= $escapeAttr($translate('Not validable')) ?>"></span>
+                                        <span class="no-action o-icon-not-validable-value" title="<?= $txt = $escapeAttr($translate('Not validable')) ?>" aria-label="<?= $txt ?>"></span>
                                     <?php elseif (!$editRight): ?>
-                                        <span class="no-action o-icon-validate-value no-right" aria-label="<?= $escapeAttr($translate('No right to write')) ?>"></span>
+                                        <span class="no-action o-icon-validate-value no-right" title="<?= $txt = $escapeAttr($translate('No right to write')) ?>" aria-label="<?= $txt ?>"></span>
                                     <?php else: ?>
                                         <a href="#"
                                             class="validate-value o-icon-validate-value"
                                             data-validate-value-url="<?= $escapeAttr($aiRecord->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                                             data-status="validate-value"
-                                            aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
-                                            title="<?= $txt ?>"></a>
+                                            title="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
+                                            aria-label="<?= $txt ?>"></a>
                                     <?php endif; ?>
                                     </span>
                                 </dd>
@@ -321,18 +321,18 @@ $labelInfo = $setting('property_label_information');
 
                                     <span class="single actions">
                                     <?php if ($isValidated): ?>
-                                        <span class="no-action o-icon-validated-value" aria-label="<?= $escapeAttr($translate('Validated')) ?>"></span>
+                                        <span class="no-action o-icon-validated-value" title="<?= $txt = $escapeAttr($translate('Validated')) ?>" aria-label="<?= $txt ?>"></span>
                                     <?php elseif ($process === 'keep'): ?>
-                                        <span class="no-action o-icon-not-validable-value" aria-label="<?= $escapeAttr($translate('Not validable')) ?>"></span>
+                                        <span class="no-action o-icon-not-validable-value" title="<?= $txt = $escapeAttr($translate('Not validable')) ?>" aria-label="<?= $txt ?>"></span>
                                     <?php elseif (!$editRight): ?>
-                                        <span class="no-action o-icon-validate-value no-right" aria-label="<?= $escapeAttr($translate('No right to write')) ?>"></span>
+                                        <span class="no-action o-icon-validate-value no-right" title="<?= $txt = $escapeAttr($translate('No right to write')) ?>" aria-label="<?= $txt ?>"></span>
                                     <?php else: ?>
                                         <a href="#"
                                             class="validate-value o-icon-validate-value"
                                             data-validate-value-url="<?= $escapeAttr($aiRecord->adminUrl('validate-value') . "?term=$term&key=$key") ?>"
                                             data-status="validate-value"
-                                            aria-label="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
-                                            title="<?= $txt ?>"></a>
+                                            title="<?= $txt = $escapeAttr(sprintf($translate('Validate this value (%s)'), $translate($process))) ?>"
+                                            aria-label="<?= $txt ?>"></a>
                                     <?php endif; ?>
 
                                     </span>

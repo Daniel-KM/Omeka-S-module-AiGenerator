@@ -217,7 +217,7 @@ class GenerateViaOpenAi extends AbstractPlugin
 
         $models = $this->settings->get('aigenerator_models') ?: [];
         if (!$models) {
-            $this->useMessenger || $this->messenger->addWarning(new PsrMessage(
+            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
                 'The list of models is empty.' // @translate
             ));
             $this->logger->warn(
