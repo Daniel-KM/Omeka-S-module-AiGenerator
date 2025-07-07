@@ -16,7 +16,7 @@ use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 
-class GenerateViaChatGpt extends AbstractPlugin
+class GenerateViaOpenAi extends AbstractPlugin
 {
     /**
      * @var \Omeka\Api\Manager
@@ -79,12 +79,15 @@ class GenerateViaChatGpt extends AbstractPlugin
     }
 
     /**
-     * Generate resource metadata via ChatGPT.
+     * Generate resource metadata via OpenAI.
      *
      * @see https://packagist.org/packages/chatgptcom/chatgpt-php
      *
      * @var array $options
-     * - prompt (string): specific prompt
+     * - prompt_system (string|false): specific prompt for the system (session).
+     *   The configured prompt in settings is used by default, unless false is
+     *   passed.
+     * - prompt_user (string): specific prompt.
      */
     public function __invoke(ItemRepresentation|MediaRepresentation $resource, array $options = []): ?GeneratedResourceRepresentation
     {
@@ -96,23 +99,26 @@ class GenerateViaChatGpt extends AbstractPlugin
         }
 
         if (!$this->apiKey) {
-            $this->logger->err('ChatGPT api key is undefined.'); // @translate
+            $this->logger->err('OpenAI api key is undefined.'); // @translate
             return null;
         }
 
-        // TODO Check if the files and urls are accessible from internet.
+        // The prompt for session or for user may be skipped, not the two.
 
-        if (empty($options['prompt'])) {
-            $prompt = trim((string) $this->settings->get('generate_chatgpt_prompt'));
-            if (!$prompt) {
-                $configModule = include dirname(__DIR__, 4) . '/config/module.config.php';
-                $prompt = $configModule['generate']['settings']['generate_chatgpt_prompt'];
-                $this->messenger->addWarning(new PsrMessage(
-                    'The prompt is not defined, so the record cannot be generated.' // @translate
-                ));
-                $this->logger->err('[Generate] Prompt is not defined.'); // @translate
-                return null;
-            }
+        if (empty($options['prompt_system']) && $options['prompt_system'] !== false) {
+            $options['prompt_system'] = trim((string) $this->settings->get('generate_prompt_system'));
+        }
+
+        if (empty($options['prompt_user']) && $options['prompt_user'] !== false) {
+            $options['prompt_user'] = trim((string) $this->settings->get('generate_prompt_user'));
+        }
+
+        if (empty($options['prompt_user']) && empty($options['prompt_user'])) {
+            $this->messenger->addWarning(new PsrMessage(
+                'The prompt is not defined, so the record cannot be generated.' // @translate
+            ));
+            $this->logger->warn('[Generate] Prompt is not defined.'); // @translate
+            return null;
         }
 
         $isMedia = false;
@@ -166,25 +172,49 @@ class GenerateViaChatGpt extends AbstractPlugin
             return null;
         }
 
-        // Currently, ChatGPT and the library OpenAI does not support sending
-        // prompt and image separately.
-        // So append urls to prompt.
-        $prompt = $this->preparePrompt($resource, $options['prompt'], $urls);
-        if (!$prompt) {
-            return null;
+        $messages = [];
+
+        $promptSystem = $this->preparePrompt($resource, $options['prompt_system'], $urls);
+        if ($promptSystem) {
+            $messages[] = [
+                'role' => 'system',
+                'content' => $promptSystem,
+            ];
         }
 
-        // Send the request to ChatGPT.
+        $messageUser = [
+            'role' => 'user',
+            'content' => [],
+        ];
+
+        $promptUser = $this->preparePrompt($resource, $options['prompt_user'], $urls);
+        if ($promptUser) {
+            $messageUser['content'][] = [
+                'type' => 'text',
+                'text' => $promptUser,
+            ];
+        }
+
+        foreach ($urls as $url) {
+            $messageUser['content'][] = [
+                'type' => 'image_url',
+                'image_url' => [
+                    'url' => $url,
+                ],
+            ];
+        }
+
+        $messages[] = $messageUser;
+
+        // Send the request to OpenAI.
         $client = OpenAI::client($this->apiKey);
 
         try {
             /** @var \OpenAI\Responses\Chat\CreateResponse $response */
             $response = $client->chat()->create([
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                    ['role' => 'system', 'content' => 'You are a helpful assistant.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
+                'model' => 'gpt-4.1-mini',
+                'messages' => $messages,
+                'max_tokens' => 300,
             ]);
         } catch (\Exception $e) {
             $this->messenger->addError(new PsrMessage(
@@ -250,49 +280,85 @@ class GenerateViaChatGpt extends AbstractPlugin
         $replace = [];
 
         $prompt = (string) $prompt;
-        if (!str_contains($prompt, '{url}') && !str_contains($prompt, '{urls}')) {
-            $prompt .= "\n{urls}";
-        }
 
-        if (mb_strpos($prompt, '{url}') !== false) {
+        if (str_contains($prompt, '{url}')) {
             $replace['{url}'] = reset($urls);
         }
 
-        if (mb_strpos($prompt, '{urls}') !== false) {
+        if (str_contains($prompt, '{urls}')) {
             $replace['{urls}'] = implode(', ', $urls);
         }
 
-        if (mb_strpos($prompt, '{properties}') !== false) {
-            /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
-            $template = $resource->resourceTemplate();
-            if (!$template) {
-                $this->messenger->addWarning(new PsrMessage(
-                    'The prompt contains the placeholder "{properties}", but there is no template to replace it.' // @translate
-                ));
-                return null;
+        $missingTemplate = function (string $placeholder): null {
+            $this->messenger->addWarning(new PsrMessage(
+                'The prompt contains the placeholder "{placeholder}", but there is no template to replace it.', // @translate
+                ['placeholder' => $placeholder]
+            ));
+            $this->logger->warn(
+                '[Generate] The prompt contains the placeholder "{placeholder}", but there is no template to replace it.', // @translate
+                ['placeholder' => $placeholder]
+            );
+            return null;
+        };
+
+        /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
+        $template = $resource->resourceTemplate();
+
+        if (str_contains($prompt, '{properties}')) {
+            if ($template) {
+                $list = [];
+                foreach ($template->resourceTemplateProperties() as $rtp) {
+                    $list[] = $rtp->property()->term();
+                }
+                $replace['{properties}'] = implode(', ', $list);
+            } else {
+                $missingTemplate('{properties}');
+                $replace['{properties}'] = '';
             }
-            $list = [];
-            foreach ($template->resourceTemplateProperties() as $rtp) {
-                $list[] = $rtp->property()->term();
-            }
-            $replace['{properties}'] = implode(', ', $list);
         }
 
-        if (mb_strpos($prompt, '{properties_names}') !== false) {
-            /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $template */
-            $template = $resource->resourceTemplate();
-            if (!$template) {
-                $this->messenger->addWarning(new PsrMessage(
-                    'The prompt contains the placeholder "{properties_names}", but there is no template to replace it.' // @translate
-                ));
-                return null;
+        if (str_contains($prompt, '{properties_names}')) {
+            if ($template) {
+                $list = [];
+                foreach ($template->resourceTemplateProperties() as $rtp) {
+                    $property = $rtp->property();
+                    $list[] = $property->vocabulary()->label() . ' : ' . $property->label();
+                }
+                $replace['{properties_names}'] = implode(', ', $list);
+            } else {
+                $missingTemplate('{properties_names}');
+                $replace['{properties_names}'] = '';
             }
-            $list = [];
-            foreach ($template->resourceTemplateProperties() as $rtp) {
-                $property = $rtp->property();
-                $list[] = $property->vocabulary()->label() . ' : ' . $property->label();
+        }
+
+        if (str_contains($prompt, '{properties_sample}')) {
+            if ($template) {
+                $list = [];
+                foreach ($template->resourceTemplateProperties() as $rtp) {
+                    $property = $rtp->property();
+                    $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+                }
+                $replace['{properties_sample}'] =  json_encode($list, 320);
+            } else {
+                $missingTemplate('{properties_sample}');
+                $replace['{properties_sample}'] = '';
             }
-            $replace['{properties_names}'] = implode(', ', $list);
+        }
+
+        if (str_contains($prompt, '{properties_sample_json}')) {
+            if ($template) {
+                $list = [];
+                foreach ($template->resourceTemplateProperties() as $rtp) {
+                    $property = $rtp->property();
+                    $list[$property->term()] = sprintf('Example %s', $property->label()); // @translate
+                }
+                $replace['{properties_sample_json}'] = '```json' . "\n"
+                    . json_encode($list, 320)
+                    . '```';
+            } else {
+                $missingTemplate('{properties_sample_json}');
+                $replace['{properties_sample_json}'] = '';
+            }
         }
 
         return $replace

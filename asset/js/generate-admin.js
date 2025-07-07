@@ -106,9 +106,9 @@
         const handleChangeGenerateMetadata = function() {
             const input = $('.resource-form, #batch-edit-item, batch-edit-tmedia').find('input[type=checkbox]#generate-metadata');
             if (input.prop("checked")) {
-                $('textarea#generate-prompt').prop('disabled', false).closest('.field').show();
+                $('textarea.generate-settings').prop('disabled', false).closest('.field').show();
             } else {
-                $('textarea#generate-prompt').prop('disabled', true).closest('.field').hide();
+                $('textarea.generate-settings').prop('disabled', true).closest('.field').hide();
             }
         };
 

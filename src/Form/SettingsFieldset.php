@@ -28,7 +28,7 @@ class SettingsFieldset extends Fieldset
                 'name' => 'generate_roles',
                 'options' => [
                     'element_group' => 'generate',
-                    'label' => 'Roles allowed to generate', // @translate
+                    'label' => 'Roles allowed to generate via AI', // @translate
                     'empty_option' => '',
                 ],
                 'attributes' => [
@@ -41,13 +41,26 @@ class SettingsFieldset extends Fieldset
             ])
             ->add([
                 'type' => Element\Textarea::class,
-                'name' => 'generate_chatgpt_prompt',
+                'name' => 'generate_prompt_system',
                 'options' => [
                     'element_group' => 'generate',
-                    'label' => 'Prompt to generate resource metadata via ChatGPT', // @translate
+                    'label' => 'Prompt to set context of a session for resource analysis', // @translate
+                    'info' => 'Write the prompt in the language the record should be.', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate_chatgpt_prompt',
+                    'id' => 'generate_prompt_system',
+                    'required' => false,
+                ],
+            ])
+            ->add([
+                'type' => Element\Textarea::class,
+                'name' => 'generate_prompt_user',
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Prompt to generate resource metadata', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate_prompt_user',
                     'required' => false,
                 ],
             ])

@@ -39,14 +39,32 @@ class BatchEditFieldset extends Fieldset
             ])
             ->add([
                 'type' => Element\Textarea::class,
-                'name' => 'generate_chatgpt_prompt',
+                'name' => 'generate_prompt_system',
                 'options' => [
                     'element_group' => 'generate',
-                    'label' => 'Prompt', // @translate
+                    'label' => 'Prompt (session)', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'generate-prompt',
-                    'rows' => 10,
+                    'id' => 'generate-prompt-system',
+                    'class' => 'generate-settings',
+                    'rows' => 5,
+                    // Enabled via js when checkbox is on.
+                    'disabled' => 'disabled',
+                    // This attribute is required to make "batch edit all" working.
+                    'data-collection-action' => 'replace',
+                ],
+            ])
+            ->add([
+                'type' => Element\Textarea::class,
+                'name' => 'generate_prompt_user',
+                'options' => [
+                    'element_group' => 'generate',
+                    'label' => 'Prompt (user)', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'generate-prompt-user',
+                    'class' => 'generate-settings',
+                    'rows' => 5,
                     // Enabled via js when checkbox is on.
                     'disabled' => 'disabled',
                     // This attribute is required to make "batch edit all" working.

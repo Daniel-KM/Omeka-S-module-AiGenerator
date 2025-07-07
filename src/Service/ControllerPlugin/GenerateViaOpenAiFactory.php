@@ -2,18 +2,18 @@
 
 namespace Generate\Service\ControllerPlugin;
 
-use Generate\Mvc\Controller\Plugin\GenerateViaChatGpt;
+use Generate\Mvc\Controller\Plugin\GenerateViaOpenAi;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
-class GenerateViaChatGptFactory implements FactoryInterface
+class GenerateViaOpenAiFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $plugins = $services->get('ControllerPluginManager');
         $settings = $services->get('Omeka\Settings');
 
-        return new GenerateViaChatGpt(
+        return new GenerateViaOpenAi(
             $services->get('Omeka\ApiManager'),
             $services->get('Omeka\AuthenticationService'),
             $services->get('Common\EasyMeta'),

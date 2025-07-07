@@ -92,7 +92,8 @@ class Module extends AbstractModule
     {
         $translatables = [
             'settings' => [
-                'generate_chatgpt_prompt',
+                'generate_prompt_system',
+                'generate_prompt_user',
             ],
         ];
         return isset($translatables[$settingsType])
@@ -356,13 +357,19 @@ class Module extends AbstractModule
 
         $data['generate'] = [
             'generate_metadata' => true,
-            'generate_chatgpt_prompt' => $post['generate']['generate_chatgpt_prompt'] ?? null,
+            'generate_prompt_system' => $post['generate']['generate_prompt_system'] ?? null,
+            'generate_prompt_user' => $post['generate']['generate_prompt_user'] ?? null,
         ];
         $event->setParam('data', $data);
 
         $this->getServiceLocator()->get('Omeka\Logger')->info(
-            "Generated metadata with options:\n{prompt}", // @translate
-            ['prompt' => $data['generate']['generate_chatgpt_prompt']]
+            "Generated metadata with options:\n{json}", // @translate
+            [
+                'json' => [
+                    'prompt_system' => $data['generate']['generate_prompt_system'],
+                    'prompt_user' => $data['generate']['generate_prompt_user'],
+                ],
+            ]
         );
     }
 
@@ -394,20 +401,24 @@ class Module extends AbstractModule
         }
 
         $plugins = $services->get('ControllerPluginManager');
-        $generateViaChatGpt = $plugins->get('generateViaChatGpt');
+        $generateViaOpenAi = $plugins->get('generateViaOpenAi');
 
         // This is an api-post event, so id is ready and checks are done.
         $resource = $event->getParam('response')->getContent();
         $adapter = $services->get('Omeka\ApiAdapterManager')->get($resource->getResourceName());
         $representation = $adapter->getRepresentation($resource);
 
-        // Check for a specific prompt.
-        $prompt = $resourceData['generate_chatgpt_prompt']
-            ?? ['generate']['generate_chatgpt_prompt']
+        // Check for specific prompts.
+        $promptSystem = $resourceData['generate_prompt_system']
+            ?? ['generate']['generate_prompt_system']
+            ?? null;
+        $promptUser = $resourceData['generate_prompt_user']
+            ?? ['generate']['generate_prompt_user']
             ?? null;
 
-        $generateViaChatGpt($representation, [
-            'prompt' => $prompt,
+        $generateViaOpenAi($representation, [
+            'prompt_system' => $promptSystem,
+            'prompt_user' => $promptUser,
         ]);
     }
 
@@ -491,8 +502,10 @@ class Module extends AbstractModule
 
         $apiKey = $settings->get('generate_api_key_openai');
 
-        $prompt = trim((string) $settings->get('generate_chatgpt_prompt'))
-            ?: $this->getModuleConfig('settings')['generate_chatgpt_prompt'];
+        $promptSystem = trim((string) $settings->get('generate_prompt_system'))
+            ?: $this->getModuleConfig('settings')['generate_prompt_system'];
+        $promptUser = trim((string) $settings->get('generate_prompt_user'))
+            ?: $this->getModuleConfig('settings')['generate_prompt_user'];
 
         // TODO Use BatchEditFieldset.
         $elementGenerate = new \Laminas\Form\Element\Checkbox('generate_metadata');
@@ -511,12 +524,25 @@ class Module extends AbstractModule
                 'disabled' => empty($apiKey) ? 'disabled' : false,
             ]);
 
-        $elementPrompt = new \Laminas\Form\Element\Textarea('generate_chatgpt_prompt');
-        $elementPrompt
-            ->setLabel('Prompt') // @translate
+        $elementPromptSystem = new \Laminas\Form\Element\Textarea('generate_prompt_system');
+        $elementPromptSystem
+            ->setLabel('Prompt to set context of a session for resource analysis') // @translate
             ->setAttributes([
-                'id' => 'generate-prompt',
-                'value' => $prompt,
+                'id' => 'generate-prompt-system',
+                'value' => $promptSystem,
+                'class' => 'generate-settings',
+                'rows' => 10,
+                // Enabled via js when checkbox is on.
+                'disabled' => 'disabled',
+            ]);
+
+        $elementPromptUser = new \Laminas\Form\Element\Textarea('generate_prompt_user');
+        $elementPromptUser
+            ->setLabel('Prompt to generate resource metadata') // @translate
+            ->setAttributes([
+                'id' => 'generate-prompt-user',
+                'value' => $promptUser,
+                'class' => 'generate-settings',
                 'rows' => 10,
                 // Enabled via js when checkbox is on.
                 'disabled' => 'disabled',
@@ -524,7 +550,8 @@ class Module extends AbstractModule
 
         $view = $event->getTarget();
         echo $view->formRow($elementGenerate);
-        echo $view->formRow($elementPrompt);
+        echo $view->formRow($elementPromptSystem);
+        echo $view->formRow($elementPromptUser);
     }
 
     public function addBatchUpdateFormElements(Event $event): void
@@ -551,17 +578,17 @@ class Module extends AbstractModule
 
         $apiKey = $settings->get('generate_api_key_openai');
 
-        $prompt = trim((string) $settings->get('generate_chatgpt_prompt'))
-            ?: $this->getModuleConfig('settings')['generate_chatgpt_prompt'];
+        $promptSystem = trim((string) $settings->get('generate_prompt_system'))
+            ?: $this->getModuleConfig('settings')['generate_prompt_system'];
+
+        $promptUser = trim((string) $settings->get('generate_prompt_user'))
+            ?: $this->getModuleConfig('settings')['generate_prompt_user'];
 
         /** @var \Omeka\Form\ResourceBatchUpdateForm $form */
         $form = $event->getTarget();
         $services = $this->getServiceLocator();
         $formElementManager = $services->get('FormElementManager');
         // $resourceType = $form->getOption('resource_type');
-
-        $prompt = trim((string) $settings->get('generate_chatgpt_prompt'))
-            ?: $this->getModuleConfig('settings')['generate_chatgpt_prompt'];
 
         /** @var \Generate\Form\BatchEditFieldset $fieldset */
         $fieldset = $formElementManager->get(BatchEditFieldset::class);
@@ -574,8 +601,11 @@ class Module extends AbstractModule
             )
             ->setAttribute('disabled', empty($apiKey) ? 'disabled' : false);
         $fieldset
-            ->get('generate_chatgpt_prompt')
-            ->setValue($prompt);
+            ->get('generate_prompt_system')
+            ->setValue($promptSystem);
+        $fieldset
+            ->get('generate_prompt_user')
+            ->setValue($promptUser);
         $form->add($fieldset);
 
         $groups = $form->getOption('element_groups');

@@ -52,8 +52,9 @@ return [
         'invokables' => [
             'generativeData' => Mvc\Controller\Plugin\GenerativeData::class,
         ],
+        // TODO Create a service for AiGenerator.
         'factories' => [
-            'generateViaChatGpt' => Service\ControllerPlugin\GenerateViaChatGptFactory::class,
+            'generateViaOpenAi' => Service\ControllerPlugin\GenerateViaOpenAiFactory::class,
         ],
     ],
     'navigation' => [
@@ -139,7 +140,14 @@ return [
         ],
         'settings' => [
             'generate_roles' => [],
-            'generate_chatgpt_prompt' => 'Analyze the following image: {url}, then generate the following metadata as json: {properties}', // @translate
+            'generate_prompt_system' => <<<'TXT'
+                You are a system to analyze images. The images are stored in a database and your analyse is used to search and find these images.
+                Therefore, describe the main content of the image which might be relevant for search/find operations.
+                Output the response as a structured json. Return only the requested properties.
+                Example:
+                {properties_sample_json}
+                TXT, // @translate
+            'generate_prompt_user' => 'Analyze the image then generate metadata as json', // @translate
         ],
     ],
 ];
