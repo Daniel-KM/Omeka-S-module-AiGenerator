@@ -11,7 +11,6 @@ $api = $plugins->get('api');
 $setting = $plugins->get('setting');
 $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
-$hyperlink = $plugins->get('hyperlink');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 ?>
 
@@ -38,9 +37,20 @@ $editRight = $resource->userIsAllowed('update');
 $labelInfo = $setting('property_label_information');
 ?>
 
-<?php foreach ($generatedResources as $generatedResource): ?>
-<div class="generated-resource">
-<table class="tablesaw <?php if ($batchEditRight) echo 'batch-edit'; ?>" data-tablesaw-mode="stack">
+<?php foreach ($generatedResources as $generatedResource):
+    /**
+     * @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate
+     */
+    $proposal = $generatedResource->proposalNormalizeForValidation();
+    $values = $resource->values();
+    $resourceTemplate = $proposal['template'] ?? null;
+    // Clean data for the special keys.
+    unset($proposal['template'], $proposal['media']);
+
+    $isValidable = $generatedResource->isValidable();
+    ?>
+<div class="generated-resource" data-id="<?= $generatedResource->id() ?>" data-linked-id="<?= $generatedResource->resource()?->id() ?>">
+<table class="tablesaw<?= $batchEditRight ? ' batch-edit' : '' ?>" data-tablesaw-mode="stack" data-id="<?= $generatedResource->id() ?>">
     <thead>
         <tr>
             <th>
@@ -49,43 +59,54 @@ $labelInfo = $setting('property_label_information');
                 <span class="generated-resource-id">#<?= $generatedResource->id() ?></span>
                 */ ?>
 
+                <span class="generated-resource-id"><?= sprintf($translate('(#%s)'), $generatedResource->id()) ?></span>
                 <span class="generated-resource-date"><?= $this->i18n()->dateFormat($generatedResource->created(), 'medium', 'medium') ?></span>
 
+                <?php /* Unlike Contribution, there is no possible modification of a generated resource for now. ?>
+                <?php // TODO Don't check "modified" when the modification is just a change of the flag. ?>
                 <?php if ($generatedResource->created() != $generatedResource->modified()): // Don't use !==. ?>
                 <span class="generated-resource-date-modified"><?= $translate('(modified)') ?></span>
                 <?php endif; ?>
+                <?php */ ?>
 
                 <?php if ($editRight): ?>
                 <?php // TODO Check if all values are the same to change the default icon to "validated". ?>
+                <?php if ($isValidable): ?>
                 <span class="single actions"><a href="#"
                     class="validate o-icon-validate"
-                    data-validate-url="<?= $escape($generatedResource->adminUrl('validate')) ?>"
+                    data-validate-url="<?= $escapeAttr($generatedResource->adminUrl('validate')) ?>"
                     data-status="validate"
-                    aria-label="<?= $escape($translate('Validate all values')) ?>"
-                    title="<?= $escape($translate('Validate all values')) ?>"></a></span>
+                    title="<?= $txt = $escapeAttr($translate('Validate all values')) ?>"
+                    aria-label="<?= $txt ?>"></a></span>
+                <?php else: ?>
+                <span class="single actions"><span
+                    class="no-action o-icon-unvalidable"
+                    data-status="not-validable"
+                    title="<?= $txt = $escapeAttr($translate('Not validable or already validated')) ?>"
+                    aria-label="<?= $txt ?>"></span></span>
+                <?php endif; ?>
+                <?php if ($isValidable): ?>
                 <span class="single actions"><a href="#"
                     class="status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                    data-status-toggle-url="<?= $escape($generatedResource->adminUrl('toggle-status')) ?>"
+                    data-status-toggle-url="<?= $escapeAttr($generatedResource->adminUrl('toggle-status')) ?>"
                     data-status="<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
-                    aria-label="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"
-                    title="<?= $escape($translate('Toggle status reviewed/unreviewed')) ?>"></a></span>
+                    title="<?= $txt = $escapeAttr($translate('Toggle status reviewed/unreviewed')) ?>"
+                    aria-label="<?= $txt ?>"></a></span>
+                <?php else: ?>
+                <span class="single actions"><span
+                    class="no-action status-toggle o-icon-<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    data-status="<?= $generatedResource->isReviewed() ? 'reviewed' : 'unreviewed' ?>"
+                    title="<?= $txt = ($escapeAttr($generatedResource->isReviewed() ? $translate('Reviewed') : $translate('Unreviewed'))) ?>"
+                    aria-label="<?= $txt ?>"
+                    ></span></span>
                 <?php endif; ?>
-
+                <?php endif; ?>
             </th>
         </tr>
     </thead>
     <tbody>
         <tr class="generated-resource-value">
             <td>
-                <?php
-                $proposal = $generatedResource->proposalNormalizeForValidation();
-                $values = $resource->values();
-                /** @var \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate */
-                $resourceTemplate = $proposal['template'] ?? null;
-                // Clean data for the special keys.
-                unset($proposal['template'], $proposal['media']);
-
-                ?>
                 <dl>
                     <div class="property">
                         <dt><?= $escape($translate('Resource template')) ?></dt>

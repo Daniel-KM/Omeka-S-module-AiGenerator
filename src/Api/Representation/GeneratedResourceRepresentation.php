@@ -1033,7 +1033,9 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
 
         /** @var \Generate\View\Helper\GeneratedResourceFields $generatedResourceFields */
         $generatedResourceFields = $this->getViewHelper('generatedResourceFields');
+
         // No event triggered for now.
+
         $generatedResource = $this->resource();
         $this->values = $generatedResourceFields($generatedResource, $this);
         return $this->values;
@@ -1045,6 +1047,8 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
      * Options:
      * - viewName: Name of view script, or a view model. Default
      *   "site/resource-values-generated"
+     *
+     * @todo Use the same display in show-details and generated-resource-list.
      */
     public function displayValues(array $options = []): string
     {
@@ -1170,6 +1174,30 @@ class GeneratedResourceRepresentation extends AbstractEntityRepresentation
         return $generatedResource
             ? $generatedResource->siteUrl($siteSlug, $canonical, $action)
             : null;
+    }
+
+    /**
+     * Determine is the generated resource can be validated as resource.
+     *
+     * A generated resource can be validated if:
+     * - not already validated
+     * - all propositions are not validated or not marked as "keep".
+     *
+     * The check does not include user rights.
+     *
+     * @return bool
+     */
+    public function isValidable(): bool
+    {
+        $resourceValidable = false;
+        $proposal = $this->proposalNormalizeForValidation();
+        // Clean data for the special keys.
+        unset($proposal['template'], $proposal['media']);
+        foreach ($proposal as $propositions) foreach ($propositions as $proposition) {
+            $resourceValidable = $resourceValidable
+                || (!$proposition['validated'] && $proposition['process'] !== 'keep');
+        }
+        return $resourceValidable;
     }
 
     /**
