@@ -44,8 +44,8 @@ return [
         ],
     ],
     'controllers' => [
-        'factories' => [
-            'Generate\Controller\Admin\Index' => Service\Controller\IndexControllerFactory::class,
+        'invokables' => [
+            'Generate\Controller\Admin\Index' => Controller\Admin\IndexController::class,
         ],
     ],
     'controller_plugins' => [
@@ -55,6 +55,7 @@ return [
         // TODO Create a service for AiGenerator.
         'factories' => [
             'generateViaOpenAi' => Service\ControllerPlugin\GenerateViaOpenAiFactory::class,
+            'validateRecordOrCreateOrUpdate' => Service\ControllerPlugin\ValidateRecordOrCreateOrUpdateFactory::class,
         ],
     ],
     'navigation' => [

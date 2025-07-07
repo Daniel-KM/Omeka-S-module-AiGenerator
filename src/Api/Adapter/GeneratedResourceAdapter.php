@@ -197,6 +197,23 @@ class GeneratedResourceAdapter extends AbstractEntityAdapter
         }
     }
 
+    public function preprocessBatchUpdate(array $data, Request $request)
+    {
+        $rawData = $request->getContent();
+
+        if (isset($rawData['o:resource'])) {
+            $data['o:resource'] = $rawData['o:resource'];
+        }
+        if (isset($rawData['o:owner'])) {
+            $data['o:owner'] = $rawData['o:owner'];
+        }
+        if (isset($rawData['o:reviewed'])) {
+            $data['o:reviewed'] = $rawData['o:reviewed'];
+        }
+
+        return $data;
+    }
+
     public function validateRequest(Request $request, ErrorStore $errorStore): void
     {
         $data = $request->getContent();

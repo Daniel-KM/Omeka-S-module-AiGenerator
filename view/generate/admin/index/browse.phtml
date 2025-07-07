@@ -62,7 +62,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
 <?php $this->trigger('view.browse.before'); ?>
 <?php if (count($generatedResources)): ?>
 <form method="post" id="batch-form" class="disable-unsaved-warning">
-    <?php if (false && $this->userIsAllowed(\Generate\Api\Adapter\GeneratedResourceAdapter::class, 'batch_update')): ?>
+    <?php if ($this->userIsAllowed(\Generate\Api\Adapter\GeneratedResourceAdapter::class, 'batch_update')): ?>
     <div class="batch-inputs">
         <select class="batch-actions-select" aria-label="<?= $translate('Batch actions') ?>">
             <option value="default"><?= $translate('Batch actions') ?></option>
@@ -77,8 +77,12 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(\Generate\Api\Adapter\Generated
         </select>
         <div class="batch-actions">
             <button type="button" class="button default active" disabled="disabled"><?= $translate('Go') ?></button>
-            <input type="submit" class="validate-selected" name="validate_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url(null, ['action' => 'batch-edit'], true)) ?>">
-            <input type="submit" class="validate-all" name="validate_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url(null, ['action' => 'batch-edit-all'], true)) ?>">
+            <input type="submit" class="read-selected" name="read_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
+            <input type="submit" class="read-all" name="read_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
+            <input type="submit" class="unread-selected" name="read_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
+            <input type="submit" class="unread-all" name="read_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
+            <input type="submit" class="validate-selected" name="validate_selected" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process'], true)) ?>">
+            <input type="submit" class="validate-all" name="validate_all" value="<?= $translate('Go') ?>" formaction="<?= $escapeAttr($url('admin/generated-resource/default', ['action' => 'batch-process-all'], true)) ?>">
             <input type="hidden" name="query" class="batch-query" value="<?= $escapeAttr(json_encode($this->params()->fromQuery())) ?>">
             <a class="delete button sidebar-content delete-selected" data-sidebar-selector="#sidebar-delete-selected"><?= $translate('Go') ?></a>
             <a class="delete button sidebar-content delete-all" data-sidebar-selector="#sidebar-delete-all"><?= $translate('Go') ?></a>

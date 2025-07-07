@@ -1,4 +1,4 @@
-// TODO Remove dead code.
+'use strict';
 
 (function ($) {
 
@@ -103,16 +103,17 @@
         };
 
         // Manage check box to generate resource metadata in any form.
+        const generateFieldset = $('#generate-resource-form, .resource-form, #batch-edit-item, #batch-edit-tmedia');
         const handleChangeGenerateMetadata = function() {
-            const input = $('.resource-form, #batch-edit-item, batch-edit-tmedia').find('input[type=checkbox]#generate-metadata');
-            if (input.prop("checked")) {
-                $('textarea.generate-settings').prop('disabled', false).closest('.field').show();
-            } else {
-                $('textarea.generate-settings').prop('disabled', true).closest('.field').hide();
-            }
-        };
+            const input = generateFieldset.find('input[type=checkbox]#generate-metadata');
+            if (input.prop('checked')) {
+                generateFieldset.find('.generate-settings').prop('disabled', false).closest('.field').show();
+             } else {
+                generateFieldset.find('.generate-settings').prop('disabled', true).closest('.field').hide();
+             }
+         };
 
-        $('.resource-form, #batch-edit-item, batch-edit-tmedia').on('change', 'input[type=checkbox]#generate-metadata', handleChangeGenerateMetadata);
+        generateFieldset.on('change', 'input[type=checkbox]#generate-metadata', handleChangeGenerateMetadata);
         handleChangeGenerateMetadata();
 
         // Mark a generated resource reviewed/unreviewed.
@@ -193,7 +194,7 @@
                 } else {
                     // Set the generated resource reviewed in all cases.
                     status = data.data.generated_resource.reviewed.status;
-                    buttonReviewed = button.closest('th').find('a.status-toggle');
+                    const buttonReviewed = button.closest('th').find('a.status-toggle');
                     buttonReviewed.data('status', status);
                     buttonReviewed.addClass('o-icon-' + status);
 

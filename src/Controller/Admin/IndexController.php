@@ -4,28 +4,15 @@ namespace Generate\Controller\Admin;
 
 use Common\Mvc\Controller\Plugin\JSend;
 use Common\Stdlib\PsrMessage;
-use Doctrine\ORM\EntityManager;
-use Generate\Api\Representation\GeneratedResourceRepresentation;
 use Generate\Form\QuickSearchForm;
 use Laminas\Http\Response as HttpResponse;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\ViewModel;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Form\ConfirmForm;
 use Omeka\Stdlib\ErrorStore;
 
 class IndexController extends AbstractActionController
 {
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
-    protected $entityManager;
-
-    public function __construct(EntityManager $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
-
     public function browseAction()
     {
         $params = $this->params()->fromQuery();
@@ -221,6 +208,133 @@ class IndexController extends AbstractActionController
         return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
     }
 
+    public function batchProcessAction()
+    {
+        if (!$this->getRequest()->isPost()) {
+            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        }
+
+        // The action is the key used for submit.
+        $post = $this->params()->fromPost();
+
+        $actions = [
+            'read_selected',
+            'unread_selected',
+            'validate_selected',
+        ];
+        $action = key(array_intersect_key($post, array_flip($actions)));
+        if (!$action) {
+            $this->messenger()->addError('You must select a valid action to batch process.'); // @translate
+            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        }
+
+        $resourceIds = $post['resource_ids'] ?? [];
+        if (!$resourceIds) {
+            $this->messenger()->addError('You must select at least one generated resource to batch process.'); // @translate
+            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        }
+
+        // Process validation in background in all cases.
+        if ($action === 'validate_selected') {
+            return $this->processValidate(['id' => $resourceIds]);
+        }
+
+        /** @var \Omeka\Mvc\Controller\Plugin\Api $api */
+        $api = $this->api();
+        $response = $api->batchUpdate('generated_resources', $resourceIds, ['o:reviewed' => $action === 'read_selected'], ['isPartial' => true, 'continueOnError' => true]);
+        if ($response) {
+            $this->messenger()->addSuccess('Generated resources successfully updated'); // @translate
+        } else {
+            $this->messenger()->addError('An error occurred during update'); // @translate
+        }
+
+        return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+    }
+
+    public function batchProcessAllAction()
+    {
+        if (!$this->getRequest()->isPost()) {
+            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        }
+
+        // The action is the key used for submit.
+        $post = $this->params()->fromPost();
+
+        $actions = [
+            'read_all',
+            'unread_all',
+            'validate_all',
+        ];
+        $action = key(array_intersect_key($post, array_flip($actions)));
+        if (!$action) {
+            $this->messenger()->addError('You must select a valid action to batch process.'); // @translate
+            return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+        }
+
+        // Derive the query, removing limiting and sorting params.
+        $query = json_decode($this->params()->fromPost('query', []), true);
+        unset($query['submit'], $query['page'], $query['per_page'], $query['limit'],
+        $query['offset'], $query['sort_by'], $query['sort_order']);
+
+        // Process validation in background in all cases.
+        if ($action === 'validate_all') {
+            return $this->processValidate($query);
+        }
+
+        $job = $this->jobDispatcher()->dispatch(\Omeka\Job\BatchUpdate::class, [
+            'resource' => 'generated_resources',
+            'query' => $query,
+            'data' => ['o:reviewed' => $action === 'read_all'],
+        ]);
+
+        $urlPlugin = $this->url();
+        $message = new PsrMessage(
+            'Processing update of resources in background (job {link_job}#{job_id}{link_end}, {link_log}logs{link_end}).', // @translate
+            [
+                'link_job' => sprintf(
+                    '<a href="%s">',
+                    htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+                    ),
+                'job_id' => $job->getId(),
+                'link_end' => '</a>',
+                'link_log' => class_exists('Log\Module', false)
+                    ? sprintf('<a href="%1$s">', $urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]]))
+                    : sprintf('<a href="%1$s" target="_blank">', $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+            ]
+        );
+        $message->setEscapeHtml(false);
+        $this->messenger()->addSuccess($message);
+
+        return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+    }
+
+    protected function processValidate(array $query)
+    {
+        $job = $this->jobDispatcher()->dispatch(\Generate\Job\BatchValidate::class, [
+            'query' => $query,
+        ]);
+
+        $urlPlugin = $this->url();
+        $message = new PsrMessage(
+            'Processing validation of resources in background (job {link_job}#{job_id}{link_end}, {link_log}logs{link_end}).', // @translate
+            [
+                'link_job' => sprintf(
+                    '<a href="%s">',
+                    htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+                    ),
+                'job_id' => $job->getId(),
+                'link_end' => '</a>',
+                'link_log' => class_exists('Log\Module', false)
+                    ? sprintf('<a href="%1$s">', $urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]]))
+                    : sprintf('<a href="%1$s" target="_blank">', $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+            ]
+        );
+        $message->setEscapeHtml(false);
+        $this->messenger()->addSuccess($message);
+
+        return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+    }
+
     /* Ajax */
 
     public function toggleStatusAction()
@@ -327,7 +441,7 @@ class IndexController extends AbstractActionController
 
         // Validate and create the resource.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false, false, false);
+        $resource = $this->validateRecordOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false, false, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
             return $this->jSend(JSend::FAIL, $errorStore->getErrors() ?: null, $this->translate(
@@ -389,9 +503,8 @@ class IndexController extends AbstractActionController
         // The status "reviewed" is set to true, because a validation requires
         // a review.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, true, false, false);
+        $resource = $this->validateRecordOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, true, false, false);
         if ($errorStore->hasErrors()) {
-            // Keep similar messages different to simplify debug.
             // Keep similar messages different to simplify debug.
             return $this->jSend(JSend::FAIL, $errorStore->getErrors() ?: null, $this->translate(
                 'Generated resource is not valid: check its values.' // @translate
@@ -413,7 +526,7 @@ class IndexController extends AbstractActionController
                     'statusLabel' => $this->translate('Reviewed'), // @translate
                 ],
             ],
-            // All generated resources are patches, since the resource exists..
+            // All generated resources are patches, since the resource exists.
             'is_new' => false,
             'url' => $resource->adminUrl(),
         ]);
@@ -473,7 +586,7 @@ class IndexController extends AbstractActionController
         // The status "reviewed" is not modified, because a partial validation
         // does not imply a full review.
         $errorStore = new ErrorStore();
-        $resource = $this->validateOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false, false, false);
+        $resource = $this->validateRecordOrCreateOrUpdate($generatedResource, $resourceData, $errorStore, false, false, false);
         if ($errorStore->hasErrors()) {
             // Keep similar messages different to simplify debug.
             return $this->jSend(JSend::FAIL, $errorStore->getErrors() ?: null, $this->translate(
@@ -493,188 +606,5 @@ class IndexController extends AbstractActionController
                 'statusLabel' => $this->translate('Validated value'), // @translate
             ],
         ]);
-    }
-
-    /**
-     * Create or update a resource from data.
-     */
-    protected function validateOrCreateOrUpdate(
-        GeneratedResourceRepresentation $generatedResource,
-        array $resourceData,
-        ErrorStore $errorStore,
-        bool $reviewed = false,
-        bool $validateOnly = false,
-        bool $useMessenger = false
-    ): ?AbstractResourceEntityRepresentation {
-        $generatedResourceResource = $generatedResource->resource();
-
-        // Nothing to update or create.
-        if (!$resourceData) {
-            return $generatedResourceResource;
-        }
-
-        // Prepare the api to throw a validation exception with error store.
-        /** @var \Omeka\Mvc\Controller\Plugin\Api $api */
-        $api = $this->api(null, true);
-
-        // Files are managed through media (already stored).
-        // @see proposalToResourceData()
-        unset($resourceData['file']);
-
-        // TODO This is a new generation, so a new item for now.
-        $resourceName = $generatedResourceResource ? $generatedResourceResource->resourceName() : 'items';
-
-        // Validate only: the simplest way is to skip flushing.
-        // Nevertheless, a simple generator has no right to create a resource.
-        // So skip rights before and remove skip after.
-        // But some other modules can persist it inadvertently (?)
-        // So use api, and add an event to add an error to the error store and
-        // check if it is the only one.
-        // TODO Fix the modules that flush too much early.
-        // TODO Improve the api manager with method or option "validateOnly"?
-        // TODO Add a method to get the error store from the api without using exception.
-        $isAllowed = null;
-        if ($validateOnly) {
-            // Flush before and clear after to avoid possible issues.
-            $this->entityManager->flush();
-
-            /** * @var \Omeka\Permissions\Acl $acl */
-            $acl = $generatedResource->getServiceLocator()->get('Omeka\Acl');
-            $classes = [
-                'items' => 'Item',
-                'item_sets' => 'ItemSet',
-                'media' => 'Media',
-            ];
-            $class = $classes[$resourceName] ?? 'Item';
-            $entityClass = 'Omeka\Entity\\' . $class;
-            $action = $generatedResourceResource ? 'update' : 'create';
-            $isAllowed = $acl->userIsAllowed($entityClass, $action);
-            if (!$isAllowed) {
-                $user = $this->identity();
-                $classes = [
-                    \Omeka\Entity\Item::class,
-                    \Omeka\Entity\Media::class,
-                    \Omeka\Entity\ItemSet::class,
-                    \Omeka\Api\Adapter\ItemAdapter::class,
-                    \Omeka\Api\Adapter\MediaAdapter::class,
-                    \Omeka\Api\Adapter\ItemSetAdapter::class,
-                ];
-                $acl->allow($user ? $user->getRole() : null, $classes, [$action, 'change-owner']);
-            }
-            $apiOptions = ['flushEntityManager' => false, 'validateOnly' => true, 'isGeneration' => true];
-        } else {
-            $apiOptions = [];
-        }
-
-        try {
-            if ($generatedResourceResource) {
-                // During an update of items, keep existing media in any cases.
-                // TODO Move this check in proposalToResourceData(). Do it for item sets and sites too.
-                // @link https://gitlab.com/Daniel-KM/Omeka-S-module-Generate/-/issues/3
-                if ($resourceName === 'items') {
-                    unset(
-                        $resourceData['o:media'],
-                        $resourceData['o:primary_media'],
-                        $resourceData['o:item_set'],
-                        $resourceData['o:site']
-                    );
-                }
-                $apiOptions['isPartial'] = true;
-                $response = $api
-                    ->update($resourceName, $generatedResourceResource->id(), $resourceData, [], $apiOptions);
-            } else {
-                // The validator is not the generator.
-                // The validator will be added automatically for anonymous.
-                $owner = $generatedResource->owner() ?: null;
-                $resourceData['o:owner'] = $owner ? ['o:id' => $owner->id()] : null;
-                $resourceData['o:is_public'] = false;
-                $response = $api
-                    ->create($resourceName, $resourceData, [], $apiOptions);
-            }
-        } catch (\Omeka\Api\Exception\ValidationException $e) {
-            $this->entityManager->clear();
-            $exceptionErrorStore = $e->getErrorStore();
-            // Check if there is only one error in case of validation only.
-            if ($validateOnly) {
-                $errors = $exceptionErrorStore->getErrors();
-                // Because validateOnly is the last error and added only when
-                // there is no other one, it should be alone when no issue.
-                if (!count($errors)
-                    || (count($errors) === 1 && !empty($errors['validateOnly']))
-                ) {
-                    $errors = [];
-                } else {
-                    $errorStore->mergeErrors($exceptionErrorStore);
-                    $errors = $errorStore->getErrors();
-                }
-            } else {
-                $errorStore->mergeErrors($exceptionErrorStore);
-                $errors = $errorStore->getErrors();
-            }
-            if ($useMessenger && $errors) {
-                /** @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger */
-                $messenger = $this->messenger();
-                // Nested forms with medias create multiple levels of messages.
-                // The module fixes core, but may be absent.
-                foreach ($errorStore->getErrors() as $messages) {
-                    foreach ($messages as $message) {
-                        if (is_array($message)) {
-                            foreach ($message as $msg) {
-                                if (is_array($msg)) {
-                                    foreach ($msg as $mg) {
-                                        $messenger->addError($this->translate($mg));
-                                    }
-                                } else {
-                                    $messenger->addError($this->translate($msg));
-                                }
-                            }
-                        } else {
-                            $messenger->addError($this->translate($message));
-                        }
-                    }
-                }
-            }
-            if ($isAllowed === false) {
-                $acl->deny($user ? $user->getRole() : null, $classes, [$action, 'change-owner']);
-            }
-            return null;
-        } catch (\Exception $e) {
-            $this->entityManager->clear();
-            $message = new PsrMessage(
-                'Unable to store the resource of the generated resource: {message}', // @translate
-                ['message' => $e->getMessage()]
-            );
-            $this->logger()->err($message);
-            if ($useMessenger) {
-                $this->messenger()->addError($message);
-            } else {
-                $errorStore->addError('store', $message);
-            }
-            if ($isAllowed === false) {
-                $acl->deny($user ? $user->getRole() : null, $classes, [$action, 'change-owner']);
-            }
-            return null;
-        }
-
-        if ($isAllowed === false) {
-            $acl->deny($user ? $user->getRole() : null, $classes, [$action, 'change-owner']);
-        }
-
-        // Normally, not possible here.
-        if ($validateOnly) {
-            $this->entityManager->clear();
-            return null;
-        }
-
-        // The exception is thrown in the api, there is always a response.
-        $generatedResourceResource = $response->getContent();
-
-        $data = [];
-        $data['o:resource'] = $validateOnly || !$generatedResourceResource ? null : ['o:id' => $generatedResourceResource->id()];
-        $data['o:reviewed'] = $reviewed;
-        $response = $this->api()
-            ->update('generated_resources', $generatedResource->id(), $data, [], ['isPartial' => true]);
-
-        return $generatedResourceResource;
     }
 }
