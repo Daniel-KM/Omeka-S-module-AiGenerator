@@ -177,7 +177,7 @@ class AiRecordAdapter extends AbstractEntityAdapter
         if (isset($query['property']) && $query['property'] !== '' && $query['property'] !== []) {
             foreach ($query['property'] as $propertyData) {
                 $property = $propertyData['property'] ?? null;
-                if (is_null($property) || !preg_match('~^[\w-]+\:[\w-]+$~i', $property)) {
+                if ($property === null || !preg_match('~^[\w-]+\:[\w-]+$~i', $property)) {
                     $qb->andWhere($expr->eq(
                         'omeka_root.id',
                         $this->createNamedParameter($qb, 0)

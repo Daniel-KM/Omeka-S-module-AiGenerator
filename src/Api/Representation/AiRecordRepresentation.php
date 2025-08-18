@@ -665,7 +665,7 @@ class AiRecordRepresentation extends AbstractEntityRepresentation
 
         $resourceTemplate = $generative->template();
         $proposal = $this->proposalNormalizeForValidation();
-        $hasProposedTermAndKey = $proposedTerm && !is_null($proposedKey);
+        $hasProposedTermAndKey = $proposedTerm && $proposedKey !== null;
 
         /** @var \Common\Stdlib\EasyMeta $easyMeta */
         $services = $this->getServiceLocator();
@@ -931,7 +931,7 @@ class AiRecordRepresentation extends AbstractEntityRepresentation
         $resourceData = $this->proposalToResourceData();
 
         foreach ($query as $field => $value) {
-            if ($value === '' || is_null($value) || $value === []) {
+            if ($value === '' || $value === null || $value === []) {
                 continue;
             }
 

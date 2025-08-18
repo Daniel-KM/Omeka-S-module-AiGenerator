@@ -42,7 +42,7 @@ class AiRecordSearchFilters extends AbstractHelper
         $query = $view->params()->fromQuery();
 
         foreach ($query as $key => $value) {
-            if (is_null($value) || $value === '') {
+            if ($value === null || $value === '') {
                 continue;
             }
             switch ($key) {

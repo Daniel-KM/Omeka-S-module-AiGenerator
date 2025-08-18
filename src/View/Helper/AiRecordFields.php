@@ -428,7 +428,7 @@ class AiRecordFields extends AbstractHelper
                             break;
                         }
                     }
-                    if (is_null($proposed)) {
+                    if ($proposed === null) {
                         continue;
                     }
                     $fieldGeneration['empty'] = false;
@@ -448,7 +448,7 @@ class AiRecordFields extends AbstractHelper
                             break;
                         }
                     }
-                    if (is_null($proposed)) {
+                    if ($proposed === null) {
                         continue;
                     }
                     $fieldGeneration['empty'] = false;
@@ -467,7 +467,7 @@ class AiRecordFields extends AbstractHelper
                             break;
                         }
                     }
-                    if (is_null($proposed)) {
+                    if ($proposed === null) {
                         continue;
                     }
                     $fieldGeneration['empty'] = false;
@@ -510,7 +510,7 @@ class AiRecordFields extends AbstractHelper
                             break;
                         }
                     }
-                    if (is_null($proposed)) {
+                    if ($proposed === null) {
                         continue;
                     }
                     $fieldGeneration['empty'] = false;
@@ -530,7 +530,7 @@ class AiRecordFields extends AbstractHelper
                             break;
                         }
                     }
-                    if (is_null($proposed)) {
+                    if ($proposed === null) {
                         continue;
                     }
                     $fieldGeneration['empty'] = false;
@@ -549,7 +549,7 @@ class AiRecordFields extends AbstractHelper
                             break;
                         }
                     }
-                    if (is_null($proposed)) {
+                    if ($proposed === null) {
                         continue;
                     }
                     $fieldGeneration['empty'] = false;
