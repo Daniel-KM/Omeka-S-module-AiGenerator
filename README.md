@@ -54,8 +54,9 @@ An important setting is the prompt. It may contain contextual information to
 help the tool to find rights data. It should be in the wanted language, or you
 should specify it explicitly.
 
-It may be useful append the context of the image to get better and more specific
-results, for example who is on a photography or the location.
+It may be useful to append the context of the image to get better and more
+specific results, for example who is on a photography, the period or the
+location.
 
 ### Price
 
