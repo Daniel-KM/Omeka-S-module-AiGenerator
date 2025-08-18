@@ -64,7 +64,7 @@ $labelInfo = $setting('property_label_information');
     unset($info['o:proposal']);
     unset($info['o:modified']);
     ?>
-<div id="ai-record-<?= $aiRecord->id() ?>" class="ai-record" data-id="<?= $aiRecord->id() ?>" data-linked-id="<?= $aiRecord->resource()?->id() ?>">
+<div id="ai-record-<?= $aiRecord->id() ?>" class="ai-record" data-id="<?= $aiRecord->id() ?>" data-linked-id="<?= $aiRecord->resource() ? $aiRecord->resource()->id() : '' ?>">
 <table class="tablesaw<?= $batchEditRight ? ' batch-edit' : '' ?>" data-tablesaw-mode="stack" data-id="<?= $aiRecord->id() ?>">
     <thead>
         <tr>
