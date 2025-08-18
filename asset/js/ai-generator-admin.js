@@ -37,13 +37,13 @@
                 return null;
             }
             if (data.message) {
-                return data.message;
+                return data.message.length ? data.message : null;
             }
             if (!data.data) {
                 return null;
             }
             if (data.data.message) {
-                return data.data.message;
+                return data.data.message.length ? data.data.message : null;
             }
             for (let value of Object.values(data.data)) {
                 if (typeof value === 'string' && value.length) {
@@ -58,20 +58,20 @@
             var dialog = document.querySelector('dialog.popup-message');
             if (!dialog) {
                 dialog = `
-    <dialog class="popup popup-dialog dialog-message popup-message" data-is-dynamic="1">
-        <div class="dialog-background">
-            <div class="dialog-panel">
-                <div class="dialog-header">
-                    <button type="button" class="dialog-header-close-button" title="Close" autofocus="autofocus">
-                        <span class="dialog-close">🗙</span>
-                    </button>
-                </div>
-                <div class="dialog-contents">
-                    {{ message }}
-                </div>
-            </div>
-        </div>
-    </dialog>`;
+                    <dialog class="popup popup-dialog dialog-message popup-message" data-is-dynamic="1">
+                        <div class="dialog-background">
+                            <div class="dialog-panel">
+                                <div class="dialog-header">
+                                    <button type="button" class="dialog-header-close-button" title="Close" autofocus="autofocus">
+                                        <span class="dialog-close">🗙</span>
+                                    </button>
+                                </div>
+                                <div class="dialog-contents">
+                                    {{ message }}
+                                </div>
+                            </div>
+                        </div>
+                    </dialog>`;
                 $('body').append(dialog);
                 dialog = document.querySelector('dialog.dialog-message');
             }
