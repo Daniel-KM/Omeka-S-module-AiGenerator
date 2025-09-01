@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-07 00:00+0000\n"
+"POT-Creation-Date: 2025-09-01 00:00+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
@@ -15,105 +15,105 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: data/scripts/upgrade.php:39 Module.php:51 Module.php:59
+#: data/scripts/upgrade.php:41 Module.php:53 Module.php:61
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr "Le module %1$s doit être mis à niveau à la version %2$s ou supérieure."
 
-#: Module.php:67
+#: Module.php:69
 msgid "This module require php version {version} or above."
 msgstr "Ce module requiert php en version {version} ou supérieure."
 
-#: Module.php:759 view/ai-generator/admin/index/browse.phtml:52
+#: Module.php:670 Module.php:786 view/ai-generator/admin/index/browse.phtml:52
 msgid "AI records"
 msgstr "Notices IA"
 
-#: src/Controller/Admin/IndexController.php:405
-#: src/Controller/Admin/IndexController.php:464
-#: src/Controller/Admin/IndexController.php:529
-#: src/Controller/Admin/IndexController.php:603
+#: src/Controller/Admin/IndexController.php:412
+#: src/Controller/Admin/IndexController.php:471
+#: src/Controller/Admin/IndexController.php:536
+#: src/Controller/Admin/IndexController.php:610
 msgid "Method not allowed."
 msgstr "Méthode non autorisée."
 
-#: src/Controller/Admin/IndexController.php:416
-#: src/Controller/Admin/IndexController.php:475
-#: src/Controller/Admin/IndexController.php:540
-#: src/Controller/Admin/IndexController.php:614
-#: src/Controller/Admin/IndexController.php:622
+#: src/Controller/Admin/IndexController.php:423
+#: src/Controller/Admin/IndexController.php:482
+#: src/Controller/Admin/IndexController.php:547
+#: src/Controller/Admin/IndexController.php:621
+#: src/Controller/Admin/IndexController.php:629
 msgid "Resource not found."
 msgstr "Ressource non trouvée."
 
-#: src/Controller/Admin/IndexController.php:427
-#: src/Controller/Admin/IndexController.php:455
-#: view/common/admin/ai-records-list.phtml:112
+#: src/Controller/Admin/IndexController.php:434
+#: src/Controller/Admin/IndexController.php:462
+#: view/common/admin/ai-records-list.phtml:124
 msgid "Unreviewed"
 msgstr "Non relu"
 
-#: src/Controller/Admin/IndexController.php:435
-#: src/Controller/Admin/IndexController.php:492
-#: src/Controller/Admin/IndexController.php:552
-#: src/Controller/Admin/IndexController.php:629
+#: src/Controller/Admin/IndexController.php:442
+#: src/Controller/Admin/IndexController.php:499
+#: src/Controller/Admin/IndexController.php:559
+#: src/Controller/Admin/IndexController.php:636
 msgid "Unauthorized access."
 msgstr "Accès interdit."
 
-#: src/Controller/Admin/IndexController.php:447
-#: src/Controller/Admin/IndexController.php:514
-#: src/Controller/Admin/IndexController.php:579
-#: src/Controller/Admin/IndexController.php:662
+#: src/Controller/Admin/IndexController.php:454
+#: src/Controller/Admin/IndexController.php:521
+#: src/Controller/Admin/IndexController.php:586
+#: src/Controller/Admin/IndexController.php:669
 msgid "An internal error occurred."
 msgstr "Une erreur interne s’est produite."
 
-#: src/Controller/Admin/IndexController.php:455
-#: src/Controller/Admin/IndexController.php:590
-#: view/common/admin/ai-records-list.phtml:112
+#: src/Controller/Admin/IndexController.php:462
+#: src/Controller/Admin/IndexController.php:597
+#: view/common/admin/ai-records-list.phtml:124
 msgid "Reviewed"
 msgstr "Relu"
 
-#: src/Controller/Admin/IndexController.php:484
+#: src/Controller/Admin/IndexController.php:491
 msgid "Resource already exists."
 msgstr "La ressource existe déjà."
 
-#: src/Controller/Admin/IndexController.php:499
+#: src/Controller/Admin/IndexController.php:506
 msgid "AI record is not valid: check template."
 msgstr "La notice ia est incorrecte : vérifier le modèle."
 
-#: src/Controller/Admin/IndexController.php:509
+#: src/Controller/Admin/IndexController.php:516
 msgid "AI record cannot be created: some values are not valid."
 msgstr "La notice ia ne peut être créée : certaines valeurs sont incorrectes."
 
-#: src/Controller/Admin/IndexController.php:559
-#: src/Controller/Admin/IndexController.php:646
+#: src/Controller/Admin/IndexController.php:566
+#: src/Controller/Admin/IndexController.php:653
 msgid "AI record is not valid."
 msgstr "La notice ia n’est pas valable."
 
-#: src/Controller/Admin/IndexController.php:573
+#: src/Controller/Admin/IndexController.php:580
 msgid "AI record is not valid: check its values."
 msgstr "La notice ia est incorrecte : vérifier ses valeurs."
 
-#: src/Controller/Admin/IndexController.php:587
-#: view/common/admin/ai-records-list.phtml:223
-#: view/common/admin/ai-records-list.phtml:277
-#: view/common/admin/ai-records-list.phtml:324
+#: src/Controller/Admin/IndexController.php:594
+#: view/common/admin/ai-records-list.phtml:235
+#: view/common/admin/ai-records-list.phtml:289
+#: view/common/admin/ai-records-list.phtml:336
 msgid "Validated"
 msgstr "Validé"
 
-#: src/Controller/Admin/IndexController.php:637
+#: src/Controller/Admin/IndexController.php:644
 msgid "Missing term or key."
 msgstr "Terme ou clé manquante."
 
-#: src/Controller/Admin/IndexController.php:657
+#: src/Controller/Admin/IndexController.php:664
 msgid "AI record is not valid: check values."
 msgstr "La notice ia est incorrecte : vérifier les valeurs."
 
-#: src/Controller/Admin/IndexController.php:670
+#: src/Controller/Admin/IndexController.php:677
 msgid "Validated value"
 msgstr "Valeur validée"
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:576
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:579
 msgid "Urls of images to analyze are:"
 msgstr "Urls des images à analyser :"
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:584
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:587
 msgid ""
 "Output the response as JSON object. Each property may be single or multiple. "
 "Return only requested properties. Skip empty values."
@@ -121,15 +121,15 @@ msgstr ""
 "Répondez avec un objet JSON. Chaque propriété peut être simple ou multiple. "
 "Indiquer uniquement les propriétés demandées. Ignorer les valeurs inconnues."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:598
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:601
 msgid "Example:"
 msgstr "Exemple :"
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:764
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:779
 msgid "Get specific metadata from an image."
 msgstr "Obtenir des métadonnées spécifiques d’une image."
 
-#: src/View/Helper/AiRecordSearchFilters.php:68
+#: src/View/Helper/AiRecordSearchFilters.php:70
 #: view/ai-generator/admin/index/show-details.phtml:41
 msgid "Is reviewed"
 msgstr "Relu"
@@ -177,47 +177,47 @@ msgstr "Choisir une notice ia"
 
 #: view/ai-generator/admin/index/browse.phtml:126
 #: view/ai-generator/admin/index/show-details.phtml:62
-#: view/common/admin/ai-records-list.phtml:128
+#: view/common/admin/ai-records-list.phtml:140
 msgid "No resource template"
 msgstr "Pas de modèle de ressource"
 
 #: view/ai-generator/admin/index/browse.phtml:134
 #: view/ai-generator/admin/index/browse.phtml:135
-#: view/common/admin/ai-records-list.phtml:106
+#: view/common/admin/ai-records-list.phtml:118
 msgid "Toggle status reviewed/unreviewed"
 msgstr "Inverser le statut relu/non-relu"
 
 #: view/ai-generator/admin/index/browse.phtml:144
-#: view/common/admin/ai-records-list.phtml:91
+#: view/common/admin/ai-records-list.phtml:103
 msgid "Validate all values"
 msgstr "Valider toutes les valeurs"
 
 #: view/ai-generator/admin/index/browse.phtml:152
-#: view/common/admin/ai-records-list.phtml:97
+#: view/common/admin/ai-records-list.phtml:109
 msgid "Not validable or already validated"
 msgstr "Non validable ou déjà validé"
 
-#: view/ai-generator/admin/index/browse.phtml:207
-#: view/ai-generator/admin/index/browse.phtml:225
+#: view/ai-generator/admin/index/browse.phtml:208
+#: view/ai-generator/admin/index/browse.phtml:226
 msgid "Delete ai records"
 msgstr "Supprimer les notices ia"
 
-#: view/ai-generator/admin/index/browse.phtml:208
+#: view/ai-generator/admin/index/browse.phtml:209
 msgid "Are you sure you would like to delete the selected ai records?"
 msgstr ""
 "Êtes-vous certain de vouloir supprimer toutes les notices ia sélectionnées ?"
 
-#: view/ai-generator/admin/index/browse.phtml:210
-#: view/ai-generator/admin/index/browse.phtml:228
+#: view/ai-generator/admin/index/browse.phtml:211
+#: view/ai-generator/admin/index/browse.phtml:229
 #, php-format
 msgid ""
 "%1$s: this action will permanently delete %2$s ai records and cannot be "
 "undone."
 msgstr ""
 "%1$s : cette action supprimera %2$s notices ia de manière définitive et ne "
-"pourra pas être annulée.."
+"pourra pas être annulée."
 
-#: view/ai-generator/admin/index/browse.phtml:226
+#: view/ai-generator/admin/index/browse.phtml:227
 msgid ""
 "Are you sure you would like to delete all ai records on all pages of this "
 "result?"
@@ -225,11 +225,11 @@ msgstr ""
 "Êtes-vous certain de vouloir supprimer toutes les notices ia de toutes les "
 "pages de ce résultat ?"
 
-#: view/ai-generator/admin/index/browse.phtml:268
+#: view/ai-generator/admin/index/browse.phtml:269
 msgid "Omeka could not find any ai records."
 msgstr "Omeka ne trouve pas de notice ia."
 
-#: view/ai-generator/admin/index/browse.phtml:280
+#: view/ai-generator/admin/index/browse.phtml:281
 msgid "Search ai records"
 msgstr "Rechercher des notices ia"
 
@@ -274,38 +274,43 @@ msgstr "Réponse id : %s"
 msgid "Proposal"
 msgstr "Proposition"
 
-#: view/common/admin/ai-records-list.phtml:28
+#: view/common/admin/ai-records-list.phtml:29
 msgid "There are no generated resources for this resource."
 msgstr "Il n’y a aucune notice ia pour cette ressource."
 
-#: view/common/admin/ai-records-list.phtml:72
+#: view/common/admin/ai-records-list.phtml:74
 msgid "AI record"
 msgstr "Notice IA"
 
-#: view/common/admin/ai-records-list.phtml:73
+#: view/common/admin/ai-records-list.phtml:75
 msgid "More info about ai record"
 msgstr "Plus d'info sur la notice ia"
 
-#: view/common/admin/ai-records-list.phtml:74
+#: view/common/admin/ai-records-list.phtml:76
 #, php-format
 msgid "(#%s)"
 msgstr "(#%s)"
 
-#: view/common/admin/ai-records-list.phtml:225
-#: view/common/admin/ai-records-list.phtml:279
-#: view/common/admin/ai-records-list.phtml:326
+#: view/common/admin/ai-records-list.phtml:92
+#: view/common/admin/ai-records-list.phtml:93
+msgid "Delete ai record"
+msgstr "Supprimer la notice ia"
+
+#: view/common/admin/ai-records-list.phtml:237
+#: view/common/admin/ai-records-list.phtml:291
+#: view/common/admin/ai-records-list.phtml:338
 msgid "Not validable"
 msgstr "Ne peut être validé"
 
-#: view/common/admin/ai-records-list.phtml:227
-#: view/common/admin/ai-records-list.phtml:281
-#: view/common/admin/ai-records-list.phtml:328
+#: view/common/admin/ai-records-list.phtml:239
+#: view/common/admin/ai-records-list.phtml:293
+#: view/common/admin/ai-records-list.phtml:340
 msgid "No right to write"
 msgstr "Pas de droit d’écriture"
 
-#: view/common/admin/ai-records-list.phtml:233
-#: view/common/admin/ai-records-list.phtml:287
-#: view/common/admin/ai-records-list.phtml:334
+#: view/common/admin/ai-records-list.phtml:245
+#: view/common/admin/ai-records-list.phtml:299
+#: view/common/admin/ai-records-list.phtml:346
 #, php-format
 msgid "Validate this value (%s)"
 msgstr "Valider cette valeur (%s)"
@@ -317,13 +322,13 @@ msgstr "Valider cette valeur (%s)"
 msgid "%s [unavailable]"
 msgstr "%s [indisponible]"
 
-#: data/scripts/upgrade.php:46
+#: data/scripts/upgrade.php:49
 msgid "The module {module} should be upgraded to version {version} or later."
 msgstr ""
 "Le module {module} doit être mis à niveau à la version {version} ou "
 "supérieure."
 
-#: Module.php:389
+#: Module.php:391
 msgid ""
 "Generate ai records with options:\n"
 "{json}"
@@ -331,89 +336,94 @@ msgstr ""
 "Générer des notices ia avec des options :\n"
 "{json}"
 
-#: Module.php:557 src/Form/SettingsFieldset.php:12
-#: src/Form/SettingsFieldset.php:15 src/Form/BatchEditFieldset.php:17
+#: Module.php:571 src/Form/SettingsFieldset.php:14
+#: src/Form/SettingsFieldset.php:17 src/Form/BatchEditFieldset.php:13
+#: src/Form/BatchEditFieldset.php:16 src/Form/BatchEditFieldset.php:25
 msgid "AI Record Generator"
 msgstr "Générateur de notice IA"
 
-#: Module.php:593 src/Form/SettingsFieldset.php:113
+#: Module.php:607 src/Form/SettingsFieldset.php:115
 msgid "Midsized"
 msgstr "Moyen"
 
-#: Module.php:616
+#: Module.php:630
 msgid "Generate (api key undefined)"
 msgstr "Générer (clé d’api non définie)"
 
-#: Module.php:617 src/Form/BatchEditFieldset.php:31
+#: Module.php:631 src/Form/BatchEditFieldset.php:40
 msgid "Generate"
 msgstr "Générer"
 
-#: Module.php:762
+#: Module.php:728
+msgid "Resource template is not set or skipped"
+msgstr "Le modèle de ressource n’est pas défini ou ignoré"
+
+#: Module.php:789
 msgid "{total} ai records ({count} not reviewed)"
 msgstr "{total} notices ia ({count} non relues)"
 
-#: Module.php:765
+#: Module.php:792
 msgid "No ai records"
 msgstr "Aucune notice ia"
 
-#: Module.php:788
+#: Module.php:815
 msgid "Make properties generatable via AI"
 msgstr "Rendre les propriétés générables via l’IA"
 
-#: Module.php:791
+#: Module.php:817
 msgid "All (default)"
 msgstr "Tous (par défaut)"
 
-#: Module.php:792
+#: Module.php:818
 msgid "Specific properties"
 msgstr "Propriétés spécifiques"
 
-#: Module.php:813
+#: Module.php:838
 msgid "Generatable via AI"
 msgstr "Générable par l’IA"
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:209
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:211
 msgid "OpenAI api key is undefined."
 msgstr "La clé de l’api OpenAI n’est pas définie."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:219
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:221
 msgid "The list of models is empty."
 msgstr "La liste des modèles est vide."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:222
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:224
 msgid "[AiGenerator] The list of models is empty."
 msgstr "[AiGenerator] La liste des modèles est vide."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:232
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:234
 msgid "The model \"{model}\" is not in the list of allowed models."
 msgstr "Le modèle #{model} n’est pas dans la liste des modèles autorisés."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:236
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:238
 msgid ""
 "[AiGenerator] The model \"{model}\" is not in the list of allowed models."
 msgstr ""
 "[AiGenerator] Le modèle #{model} n’est pas dans la liste des modèles "
 "autorisés."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:263
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:265
 msgid "No prompt is defined, so the record cannot be generated."
 msgstr ""
 "Aucune invite n’est définie, la notice ia ne peut donc pas être généré."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:265
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:267
 msgid "[AiGenerator] Prompts are not defined."
 msgstr "[AiGenerator] Les invites ne sont pas définies."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:276
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:278
 msgid "The item has no file, so the record cannot be generated."
 msgstr ""
 "Le contenu n’a pas de fichier, la notice ia ne peut donc pas être générée."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:279
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:281
 msgid "[AiGenerator] The item #{item_id} has no file."
 msgstr "[AiGenerator] Le contenu #{item_id} n’a pas de fichier."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:305
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:309
 msgid ""
 "The resource is not a file, not an image or the original file is missing, so "
 "the record cannot be generated."
@@ -421,7 +431,7 @@ msgstr ""
 "La ressource n’est pas un fichier, une image ou le fichier original manque. "
 "La notice ia ne peut pas être générée."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:308
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:312
 msgid ""
 "[AiGenerator] The media #{media_id} is not a file, not an image or the "
 "original file is missing."
@@ -429,7 +439,7 @@ msgstr ""
 "[AiGenerator] Le média #{media_id} n’est pas un fichier, une image ou n’a "
 "pas de fichier original."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:313
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:317
 msgid ""
 "The item has no files, or no image or no original file, so the record cannot "
 "be generated."
@@ -437,7 +447,7 @@ msgstr ""
 "Le contenu n’a pas de fichier, ou pas d’image ou pas de fichier original. La "
 "notice ia ne peut pas être générée."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:316
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:320
 msgid ""
 "[AiGenerator] The item #{item_id} has no files, or no image or no original "
 "file."
@@ -445,11 +455,11 @@ msgstr ""
 "[AiGenerator] Le contenu #{item_id} n’a pas de fichier, d’image ou de "
 "fichier original."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:408
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:413
 msgid "The structure defined from the template is empty or incorrect."
 msgstr "La structure définie à partir du modèle est vide ou incorrecte."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:411
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:416
 msgid ""
 "[AiGenerator] Error for resource #{resource_id}: the structure defined from "
 "the template is empty or incorrect."
@@ -457,19 +467,19 @@ msgstr ""
 "[AiGenerator] Erreur pour la ressource #{resource_id} : la structure définie "
 "à partir du modèle est vide ou incorrecte."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:447
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:451
 msgid "An exception occurred: {msg}"
 msgstr "Une exception s’est produite : {msg}"
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:451
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:455
 msgid "[AiGenerator] Exception for resource #{resource_id}: {msg}"
 msgstr "[AiGenerator] Exception pour la ressource #{resource_id} : {msg}"
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:504
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:507
 msgid "An exception occurred when creating ai record: {msg}"
 msgstr "Une exception s’est produite lors de la création d’une notice : {msg}"
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:508
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:511
 msgid ""
 "[AiGenerator] Exception when creating ai record for resource #{resource_id}: "
 "{msg}"
@@ -477,15 +487,15 @@ msgstr ""
 "[AiGenerator] Exception lors de la création de la notice ia pour la "
 "ressource #{resource_id} : {msg}"
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:523
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:526
 msgid "AI record not valid."
 msgstr "La notice ia n’est pas valide."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:526
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:529
 msgid "[AiGenerator] AI record #{ai_record_id}: not valid."
 msgstr "[AiGenerator] Notice IA #{ai_record_id} : non valide."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:629
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:637
 msgid ""
 "The prompt contains the placeholder \"{placeholder}\", but there is no "
 "template to replace it or it is marked non-generatable."
@@ -493,7 +503,7 @@ msgstr ""
 "L’invite contient le joker \"{placeholder}\", mais il n’y a pas de modèle "
 "pour le remplacer ou il est marqué comme non générable."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:633
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:641
 msgid ""
 "[AiGenerator] The prompt contains the placeholder \"{placeholder}\", but "
 "there is no template to replace it or it is marked non-generatable."
@@ -502,14 +512,34 @@ msgstr ""
 "mais il n’y a pas de modèle pour le remplacer ou il est marqué comme non "
 "générable."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:749
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:646
+msgid ""
+"The prompt contains the placeholder \"{placeholder}\", but there is no "
+"resource template, or no template to replace it or it is marked non-"
+"generatable."
+msgstr ""
+"L’invite contient le joker \"{placeholder}\", mais il n’y a pas de modèle de "
+"ressource, ou pas de modèle pour le remplacer, ou il est marqué comme non "
+"générable."
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:650
+msgid ""
+"[AiGenerator] The prompt contains the placeholder \"{placeholder}\", but "
+"there is no resource template, or no template to replace it or it is marked "
+"non-generatable."
+msgstr ""
+"[AiGenerator] L’invite contient le caractère générique \"{placeholder}\", "
+"mais il n’y a pas de modèle de ressource, ou pas de modèle pour le remplacer "
+"ou il est marqué comme non générable."
+
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:764
 msgid ""
 "The process requires a resource with a template with generatable properties."
 msgstr ""
 "Le traitement nécessite une ressource avec un modèle dont les propriétés "
 "peuvent être générées."
 
-#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:752
+#: src/Mvc/Controller/Plugin/GenerateViaOpenAi.php:767
 msgid ""
 "[AiGenerator] For resource #{resource_id}, the process requires a resource "
 "with a template with generatable properties."
@@ -517,15 +547,15 @@ msgstr ""
 "[AiGenerator] Pour la ressource #{resource_id}, le traitement requiert une "
 "ressource avec un modèle ayant des propriétés générables."
 
-#: src/Mvc/Controller/Plugin/GenerativeData.php:83
+#: src/Mvc/Controller/Plugin/GenerativeData.php:85
 msgid "A resource template must be set to allow to generate metadata."
 msgstr "Un modèle de ressource doit être défini afin de générer des notices."
 
-#: src/Mvc/Controller/Plugin/GenerativeData.php:90
+#: src/Mvc/Controller/Plugin/GenerativeData.php:92
 msgid "The module Advanced Resource Template is not available."
 msgstr "Le module Modèle de ressource avancé n’est pas disponible."
 
-#: src/Mvc/Controller/Plugin/GenerativeData.php:132
+#: src/Mvc/Controller/Plugin/GenerativeData.php:134
 msgid ""
 "The resource template #{template_id} used for media in template {template} "
 "is not available."
@@ -533,25 +563,25 @@ msgstr ""
 "Le modèle de ressource #{template_id} utilisé pour les médias dans le modèle "
 "{template} n’est pas disponible."
 
-#: src/Mvc/Controller/Plugin/GenerativeData.php:332
+#: src/Mvc/Controller/Plugin/GenerativeData.php:334
 msgid ""
 "The template #{template_id} does not exist and cannot be used for generation."
 msgstr ""
 "Le modèle #{template_id} n’existe pas et ne peut pas être utilisé pour la "
 "génération."
 
-#: src/Mvc/Controller/Plugin/GenerativeData.php:337
+#: src/Mvc/Controller/Plugin/GenerativeData.php:339
 msgid ""
 "The template \"{template}\" does not exist and cannot be used for generation."
 msgstr ""
 "Le modèle {template} n’existe pas et ne peut pas être utilisé pour la "
 "génération."
 
-#: src/Mvc/Controller/Plugin/ValidateRecordOrCreateOrUpdate.php:223
+#: src/Mvc/Controller/Plugin/ValidateRecordOrCreateOrUpdate.php:225
 msgid "Unable to store the resource of the ai record: {message}"
 msgstr "Impossible d’enregistrer la ressource pour la notice ia : {message}"
 
-#: src/Job/BatchValidate.php:56
+#: src/Job/BatchValidate.php:58
 msgid ""
 "A query is required to batch validate ai records. It is not possible to "
 "validate all records together. Set a fake argument if needed."
@@ -560,57 +590,57 @@ msgstr ""
 "possible de valider toutes les notices en même temps. Ajouter un faux "
 "argument si nécessaire."
 
-#: src/Job/BatchValidate.php:64
+#: src/Job/BatchValidate.php:66
 msgid ""
 "There is no ai record to validate or you do not have rights ro process them."
 msgstr ""
 "Il n’y a pas de notice ia à valider ou vous n’avez pas le droit de les "
 "traiter."
 
-#: src/Job/BatchValidate.php:69
+#: src/Job/BatchValidate.php:71
 msgid "Process started"
 msgstr "Démarrage du traitement"
 
-#: src/Job/BatchValidate.php:87
+#: src/Job/BatchValidate.php:89
 msgid "{processed}/{total} resources processed."
 msgstr "{processed}/{total} ressources traitées."
 
-#: src/Job/BatchValidate.php:93
+#: src/Job/BatchValidate.php:95
 msgid ""
 "Process ended. {processed}/{total} ai records processed; {count} validated."
 msgstr ""
 "Le traitement est terminé. {processed}/{total} notices ia traitées ; {count} "
 "validées."
 
-#: src/Job/BatchValidate.php:108
+#: src/Job/BatchValidate.php:110
 msgid "AI record #{ai_record_id}: user has no right to process."
 msgstr "Notice ia #{ai_record_id} : l’utilisateur n’a pas le droit de traiter."
 
-#: src/Job/BatchValidate.php:117
+#: src/Job/BatchValidate.php:119
 msgid "AI record #{ai_record_id}: not valid."
 msgstr "Notice ia #{ai_record_id} : non valide."
 
-#: src/Job/BatchValidate.php:145
+#: src/Job/BatchValidate.php:147
 msgid "The resource #{resource_id} is validated."
 msgstr "La ressource #{resource_id} est validée."
 
-#: src/Form/SettingsFieldset.php:32
+#: src/Form/SettingsFieldset.php:34
 msgid "Roles allowed to generate via AI"
 msgstr "Rôles autorisés à générer via IA"
 
-#: src/Form/SettingsFieldset.php:40
+#: src/Form/SettingsFieldset.php:42
 msgid "Select roles…"
 msgstr "Choisir des rôles…"
 
-#: src/Form/SettingsFieldset.php:49
+#: src/Form/SettingsFieldset.php:51
 msgid "Validate by default if user has rights"
 msgstr "Valider par défaut si l’utilisateur a les droits"
 
-#: src/Form/SettingsFieldset.php:61
+#: src/Form/SettingsFieldset.php:63
 msgid "List of available models (as name = label)"
 msgstr "Liste des modèles disponibles (comme nom = étiquette)"
 
-#: src/Form/SettingsFieldset.php:62
+#: src/Form/SettingsFieldset.php:64
 msgid ""
 "To analyze an image costs about 300 to 5000 tokens, according to the model, "
 "the image size, the length of the prompt and the length of the response. "
@@ -621,36 +651,36 @@ msgstr ""
 "longueur de la réponse. Attention : un multiplicateur de 1,6 à 2,6 est "
 "utilisé pour analyser les images."
 
-#: src/Form/SettingsFieldset.php:84
+#: src/Form/SettingsFieldset.php:86
 msgid "Default model name"
 msgstr "Modèle par défaut"
 
-#: src/Form/SettingsFieldset.php:85
+#: src/Form/SettingsFieldset.php:87
 msgid "Use exact name from above field."
 msgstr "Utiliser le nom exact du champ ci-dessus."
 
-#: src/Form/SettingsFieldset.php:97
+#: src/Form/SettingsFieldset.php:99
 msgid "Default max tokens by request"
 msgstr "Nombre maximal de jetons par défaut selon la demande"
 
-#: src/Form/SettingsFieldset.php:109
+#: src/Form/SettingsFieldset.php:111
 msgid "Default derivative image"
 msgstr "Image dérivée par défaut"
 
-#: src/Form/SettingsFieldset.php:112
+#: src/Form/SettingsFieldset.php:114
 msgid "Large"
 msgstr "Large"
 
-#: src/Form/SettingsFieldset.php:114
+#: src/Form/SettingsFieldset.php:116
 msgid "Square"
 msgstr "Carré"
 
-#: src/Form/SettingsFieldset.php:128
+#: src/Form/SettingsFieldset.php:130
 msgid "Prompt to set context of a session for resource analysis"
 msgstr ""
 "Invite pour définir le contexte de la session pour l’analyse des ressources"
 
-#: src/Form/SettingsFieldset.php:129
+#: src/Form/SettingsFieldset.php:131
 msgid ""
 "Write the prompt in the language the record should be. Keep the prompt short "
 "to take care of credits."
@@ -658,42 +688,42 @@ msgstr ""
 "Rédigez l’invite dans la langue de la notice. Soyez bref pour ne pas "
 "gaspiller les crédits."
 
-#: src/Form/SettingsFieldset.php:140
+#: src/Form/SettingsFieldset.php:142
 msgid "Prompt to generate ai record"
 msgstr "Invite pour générer une notice ia"
 
-#: src/Form/SettingsFieldset.php:141
+#: src/Form/SettingsFieldset.php:143
 msgid "May be empty when the prompt for context is complete."
 msgstr "Peut être vide lorsque la demande de contexte est complète."
 
-#: src/Form/SettingsFieldset.php:153
+#: src/Form/SettingsFieldset.php:155
 msgid "Item sets for automatic generation"
 msgstr "Collections pour la génération automatique"
 
-#: src/Form/SettingsFieldset.php:161
+#: src/Form/SettingsFieldset.php:163
 msgid "Select item sets…"
 msgstr "Choisir des collections…"
 
-#: src/Form/SettingsFieldset.php:170
+#: src/Form/SettingsFieldset.php:172
 msgid "HIde the flag review/unreviewed"
 msgstr "Cacher le drapeau relu/non-relu"
 
-#: src/Form/ConfigForm.php:17
+#: src/Form/ConfigForm.php:19
 msgid "OpenAI api key"
 msgstr "Clé api OpenAI"
 
-#: src/Form/ConfigForm.php:18
+#: src/Form/ConfigForm.php:20
 msgid ""
 "The api key can be created with an account on OpenAI developer platform."
 msgstr ""
 "La clé api peut être créée avec un compte sur la plateforme de développement "
 "OpenAI."
 
-#: src/Form/ConfigForm.php:30
-msgid "OpenAI organization id"
-msgstr "Identifiant de l’organisation OpenAI"
+#: src/Form/ConfigForm.php:32
+msgid "Optional OpenAI organization id"
+msgstr "Identifiant facultatif de l’organisation OpenAI"
 
-#: src/Form/ConfigForm.php:31
+#: src/Form/ConfigForm.php:33
 msgid ""
 "The optional organization id allows to follow members in the OpenAI "
 "dashboard."
@@ -701,11 +731,11 @@ msgstr ""
 "L’identifiant facultatif de l’organisation permet de suivre les membres dans "
 "le tableau de bord OpenAI."
 
-#: src/Form/ConfigForm.php:42
-msgid "OpenAI project id"
-msgstr "Identifiant du projet OpenAI"
+#: src/Form/ConfigForm.php:44
+msgid "Optional OpenAI project id"
+msgstr "Identifiant facultatif du projet OpenAI"
 
-#: src/Form/ConfigForm.php:43
+#: src/Form/ConfigForm.php:45
 msgid ""
 "The optional project id allows to follow various projects in the OpenAI "
 "dashboard."
@@ -713,109 +743,109 @@ msgstr ""
 "L’identifiant de projet facultatif permet de suivre différents projets dans "
 "le tableau de bord OpenAI."
 
-#: src/Form/BatchEditFieldset.php:32
+#: src/Form/BatchEditFieldset.php:41
 msgid "It is recommended to process this task in background."
 msgstr "Il est recommandé d’exécuter cette tâche en arrière-plan."
 
-#: src/Form/BatchEditFieldset.php:46
+#: src/Form/BatchEditFieldset.php:55
 msgid "Validate"
 msgstr "Valider"
 
-#: src/Form/BatchEditFieldset.php:63
+#: src/Form/BatchEditFieldset.php:72
 msgid "Model"
 msgstr "Modèle"
 
-#: src/Form/BatchEditFieldset.php:79
+#: src/Form/BatchEditFieldset.php:88
 msgid "Maximum tokens"
 msgstr "Jetons maximum"
 
-#: src/Form/BatchEditFieldset.php:96
+#: src/Form/BatchEditFieldset.php:105
 msgid "Derivative image"
 msgstr "Image dérivée"
 
-#: src/Form/BatchEditFieldset.php:112
+#: src/Form/BatchEditFieldset.php:121
 msgid "Prompt (session)"
 msgstr "Invite (session)"
 
-#: src/Form/BatchEditFieldset.php:129
+#: src/Form/BatchEditFieldset.php:138
 msgid "Prompt (user)"
 msgstr "Invite (utilisateur)"
 
-#: src/Form/QuickSearchForm.php:42
+#: src/Form/QuickSearchForm.php:44
 msgid "Select a template…"
 msgstr "Choisir un modèle…"
 
-#: src/Form/QuickSearchForm.php:65
+#: src/Form/QuickSearchForm.php:67
 msgid "Set a date with optional comparator…"
 msgstr "Indiquer une date avec un signe éventuel de comparaison…"
 
-#: src/Form/QuickSearchForm.php:75
+#: src/Form/QuickSearchForm.php:77
 msgid "Any"
 msgstr "Tous"
 
-#: src/Form/QuickSearchForm.php:114
+#: src/Form/QuickSearchForm.php:116
 msgid "User by id"
 msgstr "Utilisateur par id"
 
-#: src/Api/Adapter/AiRecordAdapter.php:254
+#: src/Api/Adapter/AiRecordAdapter.php:256
 msgid "The proposal must be an array"
 msgstr "La proposition doit être une table"
 
-#: src/Controller/Admin/IndexController.php:91
+#: src/Controller/Admin/IndexController.php:93
 msgid "This ai record is a new resource or has no more resource."
 msgstr "Cette notice ia est une nouvelle ressource ou n’a plus de ressource."
 
-#: src/Controller/Admin/IndexController.php:138
+#: src/Controller/Admin/IndexController.php:140
 msgid "The resource id should be defined to generate a record."
 msgstr ""
 "L’identifiant de la ressource doit être défini pour générer une notice."
 
-#: src/Controller/Admin/IndexController.php:147
+#: src/Controller/Admin/IndexController.php:149
 msgid "The resource to generate is not available."
 msgstr "La ressource à générer n’est pas disponible."
 
-#: src/Controller/Admin/IndexController.php:157
+#: src/Controller/Admin/IndexController.php:168
 msgid "The user is not allowed to generate a record."
 msgstr "L’utilisateur n’est pas autorisé à générer une notice."
 
-#: src/Controller/Admin/IndexController.php:175
+#: src/Controller/Admin/IndexController.php:186
 msgid "The resource was generated successfully."
 msgstr "La ressource a été générée avec succès."
 
-#: src/Controller/Admin/IndexController.php:213
+#: src/Controller/Admin/IndexController.php:220
 msgid "AI record successfully deleted"
 msgstr "La notice ia a été correctement supprimée"
 
-#: src/Controller/Admin/IndexController.php:230
+#: src/Controller/Admin/IndexController.php:237
 msgid "You must select at least one ai record to batch delete."
 msgstr "Vous devez choisir au moins une notice ia pour supprimer en lot."
 
-#: src/Controller/Admin/IndexController.php:239
+#: src/Controller/Admin/IndexController.php:246
 msgid "AI records successfully deleted"
 msgstr "Les notices ia ont été correctement supprimée"
 
-#: src/Controller/Admin/IndexController.php:265
+#: src/Controller/Admin/IndexController.php:272
 msgid "Deleting ai records. This may take a while."
 msgstr "Suppression des notices ia en cours. Cela peut prendre un moment."
 
-#: src/Controller/Admin/IndexController.php:288
-#: src/Controller/Admin/IndexController.php:331
+#: src/Controller/Admin/IndexController.php:295
+#: src/Controller/Admin/IndexController.php:338
 msgid "You must select a valid action to batch process."
 msgstr "Vous devez choisir une action valide pour lancer un traitement en lot."
 
-#: src/Controller/Admin/IndexController.php:294
+#: src/Controller/Admin/IndexController.php:301
 msgid "You must select at least one ai record to batch process."
 msgstr "Vous devez choisir au moins une notice ia pour traiter en lot."
 
-#: src/Controller/Admin/IndexController.php:307
+#: src/Controller/Admin/IndexController.php:314
 msgid "AI records successfully updated"
 msgstr "Les notices ia ont été correctement mises à jour"
 
-#: src/Controller/Admin/IndexController.php:309
+#: src/Controller/Admin/IndexController.php:316
 msgid "An error occurred during update"
 msgstr "Une erreur interne s’est produite lors de la mise à jour"
 
-#: src/Controller/Admin/IndexController.php:353
+#: src/Controller/Admin/IndexController.php:360
 msgid ""
 "Processing update of ai records in background (job {link_job}#{job_id}"
 "{link_end}, {link_log}logs{link_end})."
@@ -823,7 +853,7 @@ msgstr ""
 "Traitement de la mise à jour des notices ia en arrière-plan (job {link_job}"
 "#{job_id}{link_end}, {link_log}logs{link_end})."
 
-#: src/Controller/Admin/IndexController.php:380
+#: src/Controller/Admin/IndexController.php:387
 msgid ""
 "Processing validation of ai records in background (job {link_job}#{job_id}"
 "{link_end}, {link_log}logs{link_end})."
@@ -831,11 +861,35 @@ msgstr ""
 "Traitement de la validation des notices ia en arrière-plan (job {link_job}"
 "#{job_id}{link_end}, {link_log}logs{link_end})."
 
-#: config/module.config.php:64
+#: config/module.config.php:67
 msgid "AI Records"
 msgstr "Notices IA"
 
-#: config/module.config.php:162
+#: config/module.config.php:151
+msgid "GPT 4.1 nano ($0.50 / 1M tokens)"
+msgstr "GPT 4.1 nano ($0.50 / 1M jetons)"
+
+#: config/module.config.php:152
+msgid "GPT 4.1 mini ($2 / 1M tokens)"
+msgstr "GPT 4.1 mini ($2 / 1M jetons)"
+
+#: config/module.config.php:153
+msgid "GPT 4.1 ($10 / 1M tokens)"
+msgstr "GPT 4.1 ($10 / 1M jetons)"
+
+#: config/module.config.php:154
+msgid "GPT 4o mini ($0.75 / 1M tokens, tokens x 10)"
+msgstr "GPT 4o mini ($0.75 / 1M jetons, jetons x 10)"
+
+#: config/module.config.php:155
+msgid "GPT 4o ($12.5 / 1M tokens)"
+msgstr "GPT 4o ($12.5 / 1M jetons)"
+
+#: config/module.config.php:159
+msgid "GPT 4.5 preview ($225 / 1M tokens)"
+msgstr "GPT 4.5 preview ($225 / 1M jetons)"
+
+#: config/module.config.php:165
 msgid ""
 "You are an image analysis system. Describe main content of image for "
 "indexing and search purposes."
@@ -843,6 +897,9 @@ msgstr ""
 "Vous êtes un système d’analyse d’images. Décrivez le contenu principal de "
 "l’image à des fins d’indexation et de recherche."
 
-#: config/module.config.php:173
+#: config/module.config.php:176
 msgid "Analyze image"
 msgstr "Analyser l’image"
+
+#~ msgid "aigenerator_prompt_system"
+#~ msgstr "aigenerator_prompt_system"
