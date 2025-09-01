@@ -286,7 +286,6 @@ class GenerateViaOpenAi extends AbstractPlugin
         } elseif ($resource instanceof MediaRepresentation) {
             $isMedia = true;
             $medias = [$resource];
-            return null;
         }
 
         // Get all media files.
@@ -294,7 +293,10 @@ class GenerateViaOpenAi extends AbstractPlugin
         $useOriginal = $derivative === 'original';
         foreach ($medias as $media) {
             if ($media->renderer() === 'file'
-                && (($useOriginal && $media->hasOriginal()) || (!$useOriginal && $media->hasThumbnails()))
+                && (
+                    ($useOriginal && $media->hasOriginal())
+                    || (!$useOriginal && $media->hasThumbnails())
+                )
                 && strtok((string) $media->mediaType(), '/') === 'image'
             ) {
                 $urls[$media->id()] = $this->urlOrBase64($media, $derivative);
