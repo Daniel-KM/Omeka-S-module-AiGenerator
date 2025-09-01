@@ -12,6 +12,7 @@ $setting = $plugins->get('setting');
 $escape = $plugins->get('escapeHtml');
 $assetUrl = $plugins->get('assetUrl');
 $translate = $plugins->get('translate');
+$hyperlink = $plugins->get('hyperlink');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 
 $this->headLink()
@@ -39,6 +40,7 @@ $resourceName = $resource->getControllerName();
 $adapterName = $mapResourceAdapters[$resourceName];
 $batchEditRight = $this->userIsAllowed($adapterName, 'batch-update');
 $editRight = $resource->userIsAllowed('update');
+$deleteRight = $resource->userIsAllowed('delete');
 
 $displayFlagReview = !$setting('aigenerator_hide_flag_review');
 
@@ -81,6 +83,16 @@ $labelInfo = $setting('property_label_information');
                 <?php endif; ?>
                 <?php */ ?>
 
+                <?php if ($deleteRight): ?>
+                <span class="single actions"><?= $hyperlink('', '#', [
+                    'data-sidebar-selector' => '#sidebar',
+                    // TODO Make redirect to main resource working with ai record.
+                    'data-sidebar-content-url' => $aiRecord->adminUrl('delete-confirm') . '?redirect=' . $resource->adminUrl(),
+                    'class' => 'o-icon-delete sidebar-content',
+                    'title' => $translate('Delete ai record'),
+                    'aria-label' => $translate('Delete ai record'),
+                ]) ?></span>
+                <?php endif; ?>
                 <?php if ($editRight): ?>
                 <?php // TODO Check if all values are the same to change the default icon to "validated". ?>
                 <?php if ($isValidable): ?>
@@ -352,6 +364,19 @@ $labelInfo = $setting('property_label_information');
     </tbody>
 </table>
 </div>
+
+<?php if ($deleteRight): ?>
+
+<div id="sidebar" class="sidebar">
+    <?= $hyperlink('', '#', [
+        'class' => 'sidebar-close o-icon-close',
+        'title' => $translate('Close'),
+        'aria-label' => $translate('Close'),
+    ]) ?>
+    <div class="sidebar-content"></div>
+</div>
+
+<?php endif; ?>
 
 <?php endif; ?>
 
