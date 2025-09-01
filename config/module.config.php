@@ -57,6 +57,7 @@ return [
         // TODO Create a service for AiGenerator. Useless for now: there is only one generator.
         'factories' => [
             'generateViaOpenAi' => Service\ControllerPlugin\GenerateViaOpenAiFactory::class,
+            'isGeneratableViaAi' => Service\ControllerPlugin\IsGeneratableViaAiFactory::class,
             'validateRecordOrCreateOrUpdate' => Service\ControllerPlugin\ValidateRecordOrCreateOrUpdateFactory::class,
         ],
     ],
