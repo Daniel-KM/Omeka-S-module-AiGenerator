@@ -27,7 +27,7 @@ class BatchEditFieldset extends Fieldset
 
             ->add([
                 'name' => 'generate',
-                'type' => Element\Checkbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'element_group' => 'ai_generator',
                     'label' => 'Generate', // @translate
@@ -42,7 +42,7 @@ class BatchEditFieldset extends Fieldset
             ])
             ->add([
                 'name' => 'validate',
-                'type' => Element\Checkbox::class,
+                'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'element_group' => 'ai_generator',
                     'label' => 'Validate', // @translate
