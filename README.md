@@ -118,6 +118,8 @@ and in the tab AI Records of the item show view.
   "maximum tokens". Try with 10 000 or 100 000 tokens to be sure to get a good
   result with large images, then check the information about the response to
   adjust the default value.
+- Some generators don't support multiple images, so check the "primary media only"
+  option in that case.
 
 
 TODO
@@ -125,11 +127,11 @@ TODO
 
 - [ ] Cache the prompt session to avoid to use tokens.
 - [ ] Use custom vocabs or tables to specify limited subjects or other fields.
-- [ ] Add an option to include existing metadata.
+- [ ] Add an option to send existing metadata to the generator for more precise output.
 - [x] Add an option to skip validation (so a radio instead of a checkbox in forms). So implement api as response format.
 - [ ] Add an option to set a value annotation like "generated". For now, it can be set via module Advanced Resource Template.
 - [ ] Use the same display in generated resource / show-details and generated-resource tab in resource / view.
-- [ ] Use a three status for review/reviewed/null.
+- [ ] Use a three state status for review/reviewed/null.
 
 
 Warning
