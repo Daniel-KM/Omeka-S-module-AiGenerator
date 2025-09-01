@@ -10,13 +10,20 @@ use Laminas\Form\Fieldset;
 
 class BatchEditFieldset extends Fieldset
 {
+    protected $label = 'AI Record Generator'; // @translate
+
+    protected $elementGroups = [
+        'ai_generator' => 'AI Record Generator', // @translate
+    ];
+
     public function init(): void
     {
         $this
             ->setName('ai_generator')
+
             ->setOptions([
-                'element_group' => 'ai_generator',
                 'label' => 'AI Record Generator', // @translate
+                'element_groups' => $this->elementGroups,
             ])
             ->setAttributes([
                 'id' => 'ai-generator',

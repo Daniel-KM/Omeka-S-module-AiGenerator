@@ -91,8 +91,8 @@ class AiRecordAdapter extends AbstractEntityAdapter
             );
             $qb->andWhere($expr->in(
                 "$userAlias.id",
-                $this->createNamedParameter($qb, $query['owner_id']))
-            );
+                $this->createNamedParameter($qb, $query['owner_id'])
+            ));
         }
 
         if (isset($query['model'])

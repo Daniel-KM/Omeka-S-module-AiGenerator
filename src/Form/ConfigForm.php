@@ -29,7 +29,7 @@ class ConfigForm extends Form
                 'name' => 'aigenerator_openai_organization',
                 'type' => Element\Text::class,
                 'options' => [
-                    'label' => 'OpenAI organization id', // @translate
+                    'label' => 'Optional OpenAI organization id', // @translate
                     'info' => 'The optional organization id allows to follow members in the OpenAI dashboard.', // @translate
                 ],
                 'attributes' => [
@@ -41,7 +41,7 @@ class ConfigForm extends Form
                 'name' => 'aigenerator_openai_project',
                 'type' => Element\Text::class,
                 'options' => [
-                    'label' => 'OpenAI project id', // @translate
+                    'label' => 'Optional OpenAI project id', // @translate
                     'info' => 'The optional project id allows to follow various projects in the OpenAI dashboard.', // @translate
                 ],
                 'attributes' => [

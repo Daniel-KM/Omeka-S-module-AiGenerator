@@ -72,7 +72,7 @@ $labelInfo = $setting('property_label_information');
         <tr>
             <th>
                 <?= $translate('AI record') ?>
-                <span class="ai-record-info" data-info="<?= $escapeAttr(json_encode($info, 320)) ?>" title="<?= $txt = $escapeAttr($translate('More info about ai record')) ?>" aria-label=" title="<?= $txt ?>"><span class="o-icon- fas fa-info-circle"></span></span>
+                <span class="ai-record-info" data-info="<?= $escapeAttr(json_encode($info, 320)) ?>" title="<?= $txt = $escapeAttr($translate('More info about ai record')) ?>" aria-label="<?= $txt ?>"><span class="o-icon- fas fa-info-circle"></span></span>
                 <span class="ai-record-id"><?= sprintf($translate('(#%s)'), $aiRecord->id()) ?></span>
                 <span class="ai-record-date"><?= $i18n->dateFormat($aiRecord->created(), 'long', 'medium') ?></span>
 

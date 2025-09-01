@@ -627,21 +627,33 @@ class GenerateViaOpenAi extends AbstractPlugin
             $replace['{urls}'] = implode(', ', $urls);
         }
 
-        $missingTemplate = function (string $placeholder): null {
-            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
-                'The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
-                ['placeholder' => $placeholder]
-            ));
-            $this->logger->warn(
-                '[AiGenerator] The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
-                ['placeholder' => $placeholder]
-            );
-            return null;
-        };
-
         /** @see GenerativeData() */
         /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $template */
         $template = $resource->resourceTemplate();
+
+        $missingTemplate = function (string $placeholder) use ($template) : null {
+            if ($template) {
+                $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
+                    'The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
+                    ['placeholder' => $placeholder]
+                ));
+                $this->logger->warn(
+                    '[AiGenerator] The prompt contains the placeholder "{placeholder}", but there is no template to replace it or it is marked non-generatable.', // @translate
+                    ['placeholder' => $placeholder]
+                );
+            } else {
+                $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
+                    'The prompt contains the placeholder "{placeholder}", but there is no resource template, or no template to replace it or it is marked non-generatable.', // @translate
+                    ['placeholder' => $placeholder]
+                ));
+                $this->logger->warn(
+                    '[AiGenerator] The prompt contains the placeholder "{placeholder}", but there is no resource template, or no template to replace it or it is marked non-generatable.', // @translate
+                    ['placeholder' => $placeholder]
+                );
+            }
+            return null;
+        };
+
         if ($template) {
             $templateGeneratable = $template->dataValue('generatable');
             $templateGeneratable = in_array($templateGeneratable, ['specific', 'none'])

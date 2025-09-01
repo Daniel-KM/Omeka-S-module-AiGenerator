@@ -427,6 +427,7 @@ class Module extends AbstractModule
         $settings = $services->get('Omeka\Settings');
         $isGeneratableViaAi = $plugins->get('isGeneratableViaAi');
         $request = $event->getParam('request');
+
         $resourceData = $request->getContent();
         $generate = $resourceData['ai_generator'] ?? [];
         if (!$isGeneratableViaAi($representation)) {
