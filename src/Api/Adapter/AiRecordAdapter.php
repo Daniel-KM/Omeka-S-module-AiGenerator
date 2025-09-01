@@ -319,6 +319,9 @@ class AiRecordAdapter extends AbstractEntityAdapter
      */
     protected function buildQueryDateComparison(QueryBuilder $qb, array $query, $value, $column): void
     {
+        // Sometime, the value is a number.
+        $value = (string) $value;
+
         // TODO Format the date into a standard mysql datetime.
         $matches = [];
         preg_match('/^[^\d]+/', $value, $matches);

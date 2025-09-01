@@ -340,8 +340,8 @@ class AiRecordRepresentation extends AbstractEntityRepresentation
                 continue;
             }
 
-            $isEditable = $generative->isTermEditable($term);
-            $isFillable = $generative->isTermFillable($term);
+            $isEditable = $generative->isTermEditable((string) $term);
+            $isFillable = $generative->isTermFillable((string) $term);
             if (!$isEditable && !$isFillable) {
                 // Skipped in the case options changed between generated resources and moderation.
                 // continue;
@@ -399,8 +399,8 @@ class AiRecordRepresentation extends AbstractEntityRepresentation
 
                 switch ($mainType) {
                     case 'literal':
-                        $original = $proposition['original']['@value'] ?? '';
-                        $proposed = $proposition['proposed']['@value'] ?? '';
+                        $original = (string) ($proposition['original']['@value'] ?? '');
+                        $proposed = (string) ($proposition['proposed']['@value'] ?? '');
 
                         // Nothing to do if there is no proposition and no original.
                         $hasOriginal = (bool) strlen($original);
@@ -1047,7 +1047,7 @@ class AiRecordRepresentation extends AbstractEntityRepresentation
         $titles = $this->proposedValues($titleTerm);
 
         return ($titles ? reset($titles)['proposed']['@value'] ?? null : null)
-            ?? (($title = $this->title()) && strlen($title) ? $title : null)
+            ?? (($title = $this->title()) && strlen((string) $title) ? $title : null)
             ?? $default
             ?? $this->getServiceLocator()->get('MvcTranslator')->translate('[Untitled]');
     }
