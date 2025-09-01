@@ -43,10 +43,25 @@ if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActi
     );
     throw new ModuleCannotInstallException((string) $message);
 }
+
 if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('AdvancedResourceTemplate', '3.4.43')) {
     $message = new PsrMessage(
         'The module {module} should be upgraded to version {version} or later.', // @translate
         ['module' => 'AdvancedResourceTemplate', 'version' => '3.4.43']
     );
     throw new ModuleCannotInstallException((string) $message);
+}
+
+if (version_compare($oldVersion, '3.4.3', '<')) {
+    // Fix resource template main option for generatable.
+    /** @var \AdvancedResourceTemplate\Api\Representation\ResourceTemplateRepresentation $resourceTemplate */
+    $resourceTemplates = $api->search('resource_templates')->getContent();
+    foreach ($resourceTemplates as $resourceTemplate) {
+        $data = $resourceTemplate->data();
+        $generatable = $data['generatable'] ?? null;
+        $data['generatable'] = in_array($generatable, ['specifc', 'none']) ? $generatable : 'all';
+        if ($data['generatable'] !== $generatable) {
+            $api->update('resource_templates', $resourceTemplate->id(), ['o:data' => $data], [], ['isPartial' => true]);
+        }
+    }
 }
