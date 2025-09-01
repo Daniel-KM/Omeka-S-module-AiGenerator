@@ -812,12 +812,10 @@ class Module extends AbstractModule
                 'type' => \Common\Form\Element\OptionalRadio::class,
                 'options' => [
                     'label' => 'Make properties generatable via AI', // @translate
-                    'options' => [
-                        'value_options' => [
-                            'all' => 'All (default)', // @translate
-                            'specific' => 'Specific properties', // @translate
-                            'none' => 'None', // @translate
-                        ],
+                    'value_options' => [
+                        'all' => 'All (default)', // @translate
+                        'specific' => 'Specific properties', // @translate
+                        'none' => 'None', // @translate
                     ],
                 ],
                 'attributes' => [
