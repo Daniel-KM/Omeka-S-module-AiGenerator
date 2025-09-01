@@ -407,6 +407,7 @@ class Module extends AbstractModule
          * @var \Omeka\Entity\Item|\Omeka\Entity\Media $resource
          * @var \Omeka\Api\Adapter\ItemAdapter|\Omeka\Api\Adapter\MediaAdapter $adapter
          * @var \Omeka\Api\Representation\ItemRepresentation|\Omeka\Api\Representation\MediaRepresentation $representation
+         * @var \AiGenerator\Mvc\Controller\Plugin\IsGeneratableViaAi $isGeneratableViaAi
          */
         $services = $this->getServiceLocator();
 
@@ -415,18 +416,29 @@ class Module extends AbstractModule
         $adapter = $services->get('Omeka\ApiAdapterManager')->get($resource->getResourceName());
         $representation = $adapter->getRepresentation($resource);
 
+        // Early check the resource template, because a resource template is
+        // required to list properties to generate metadata for.
+        $resourceTemplate = $representation->resourceTemplate();
+        if (!$resourceTemplate || $resourceTemplate->dataValue('generatable') === 'none') {
+            return;
+        }
+
+        $plugins = $services->get('ControllerPluginManager');
+        $settings = $services->get('Omeka\Settings');
+        $isGeneratableViaAi = $plugins->get('isGeneratableViaAi');
+        $request = $event->getParam('request');
+        $resourceData = $request->getContent();
+        $generate = $resourceData['ai_generator'] ?? [];
+        if (!$isGeneratableViaAi($representation)) {
+            return;
+        }
+
         // Check if ai generator should be run.
         // The generation may be set via resource form or batch edit form.
         // It may be processed automatically when the resource is in the
         // specified item sets.
 
-        $request = $event->getParam('request');
-        $resourceData = $request->getContent();
-
-        $generate = $resourceData['ai_generator'] ?? [];
-
         if (empty($generate['generate'])) {
-            $settings = $services->get('Omeka\Settings');
             $itemSetsAuto = $settings->get('aigenerator_item_sets_auto');
             if (!$itemSetsAuto) {
                 return;
@@ -665,11 +677,17 @@ class Module extends AbstractModule
      */
     public function displayTab(Event $event): void
     {
+        /**
+         * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+         * @var \AiGenerator\Mvc\Controller\Plugin\IsGeneratableViaAi $isGeneratableViaAi
+         */
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
         $view = $event->getTarget();
+        $plugins = $services->get('ControllerPluginManager');
+        $isGeneratableViaAi = $plugins->get('isGeneratableViaAi');
 
-        $resource = $view->resource;
+        $resource = $view->vars()->offsetGet('resource');
 
         $aiRecords = $api
             ->search('ai_records', [
@@ -685,6 +703,8 @@ class Module extends AbstractModule
 
         $fieldset = $this->checkAndPrepareGenerateFieldset();
         $fieldset->get('generate')->setOption('info', null);
+
+        $disable = !$isGeneratableViaAi($resource);
 
         echo '<div id="ai-records" class="section">';
 
@@ -703,15 +723,19 @@ class Module extends AbstractModule
                     'type' => \Laminas\Form\Element\Submit::class,
                     'options' => [
                         'element_group' => 'ai_generator',
-                        'label' => ' ',
+                        'label' => $disable
+                            ? 'Resource template is not set or skipped' // @translate
+                            : ' ',
                     ],
                     'attributes' => [
                         'id' => 'generate-submit',
                         'type' => 'submit',
-                        'class' => 'ai-generator-settings',
+                        'class' => 'ai-generator-settings' . ($disable ? ' is-disabled' : ''),
                         'value' => 'Submit', // @translate
+                        'disabled' => $disable ? 'disabled' : false,
                     ],
                 ]);
+
             $form = new \Laminas\Form\Form();
             $form
                 ->setAttributes([
@@ -720,9 +744,11 @@ class Module extends AbstractModule
                     // TODO Find why the submit is a get (js).
                     'method' => '¨POST',
                     'enctype' => 'multipart/form-data',
+                    'disabled' => $disable ? 'disabled' : false,
                 ])
                 ->add($fieldset)
                 ->prepare();
+
             // TODO Find the right way to not display the label:
             echo strtr($view->form($form, false), ['<legend>{__}</legend>' => '']);
         }

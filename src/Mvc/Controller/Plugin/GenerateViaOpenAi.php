@@ -246,9 +246,9 @@ class GenerateViaOpenAi extends AbstractPlugin
             : (int) $options['max_tokens'];
 
         $derivative = empty($options['derivative'])
-            ? $this->settings->get('aigenerator_derivative', 'medium')
+            ? $this->settings->get('aigenerator_derivative', 'large')
             : $options['derivative'];
-        $derivative = $derivative ?: 'medium';
+        $derivative = $derivative ?: 'large';
 
         // The prompt for session or for user may be skipped, not the two.
 

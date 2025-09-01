@@ -139,7 +139,7 @@ class IndexController extends AbstractActionController
             $this->messenger()->addError(new PsrMessage(
                 'The resource id should be defined to generate a record.' // @translate
             ));
-            return $this->redirect()->toRoute('admin/ai-record');
+            return $this->redirect()->toRoute('admin/default', [], true);
         }
 
         try {
@@ -148,7 +148,16 @@ class IndexController extends AbstractActionController
             $this->messenger()->addError(new PsrMessage(
                 'The resource to generate is not available.' // @translate
             ));
-            return $this->redirect()->toRoute('admin/ai-record');
+            return $this->redirect()->toRoute('admin/id', ['id' => $resourceId], true);
+        }
+
+        $params = [];
+        $params['controller'] = $resource->getControllerName();
+        $params['action'] = 'show';
+        $params['id'] = $resource->id();
+
+        if (!$this->isGeneratableViaAi($resource)) {
+            return $this->redirect()->toRoute('admin/id', $params, true);
         }
 
         // Generating may be expensive, so there is a specific check for roles.
@@ -158,7 +167,7 @@ class IndexController extends AbstractActionController
             $this->messenger()->addError(new PsrMessage(
                 'The user is not allowed to generate a record.' // @translate
             ));
-            return $this->redirect()->toRoute('admin/ai-record');
+            return $this->redirect()->toRoute('admin/id', $params, true);
         }
 
         $args = [
@@ -178,10 +187,6 @@ class IndexController extends AbstractActionController
             ));
         }
 
-        $params = [];
-        $params['controller'] = $resource->getControllerName();
-        $params['action'] = 'show';
-        $params['id'] = $resource->id();
         return $this->redirect()->toRoute('admin/id', $params, ['fragment' => 'ai-record']);
     }
 

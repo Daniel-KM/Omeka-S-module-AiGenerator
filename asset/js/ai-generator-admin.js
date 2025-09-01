@@ -122,6 +122,7 @@
             const input = generateFieldset.find('input[type=checkbox]#ai-generator-generate');
             if (input.prop('checked')) {
                 generateFieldset.find('.ai-generator-settings').prop('disabled', false).closest('.field').show();
+                generateFieldset.find('.ai-generator-settings.is-disabled').prop('disabled', true);
              } else {
                 generateFieldset.find('.ai-generator-settings').prop('disabled', true).closest('.field').hide();
              }
