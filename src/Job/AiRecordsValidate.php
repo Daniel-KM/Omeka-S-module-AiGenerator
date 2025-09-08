@@ -11,7 +11,7 @@ use Omeka\Stdlib\ErrorStore;
 /**
  * Validate all generations.
  */
-class BatchValidate extends AbstractJob
+class AiRecordsValidate extends AbstractJob
 {
     /**
      * @var \Omeka\Permissions\Acl

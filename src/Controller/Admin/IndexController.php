@@ -378,7 +378,7 @@ class IndexController extends AbstractActionController
 
     protected function processValidate(array $query)
     {
-        $job = $this->jobDispatcher()->dispatch(\AiGenerator\Job\BatchValidate::class, [
+        $job = $this->jobDispatcher()->dispatch(\AiGenerator\Job\AiRecordsValidate::class, [
             'query' => $query,
         ]);
 
