@@ -348,6 +348,14 @@ class GenerateViaOpenAi extends AbstractPlugin
         $promptSystem = $this->preparePrompt($resource, $promptSystem, $urls);
         $promptUser = $this->preparePrompt($resource, $promptUser, $urls);
 
+        if (!$promptSystem && !$promptUser) {
+            $this->skipMessenger || $this->messenger->addWarning(new PsrMessage(
+                'No prompts or invalid prompts are set, so the record cannot be generated.' // @translate
+            ));
+            $this->logger->warn('[AiGenerator] No prompts or invalid prompts are set, so record cannot be generated.'); // @translate
+            return null;
+        }
+
         $messages = [];
         if ($this->dataModels[$model]['messages'] ?? false) {
             if ($promptSystem) {
@@ -611,7 +619,9 @@ class GenerateViaOpenAi extends AbstractPlugin
     /**
      * Prepare a prompt with placeholders.
      *
-     * The name placeholders are experimental.
+     * The placeholder names are experimental.
+     *
+     * @return string|null The prepared prompt, or null if an error occurred.
      */
     protected function preparePrompt(ItemRepresentation|MediaRepresentation $resource, ?string $prompt, array $urls): ?string
     {
@@ -663,6 +673,8 @@ class GenerateViaOpenAi extends AbstractPlugin
             $templateGeneratable = 'none';
         }
 
+        $hasError = false;
+
         if (str_contains($prompt, '{properties}')) {
             if ($template && $templateGeneratable !== 'none') {
                 $list = [];
@@ -673,6 +685,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 }
                 $replace['{properties}'] = implode(', ', $list);
             } else {
+                $hasError = true;
                 $missingTemplate('{properties}');
                 $replace['{properties}'] = '';
             }
@@ -693,6 +706,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 }
                 $replace['{properties_names}'] = implode(', ', $list);
             } else {
+                $hasError = true;
                 $missingTemplate('{properties_names}');
                 $replace['{properties_names}'] = '';
             }
@@ -709,6 +723,7 @@ class GenerateViaOpenAi extends AbstractPlugin
                 }
                 $replace['{properties_sample}'] = json_encode($list, 448);
             } else {
+                $hasError = true;
                 $missingTemplate('{properties_sample}');
                 $replace['{properties_sample}'] = '';
             }
@@ -727,9 +742,14 @@ class GenerateViaOpenAi extends AbstractPlugin
                     . json_encode($list, 448)
                     . '```';
             } else {
+                $hasError = true;
                 $missingTemplate('{properties_sample_json}');
                 $replace['{properties_sample_json}'] = '';
             }
+        }
+
+        if ($hasError) {
+            return null;
         }
 
         return $replace
