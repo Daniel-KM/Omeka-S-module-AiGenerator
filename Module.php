@@ -775,9 +775,14 @@ class Module extends AbstractModule
         $siteSlug = $defaultSite('slug');
 
         $fieldset = $this->checkAndPrepareGenerateFieldset();
-        $fieldset->get('generate')->setOption('info', null);
+        // The fieldset is disabled if the user is not allowed to generate.
+        $isAllowed = $fieldset && $fieldset->has('generate');
+        if ($isAllowed) {
+            $fieldset->get('generate')->setOption('info', null);
+         }
 
-        $disable = !$isGeneratableViaAi($resource);
+        $disable = !$isAllowed
+            || !$isGeneratableViaAi($resource);
 
         echo '<div id="ai-records" class="section">';
 
