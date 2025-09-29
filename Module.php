@@ -37,6 +37,11 @@ class Module extends AbstractModule
         'AdvancedResourceTemplate',
     ];
 
+    /**
+     * @var bool
+     */
+    protected $isBatchUpdate = false;
+
     public function init(ModuleManager $moduleManager): void
     {
         require_once __DIR__ . '/vendor/autoload.php';
@@ -359,6 +364,8 @@ class Module extends AbstractModule
 
     /**
      * Clean params for batch update and set option for individual update.
+     *
+     * When the job is not in the background, force a new job to avoid timeout.
      */
     public function handleResourceBatchUpdatePreprocess(Event $event): void
     {
@@ -366,16 +373,16 @@ class Module extends AbstractModule
         $request = $event->getParam('request');
         $post = $request->getContent();
         $data = $event->getParam('data');
+        $ids = $request->getIds();
 
-        if (empty($post['ai_generator']['generate'])) {
+        if (empty($post['ai_generator']['generate']) || empty($ids)) {
             unset($data['ai_generator']);
             $event->setParam('data', $data);
             return;
         }
 
         // Empty string means empty string; null means default value.
-        $data['ai_generator'] = [
-            'generate' => true,
+        $args = [
             'validate' => !empty($post['ai_generator']['validate']),
             'model' => $post['ai_generator']['model'] ?? null,
             'max_tokens' => $post['ai_generator']['max_tokens'] ?? null,
@@ -383,14 +390,72 @@ class Module extends AbstractModule
             'prompt_system' => $post['ai_generator']['prompt_system'] ?? null,
             'prompt_user' => $post['ai_generator']['prompt_user'] ?? null,
         ];
+
+        // In all cases, clean the params.
+        $data['ai_generator'] = ['generate' => true] + $args;
         $event->setParam('data', $data);
 
-        unset($data['ai_generator']['generate']);
+        // If it is already a background job (so no route or route "top"),
+        // there is no need to create another job.
+        // And there is nothing to do, the process is already run via the
+        // standard event update resource.
+        /** @var \Omeka\Mvc\Status $status */
+        $status = $this->getServiceLocator()->get('Omeka\Status');
+        $isBackgroundJob = !$status->isAdminRequest();
+        if ($isBackgroundJob) {
+            $this->getServiceLocator()->get('Omeka\Logger')
+                ->info(
+                    "Generate ai records with options:\n{json}", // @translate
+                    ['json' => $args],
+                );
+            return;
+        }
 
-        $this->getServiceLocator()->get('Omeka\Logger')->info(
-            "Generate ai records with options:\n{json}", // @translate
-            ['json' => $post['ai_generator']],
+        // With "batch edit selected", there is only one loop.
+        // Warning: the job BatchUpdate creates multiple jobs, but only one is
+        // needed, "replace", that is the first.
+        $collectionAction = $request->getOption('collectionAction');
+        if ($collectionAction === 'append' || $collectionAction === 'remove') {
+            return;
+        }
+
+        // This value avoids to run the event that generates ai records on
+        // create/update, since it is done via the job below.
+        $this->isBatchUpdate = true;
+
+        $this->getServiceLocator()->get('Omeka\Logger')
+            ->info(
+                "Generate ai records separately in background with options:\n{json}", // @translate
+                ['json' => $args],
+            );
+
+        // Prepare args for the job.
+        // All args are options, except query.
+        $args = ['query' => ['id' => $ids], 'options' => $args];
+
+        $services = $this->getServiceLocator();
+        $job = $services->get(\Omeka\Job\Dispatcher::class)
+            ->dispatch(\AiGenerator\Job\AiRecordsGenerate::class, $args);
+
+        $plugins = $services->get('ControllerPluginManager');
+        $urlHelper = $services->get('ViewHelperManager')->get('url');
+        $messenger = $plugins->get('messenger');
+        $message = new PsrMessage(
+            'Processing update of ai records in background (job {link_job}#{job_id}{link_end}, {link_log}logs{link_end}).', // @translate
+            [
+                'link_job' => sprintf(
+                    '<a href="%s">',
+                    htmlspecialchars($urlHelper('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+                ),
+                'job_id' => $job->getId(),
+                'link_end' => '</a>',
+                'link_log' => class_exists('Log\Module', false)
+                    ? sprintf('<a href="%1$s">', $urlHelper('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]]))
+                    : sprintf('<a href="%1$s" target="_blank">', $urlHelper('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+            ]
         );
+        $message->setEscapeHtml(false);
+        $messenger->addSuccess($message);
     }
 
     /**
@@ -398,6 +463,12 @@ class Module extends AbstractModule
      */
     public function handleCreateUpdateResource(Event $event): void
     {
+        // The batch update run in background via a specific job, whatever it
+        // was run in front or background.
+        if ($this->isBatchUpdate) {
+            return;
+        }
+
         /**
          * @var \Omeka\Api\Manager $api
          * @var \Omeka\Api\Request $request
@@ -492,6 +563,7 @@ class Module extends AbstractModule
         if (!$request->getOption('isAiRecord')
             || !$request->getOption('validateOnly')
             || $request->getOption('flushEntityManager')
+            || $this->isBatchUpdate
         ) {
             return;
         }
