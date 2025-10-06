@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-01 00:00+0000\n"
+"POT-Creation-Date: 2025-09-08 00:00+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
@@ -15,16 +15,16 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: data/scripts/upgrade.php:41 Module.php:53 Module.php:61
+#: data/scripts/upgrade.php:41 Module.php:58 Module.php:66
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr "Le module %1$s doit être mis à niveau à la version %2$s ou supérieure."
 
-#: Module.php:69
+#: Module.php:74
 msgid "This module require php version {version} or above."
 msgstr "Ce module requiert php en version {version} ou supérieure."
 
-#: Module.php:670 Module.php:786 view/ai-generator/admin/index/browse.phtml:52
+#: Module.php:742 Module.php:858 view/ai-generator/admin/index/browse.phtml:52
 msgid "AI records"
 msgstr "Notices IA"
 
@@ -328,7 +328,7 @@ msgstr ""
 "Le module {module} doit être mis à niveau à la version {version} ou "
 "supérieure."
 
-#: Module.php:391
+#: Module.php:408
 msgid ""
 "Generate ai records with options:\n"
 "{json}"
@@ -336,49 +336,65 @@ msgstr ""
 "Générer des notices ia avec des options :\n"
 "{json}"
 
-#: Module.php:571 src/Form/SettingsFieldset.php:14
+#: Module.php:428
+msgid ""
+"Generate ai records separately in background with options:\n"
+"{json}"
+msgstr ""
+"Générer des notices ia séparément en arrière-plan avec des options :\n"
+"{json}"
+
+#: Module.php:444 src/Controller/Admin/IndexController.php:360
+msgid ""
+"Processing update of ai records in background (job {link_job}#{job_id}"
+"{link_end}, {link_log}logs{link_end})."
+msgstr ""
+"Traitement de la mise à jour des notices ia en arrière-plan (job {link_job}"
+"#{job_id}{link_end}, {link_log}logs{link_end})."
+
+#: Module.php:643 src/Form/SettingsFieldset.php:14
 #: src/Form/SettingsFieldset.php:17 src/Form/BatchEditFieldset.php:13
 #: src/Form/BatchEditFieldset.php:16 src/Form/BatchEditFieldset.php:25
 msgid "AI Record Generator"
 msgstr "Générateur de notice IA"
 
-#: Module.php:607 src/Form/SettingsFieldset.php:115
+#: Module.php:679 src/Form/SettingsFieldset.php:115
 msgid "Midsized"
 msgstr "Moyen"
 
-#: Module.php:630
+#: Module.php:702
 msgid "Generate (api key undefined)"
 msgstr "Générer (clé d’api non définie)"
 
-#: Module.php:631 src/Form/BatchEditFieldset.php:40
+#: Module.php:703 src/Form/BatchEditFieldset.php:40
 msgid "Generate"
 msgstr "Générer"
 
-#: Module.php:728
+#: Module.php:800
 msgid "Resource template is not set or skipped"
 msgstr "Le modèle de ressource n’est pas défini ou ignoré"
 
-#: Module.php:789
+#: Module.php:861
 msgid "{total} ai records ({count} not reviewed)"
 msgstr "{total} notices ia ({count} non relues)"
 
-#: Module.php:792
+#: Module.php:864
 msgid "No ai records"
 msgstr "Aucune notice ia"
 
-#: Module.php:815
+#: Module.php:887
 msgid "Make properties generatable via AI"
 msgstr "Rendre les propriétés générables via l’IA"
 
-#: Module.php:817
+#: Module.php:889
 msgid "All (default)"
 msgstr "Tous (par défaut)"
 
-#: Module.php:818
+#: Module.php:890
 msgid "Specific properties"
 msgstr "Propriétés spécifiques"
 
-#: Module.php:838
+#: Module.php:910
 msgid "Generatable via AI"
 msgstr "Générable par l’IA"
 
@@ -581,7 +597,7 @@ msgstr ""
 msgid "Unable to store the resource of the ai record: {message}"
 msgstr "Impossible d’enregistrer la ressource pour la notice ia : {message}"
 
-#: src/Job/BatchValidate.php:58
+#: src/Job/AiRecordsValidate.php:58 src/Job/AiRecordsGenerate.php:62
 msgid ""
 "A query is required to batch validate ai records. It is not possible to "
 "validate all records together. Set a fake argument if needed."
@@ -590,39 +606,84 @@ msgstr ""
 "possible de valider toutes les notices en même temps. Ajouter un faux "
 "argument si nécessaire."
 
-#: src/Job/BatchValidate.php:66
+#: src/Job/AiRecordsValidate.php:66
 msgid ""
 "There is no ai record to validate or you do not have rights ro process them."
 msgstr ""
 "Il n’y a pas de notice ia à valider ou vous n’avez pas le droit de les "
 "traiter."
 
-#: src/Job/BatchValidate.php:71
+#: src/Job/AiRecordsValidate.php:71
 msgid "Process started"
 msgstr "Démarrage du traitement"
 
-#: src/Job/BatchValidate.php:89
+#: src/Job/AiRecordsValidate.php:89
 msgid "{processed}/{total} resources processed."
 msgstr "{processed}/{total} ressources traitées."
 
-#: src/Job/BatchValidate.php:95
+#: src/Job/AiRecordsValidate.php:95
 msgid ""
 "Process ended. {processed}/{total} ai records processed; {count} validated."
 msgstr ""
 "Le traitement est terminé. {processed}/{total} notices ia traitées ; {count} "
 "validées."
 
-#: src/Job/BatchValidate.php:110
+#: src/Job/AiRecordsValidate.php:110
 msgid "AI record #{ai_record_id}: user has no right to process."
 msgstr "Notice ia #{ai_record_id} : l’utilisateur n’a pas le droit de traiter."
 
-#: src/Job/BatchValidate.php:119
+#: src/Job/AiRecordsValidate.php:119
 msgid "AI record #{ai_record_id}: not valid."
 msgstr "Notice ia #{ai_record_id} : non valide."
 
-#: src/Job/BatchValidate.php:147
+#: src/Job/AiRecordsValidate.php:147
 msgid "The resource #{resource_id} is validated."
 msgstr "La ressource #{resource_id} est validée."
+
+#: src/Job/AiRecordsGenerate.php:72
+msgid ""
+"There is no resource to generate or you do not have rights ro process them."
+msgstr ""
+"Il n’y a pas de notice ia à générer ou vous n’avez pas le droit de les "
+"traiter."
+
+#: src/Job/AiRecordsGenerate.php:83
+msgid ""
+"Generate ai records for {count} resources with options:\n"
+"{json}"
+msgstr ""
+"Générer des notices ia pour {count} ressources avec les options :\n"
+"{json}"
+
+#: src/Job/AiRecordsGenerate.php:110
+msgid ""
+"{processed}/{total} resources processed. Succeed: {resource_ids}. Failed: "
+"{resource_ids_2}."
+msgstr ""
+"{processed}/{total} ressources traitées. Succès : {resource_ids}. Échecs : "
+"{resource_ids_2}."
+
+#: src/Job/AiRecordsGenerate.php:115
+msgid ""
+"{processed}/{total} resources processed. Succeed: {resource_ids}. Failed: "
+"none."
+msgstr ""
+"{processed}/{total} ressources traitées. Succès : {resource_ids}. Échecs : "
+"aucun."
+
+#: src/Job/AiRecordsGenerate.php:120
+msgid ""
+"{processed}/{total} resources processed. Succeed: none. Faileds: "
+"{resource_ids}."
+msgstr ""
+"{processed}/{total} ressources traitées. Succès : aucun. Échecs : "
+"{resource_ids}."
+
+#: src/Job/AiRecordsGenerate.php:130
+msgid "Process ended. {processed}/{total} resources processed; {count} failed."
+msgstr ""
+"Le traitement est terminé. {processed}/{total} ressources traitées ; {count} "
+"échecs."
 
 #: src/Form/SettingsFieldset.php:34
 msgid "Roles allowed to generate via AI"
@@ -844,14 +905,6 @@ msgstr "Les notices ia ont été correctement mises à jour"
 #: src/Controller/Admin/IndexController.php:316
 msgid "An error occurred during update"
 msgstr "Une erreur interne s’est produite lors de la mise à jour"
-
-#: src/Controller/Admin/IndexController.php:360
-msgid ""
-"Processing update of ai records in background (job {link_job}#{job_id}"
-"{link_end}, {link_log}logs{link_end})."
-msgstr ""
-"Traitement de la mise à jour des notices ia en arrière-plan (job {link_job}"
-"#{job_id}{link_end}, {link_log}logs{link_end})."
 
 #: src/Controller/Admin/IndexController.php:387
 msgid ""
